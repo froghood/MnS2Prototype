@@ -1,0 +1,18 @@
+public enum PacketType : byte {
+    LatencyCorrection,
+    Connection,
+    ConnectionResponse,
+    TimeRequest,
+    TimeResponse,
+    SyncFinished,
+    VelocityChange,
+    Primary,
+    Secondary,
+    SpellA,
+    SpellB,
+    Bomb,
+    Hit,
+    Graze,
+    UpdateProjectile,
+    DestroyProjectile,
+}

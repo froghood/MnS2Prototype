@@ -1,0 +1,7 @@
+C:\Dev\C#\Projects\MnS2Prototype\bin\Release\net6.0\win-x64\publish\MnS2Prototype.pdb
+C:\Dev\C#\Projects\MnS2Prototype\bin\Release\net6.0\win-x64\publish\csfml-Audio.dll
+C:\Dev\C#\Projects\MnS2Prototype\bin\Release\net6.0\win-x64\publish\csfml-Graphics.dll
+C:\Dev\C#\Projects\MnS2Prototype\bin\Release\net6.0\win-x64\publish\csfml-System.dll
+C:\Dev\C#\Projects\MnS2Prototype\bin\Release\net6.0\win-x64\publish\csfml-Window.dll
+C:\Dev\C#\Projects\MnS2Prototype\bin\Release\net6.0\win-x64\publish\openal32.dll
+C:\Dev\C#\Projects\MnS2Prototype\bin\Release\net6.0\win-x64\publish\MnS2Prototype.exe
