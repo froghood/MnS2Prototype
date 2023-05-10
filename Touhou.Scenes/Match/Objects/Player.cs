@@ -31,7 +31,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     private Shader cooldownShader;
 
-    private Dictionary<AttackOld, (Time Time, bool Focused)> heldAttacks = new();
+    private Dictionary<Attack, (Time Time, bool Focused)> heldAttacks = new();
 
 
     private Dictionary<int, Projectile> projectiles = new();
@@ -122,59 +122,54 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
     private void InvokeAttackPresses(PlayerAction action) {
-        if (attacksByInputOld.TryGetValue(action, out var attackList)) {
-            foreach (var attack in attackList) {
+        if (attacks.TryGetValue(action, out var attack)) {
 
-                if (attack.Cooldown <= 0) attack.Cooldown = 0;
-                else attack.Cooldown -= Game.Delta;
+            if (attack.Cooldown <= 0) attack.Cooldown = 0;
+            else attack.Cooldown -= Game.Delta;
 
-                if (attack.Cooldown > 0 || attack.Disabled) continue;
+            if (attack.Cooldown > 0 || attack.Disabled) return;
 
-                Time cooldownOverflow = Math.Abs(attack.Cooldown);
+            Time cooldownOverflow = Math.Abs(attack.Cooldown);
 
-                // when attack is buffered
-                if (Game.Input.IsActionPressBuffered(action, out var state)) {
-                    Game.Input.ConsumePressBuffer(action);
+            // when attack is buffered
+            if (Game.Input.IsActionPressBuffered(action, out var state)) {
+                Game.Input.ConsumePressBuffer(action);
 
-                    bool focused = state[PlayerAction.Focus];
-                    System.Console.WriteLine(focused);
+                bool focused = state[PlayerAction.Focus];
+                System.Console.WriteLine(focused);
 
-                    attack.OnPress?.Invoke(cooldownOverflow, focused);
-                    if (attack.Holdable) heldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
+                attack.PlayerPress(this, cooldownOverflow, focused);
+                if (attack.Holdable) heldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
 
-                    System.Console.WriteLine($"buffer: {action}, {attack.Cooldown}");
+                System.Console.WriteLine($"buffer: {action}, {attack.Cooldown}");
 
 
-                }
+            }
 
-                // when attack is held but not necessarily buffered
-                else if (attack.Holdable && Game.IsActionPressed(action) && !heldAttacks.ContainsKey(attack)) {
-                    bool focused = Game.IsActionPressed(PlayerAction.Focus);
+            // when attack is held but not necessarily buffered
+            else if (attack.Holdable && Game.IsActionPressed(action) && !heldAttacks.ContainsKey(attack)) {
+                bool focused = Game.IsActionPressed(PlayerAction.Focus);
 
-                    attack.OnPress?.Invoke(cooldownOverflow, focused);
-                    heldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
+                attack.PlayerPress(this, cooldownOverflow, focused);
+                heldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
 
-                    System.Console.WriteLine($"held: {action}, {attack.Cooldown}");
-
-                }
+                System.Console.WriteLine($"held: {action}, {attack.Cooldown}");
 
             }
         }
     }
 
     private void InvokeAttackHolds(PlayerAction action) {
-        if (attacksByInputOld.TryGetValue(action, out var attackList)) {
-            foreach (var attack in attackList) {
-                if (heldAttacks.TryGetValue(attack, out var heldState)) {
+        if (attacks.TryGetValue(action, out var attack)) {
+            if (heldAttacks.TryGetValue(attack, out var heldState)) {
 
 
-                    if (attack.Cooldown <= 0) attack.OnHold?.Invoke(Math.Abs(attack.Cooldown), Game.Time - heldState.Time, heldState.Focused);
+                if (attack.Cooldown <= 0) attack.PlayerHold(this, Math.Abs(attack.Cooldown), Game.Time - heldState.Time, heldState.Focused);
 
-                    if (Game.Input.IsActionReleaseBuffered(action)) {
-                        attack.OnRelease?.Invoke(Math.Abs(attack.Cooldown), Game.Time - heldState.Time, heldState.Focused);
+                if (Game.Input.IsActionReleaseBuffered(action)) {
+                    attack.PlayerRelease(this, Math.Abs(attack.Cooldown), Game.Time - heldState.Time, heldState.Focused);
 
-                        heldAttacks.Remove(attack);
-                    }
+                    heldAttacks.Remove(attack);
                 }
             }
         }
@@ -215,6 +210,10 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public override void Render(Time time, float delta) {
         RenderCooldowns();
+
+        foreach (var attack in attacks.Values) {
+            attack.PlayerRender(this);
+        }
     }
 
 
@@ -260,16 +259,16 @@ public abstract class Player : Entity, IControllable, IReceivable {
         InvulnerabilityDuration = duration;
     }
 
-    public void ApplyCooldown(string name, Time duration) {
-        if (attacksByName.TryGetValue(name, out var attack)) {
+    public void ApplyCooldown(PlayerAction action, Time duration) {
+        if (attacks.TryGetValue(action, out var attack)) {
             attack.CooldownDuration = duration;
             attack.Cooldown = duration;
         }
     }
 
-    public void ApplyCooldowns(Time duration, params string[] attackNames) {
-        foreach (var name in attackNames) {
-            if (attacksByName.TryGetValue(name, out var attack)) {
+    public void ApplyCooldowns(Time duration, params PlayerAction[] actions) {
+        foreach (var action in actions) {
+            if (attacks.TryGetValue(action, out var attack)) {
                 attack.CooldownDuration = duration;
                 attack.Cooldown = duration;
             }
@@ -303,15 +302,15 @@ public abstract class Player : Entity, IControllable, IReceivable {
         }
     }
 
-    public void DisableAttacks(params string[] names) {
-        foreach (string name in names) {
-            if (attacksByName.TryGetValue(name, out var attack)) attack.Disabled = true;
+    public void DisableAttacks(params PlayerAction[] actions) {
+        foreach (var action in actions) {
+            if (attacks.TryGetValue(action, out var attack)) attack.Disable();
         }
     }
 
-    public void EnableAttacks(params string[] names) {
-        foreach (string name in names) {
-            if (attacksByName.TryGetValue(name, out var attack)) attack.Disabled = false;
+    public void EnableAttacks(params PlayerAction[] actions) {
+        foreach (var action in actions) {
+            if (attacks.TryGetValue(action, out var attack)) attack.Enable();
         }
     }
 
@@ -325,41 +324,12 @@ public abstract class Player : Entity, IControllable, IReceivable {
         totalSpawnedProjectiles++;
     }
 
-    private void InvokeAttack(PlayerAction action, Time time) {
-        if (GetCooldown(action, out float cooldown)) {
-            if (cooldown > 0 || heldAttack != PlayerAction.None) return;
-
-            if (Game.Input.IsActionPressBuffered(action)) {
-                Game.Input.ConsumePressBuffer(action);
-
-                if (tapAttacks.TryGetValue((action, Focused), out var callback)) callback.Invoke(MathF.Abs(cooldown));
-
-                if (holdAttacks.TryGetValue((action, Focused), out var callbacks) && heldAttack == PlayerAction.None) {
-                    heldAttack = action;
-                    heldTime = time;
-                    callbacks.PressBehavior.Invoke(MathF.Abs(cooldown));
-                }
-
-            } else if (Game.IsActionPressed(action)) {
-                if (holdAttacks.TryGetValue((action, Focused), out var callbacks) && heldAttack == PlayerAction.None) {
-                    heldAttack = action;
-                    heldTime = time;
-                    callbacks.PressBehavior.Invoke(MathF.Abs(cooldown));
-                }
-            }
-        }
-    }
-
     private void ChangeVelocity(Vector2f newVelocity) {
         if (newVelocity == Velocity) return;
         Velocity = newVelocity;
         var packet = new Packet(PacketType.VelocityChange);
         packet.In((long)Game.Network.Time).In(Position).In(Velocity);
         Game.Network.Send(packet);
-    }
-
-    protected PlayerAttackBuilder CreateAttack(PlayerAction actionInput, string name) {
-        return new PlayerAttackBuilder(attacksByName, attacksByInputOld, actionInput, name);
     }
 
     protected bool GetCooldown(PlayerAction action, out float cooldown) {
@@ -381,9 +351,9 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
         int offset = 0;
 
-        foreach (var (name, attack) in attacksByName) {
+        foreach (var (name, attack) in attacks) {
 
-            text.DisplayedString = name;
+            text.DisplayedString = name.ToString();
 
             rect.FillColor = Color.White;
             rect.Position = new Vector2f(4f + offset * 52f, Game.Window.Size.Y - 54f);
