@@ -37,7 +37,7 @@ public class ReimuPrimary : Attack {
     }
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks("Secondary", "SpellA", "SpellB");
+        player.DisableAttacks(PlayerAction.Secondary, PlayerAction.SpellA, PlayerAction.SpellB);
     }
 
     public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
@@ -93,10 +93,10 @@ public class ReimuPrimary : Attack {
             }
         }
 
-        player.ApplyCooldowns(primaryCooldown - cooldownOverflow, "Primary");
-        player.ApplyCooldowns(globalCooldown - cooldownOverflow, "Secondary", "SpellA", "SpellB");
+        player.ApplyCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
+        player.ApplyCooldowns(globalCooldown - cooldownOverflow, PlayerAction.Secondary, PlayerAction.SpellA, PlayerAction.SpellB);
 
-        player.EnableAttacks("Secondary", "SpellA", "SpellB");
+        player.EnableAttacks(PlayerAction.Secondary, PlayerAction.SpellA, PlayerAction.SpellB);
 
         attackHold = false;
         aimOffset = 0f;
@@ -136,6 +136,34 @@ public class ReimuPrimary : Attack {
                 projectile.CollisionFilters.Add(1);
                 opponent.Scene.AddEntity(projectile);
             }
+        }
+    }
+
+    public override void PlayerRender(Player player) {
+        int numVertices = 32;
+        float aimRange = MathF.PI / 180f * 140f;
+        float fullRange = aimRange * 2;
+        float increment = fullRange / (numVertices - 1);
+
+        float angleToOpponent = player.AngleToOpponent;
+
+        if (attackHold) { // ~7 frames at 60fps
+            var vertexArray = new VertexArray(PrimitiveType.TriangleFan);
+            vertexArray.Append(new Vertex(player.Position, new Color(255, 255, 255, 50)));
+            for (int i = 0; i < numVertices; i++) {
+                vertexArray.Append(new Vertex(player.Position + new Vector2f(
+                    MathF.Cos(angleToOpponent + aimRange - increment * i) * 40f,
+                    MathF.Sin(angleToOpponent + aimRange - increment * i) * 40f
+                ), new Color(255, 255, 255, 10)));
+            }
+            Game.Window.Draw(vertexArray);
+
+            var shape = new RectangleShape(new Vector2f(40f, 2f));
+            shape.Origin = new Vector2f(0f, 1f);
+            shape.Position = player.Position;
+            shape.Rotation = 180f / MathF.PI * (player.AngleToOpponent + aimOffset);
+            shape.FillColor = new Color(255, (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset)), (byte)MathF.Round(255f - 100f * Math.Abs(normalizedAimOffset)));
+            Game.Window.Draw(shape);
         }
     }
 

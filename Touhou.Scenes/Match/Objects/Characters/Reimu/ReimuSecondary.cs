@@ -23,7 +23,7 @@ public class ReimuSecondary : Attack {
 
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks("Primary", "SpellA", "SpellB");
+        player.DisableAttacks(PlayerAction.Primary, PlayerAction.SpellA, PlayerAction.SpellB);
     }
 
 
@@ -44,7 +44,7 @@ public class ReimuSecondary : Attack {
             player.SpawnProjectile(projectile);
         }
 
-        player.ApplyCooldowns(cooldown - cooldownOverflow, "Secondary");
+        player.ApplyCooldowns(cooldown - cooldownOverflow, PlayerAction.Secondary);
 
         var packet = new Packet(PacketType.Secondary).In(Game.Network.Time - cooldownOverflow).In(player.Position).In(angle);
         Game.Network.Send(packet);
@@ -53,7 +53,7 @@ public class ReimuSecondary : Attack {
 
 
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
-        player.EnableAttacks("Primary", "SpellA", "SpellB");
+        player.EnableAttacks(PlayerAction.Primary, PlayerAction.SpellA, PlayerAction.SpellB);
     }
 
 

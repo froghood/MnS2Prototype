@@ -44,7 +44,7 @@ public class ReimuSpellA : Attack {
 
         player.MovespeedModifier = 0.2f;
 
-        player.DisableAttacks("Primary", "Secondary", "SpellB");
+        player.DisableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
     }
 
 
@@ -83,10 +83,10 @@ public class ReimuSpellA : Attack {
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
         player.MovespeedModifier = 1f;
 
-        player.ApplyCooldowns(spellCooldown, "SpellA");
-        player.ApplyCooldowns(globalCooldown, "Primary", "Secondary", "SpellB");
+        player.ApplyCooldowns(spellCooldown, PlayerAction.SpellA);
+        player.ApplyCooldowns(globalCooldown, PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
 
-        player.EnableAttacks("Primary", "Secondary", "SpellB");
+        player.EnableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
     }
 
 
