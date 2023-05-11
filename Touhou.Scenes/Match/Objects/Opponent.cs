@@ -4,6 +4,7 @@ using SFML.System;
 using SFML.Window;
 using Touhou.Net;
 using Touhou.Objects;
+using Touhou.Scenes.Match.Objects.Characters;
 
 namespace Touhou.Scenes.Match.Objects;
 public abstract class Opponent : Entity, IReceivable {
@@ -19,6 +20,8 @@ public abstract class Opponent : Entity, IReceivable {
     private Vector2f knockbackStartPosition;
     private Vector2f knockbackEndPosition;
     private Time knockbackDuration;
+
+    private Dictionary<PacketType, Attack> attacks = new();
 
     public Opponent(Vector2f startingPosition) {
         basePosition = startingPosition;
@@ -54,6 +57,10 @@ public abstract class Opponent : Entity, IReceivable {
             knockbackDuration = Time.InSeconds(1);
         }
 
+        if (attacks.TryGetValue(packet.Type, out var attack)) {
+            packet.ResetReadPosition();
+            attack.OpponentPress(this, packet);
+        }
 
 
 
@@ -105,10 +112,7 @@ public abstract class Opponent : Entity, IReceivable {
         interpolationTime = MathF.Min(interpolationTime + delta * 0.5f, 1f);
     }
 
-    protected abstract void Primary(Packet packet);
-    protected abstract void Secondary(Packet packet);
-    protected abstract void SpellA(Packet packet);
-    protected abstract void SpellB(Packet packet);
+    protected void AddAttack(PacketType type, Attack attack) => attacks[type] = attack;
 
     private float EaseInOutCubic(float t) {
         return t < 0.5 ? 4 * t * t * t : 1 - MathF.Pow(-2 * t + 2, 3) / 2;

@@ -127,7 +127,7 @@ internal static class Game {
             Window.Clear(ClearColor);
             //Window.SetView(view);
             _sceneManager.Current.Render(Time, deltaAsFloat);
-            _sceneManager.Current.DebugRender(Time, deltaAsFloat);
+            //_sceneManager.Current.DebugRender(Time, deltaAsFloat);
 
             inputManager.Render();
             Window.Display();
