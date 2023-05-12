@@ -16,11 +16,11 @@ public abstract class Entity {
     public List<int> CollisionFilters { get; private set; } = new();
     public List<Hitbox> Hitboxes { get; private set; } = new();
 
-    public abstract void Update(Time time, float delta);
-    public abstract void Render(Time time, float delta);
-    public abstract void Finalize(Time time, float delta);
+    public abstract void Update();
+    public abstract void Render();
+    public abstract void PostRender();
 
-    public virtual void DebugRender(Time time, float delta) { }
+    public virtual void DebugRender() { }
 
     public virtual void Destroy() {
         IsDestroyed = true;

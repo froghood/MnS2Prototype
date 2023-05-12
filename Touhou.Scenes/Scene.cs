@@ -52,11 +52,11 @@ public abstract class Scene {
         });
     }
 
-    public void Update(Time time, float delta) {
+    public void Update() {
         int numCollisions = 0;
 
         IterateEntites(entity => {
-            entity.Update(time, delta);
+            entity.Update();
             CheckCollisions(entity, ref numCollisions);
         });
 
@@ -117,18 +117,18 @@ public abstract class Scene {
         return false;
     }
 
-    public void Render(Time time, float delta) {
+    public void Render() {
 
-        IterateEntites(e => e.Render(time, delta));
+        IterateEntites(e => e.Render());
     }
 
-    public void DebugRender(Time time, float delta) {
-        collisionGrid.Render(time, delta);
-        IterateEntites(e => e.DebugRender(time, delta));
+    public void DebugRender() {
+        collisionGrid.Render();
+        IterateEntites(e => e.DebugRender());
     }
 
-    public void Finalize(Time time, float delta) {
-        IterateEntites(e => e.Finalize(time, delta));
+    public void PostRender() {
+        IterateEntites(e => e.PostRender());
         collisionGrid.Clear();
     }
 
@@ -153,8 +153,8 @@ public abstract class Scene {
     public virtual void OnPress(PlayerAction action) { }
     public virtual void OnRelease(PlayerAction action) { }
     public virtual void OnReceive(Packet packet, IPEndPoint endPoint) { }
-    public virtual void OnUpdate(Time time, float delta) { }
-    public virtual void OnRender(Time time, float delta) { }
-    public virtual void OnFinalize(Time time, float delta) { }
+    public virtual void OnUpdate() { }
+    public virtual void OnRender() { }
+    public virtual void OnPostRender() { }
     public virtual void OnDisconnect() { }
 }

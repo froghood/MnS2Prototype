@@ -33,7 +33,7 @@ public class YinYang : Projectile {
         Hitboxes.Add(new CircleHitbox(this, -new Vector2f(0f, 0f), this.radius));
     }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
         circle.Radius = radius + 5f;
         circle.Origin = new Vector2f(circle.Radius, circle.Radius);
         circle.FillColor = Color;
@@ -42,7 +42,7 @@ public class YinYang : Projectile {
         Game.Window.Draw(circle);
     }
 
-    public override void DebugRender(Time time, float delta) {
+    public override void DebugRender() {
         foreach (CircleHitbox hitbox in Hitboxes) {
             hitboxShape.Position = hitbox.Position;
             hitboxShape.Radius = hitbox.Radius;

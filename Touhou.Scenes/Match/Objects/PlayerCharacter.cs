@@ -103,11 +103,11 @@
 //         Game.Network.Send(packet);
 //     }
 
-//     public void Update(Time time, float delta) {
-//         _onAttackUpdate?.Invoke(time, delta);
+//     public void Update() {
+//         _onAttackUpdate?.Invoke();
 //     }
 
-//     private void OnPrimaryUpdate(Time time, float delta) {
+//     private void OnPrimaryUpdate() {
 
 //         float aimRange = MathF.PI / 180f * 140f;
 //         float aimStrength = 0.1f;
@@ -132,7 +132,7 @@
 //         _attackHoldDuration += delta;
 //     }
 
-//     public void Render(Time time, float delta) {
+//     public void Render() {
 
 //         int numVertices = 32;
 //         float aimRange = MathF.PI / 180f * 140f;

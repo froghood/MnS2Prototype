@@ -58,17 +58,17 @@ public class Receiver : Entity, IReceivable {
         }
     }
 
-    public override void Update(Time time, float delta) {
+    public override void Update() {
         if (requestCount < TOTAL_REQUESTS && requestTimer.ElapsedTime.AsMilliseconds() > REQUEST_FREQUENCY) {
             Request();
         }
     }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
         Game.Window.Draw(this.text);
     }
 
-    public override void Finalize(Time time, float delta) { }
+    public override void PostRender() { }
 
     public void Request() {
         Console.ForegroundColor = ConsoleColor.DarkGray;

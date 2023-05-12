@@ -17,17 +17,17 @@ public class ValueDisplay<T> : Entity {
         text.Font = Game.DefaultFont;
     }
 
-    public override void Update(Time time, float delta) {
+    public override void Update() {
         value = valueDelegate.Invoke();
     }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
         text.Position = Position;
         text.DisplayedString = value.ToString();
         Game.Window.Draw(text);
     }
 
-    public override void Finalize(Time time, float delta) { }
+    public override void PostRender() { }
 
 
 
@@ -50,15 +50,15 @@ public class ValueDisplay<T> : Entity {
 //         text.Font = Game.DefaultFont;
 //     }
 
-//     public override void Update(Time time, float delta) {
+//     public override void Update() {
 //         value = valueDelegate.Invoke();
 //     }
 
-//     public override void Render(Time time, float delta) {
+//     public override void Render() {
 //         text.Position = Position;
 //         text.DisplayedString = $"{value}";
 //         Game.Window.Draw(text);
 //     }
 
-//     public override void Finalize(Time time, float delta) { }
+//     public override void PostRender() { }
 // }

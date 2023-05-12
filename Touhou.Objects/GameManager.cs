@@ -52,21 +52,21 @@ namespace Touhou.Objects;
 //         _player.OnRelease(action);
 //     }
 
-//     public void OnUpdate(Time time, float delta) {
-//         _player.OnUpdate(time, delta);
-//         _opponent.OnUpdate(time, delta);
+//     public void OnUpdate() {
+//         _player.OnUpdate();
+//         _opponent.OnUpdate();
 
-//         Projectiles.OnUpdate(time, delta);
+//         Projectiles.OnUpdate();
 //     }
 
-//     public void OnRender(Time time, float delta) {
-//         _player.OnRender(time, delta);
-//         _opponent.OnRender(time, delta);
+//     public void OnRender() {
+//         _player.OnRender();
+//         _opponent.OnRender();
 
-//         Projectiles.OnRender(time, delta);
+//         Projectiles.OnRender();
 //     }
 
-//     public void OnFinalize(Time time, float delta) {
-//         Projectiles.OnFinalize(time, delta);
+//     public void OnPostRender() {
+//         Projectiles.OnPostRender();
 //     }
 // }

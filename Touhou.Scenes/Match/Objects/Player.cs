@@ -30,6 +30,19 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public Vector2f KnockbackEndPosition { get; private set; }
     public Time KnockbackDuration { get; private set; }
 
+    // power
+    public int Power { get => Math.Min(Timer.Power + powerGainedFromGrazing - powerSpent, 400); }
+    private int powerGainedFromGrazing;
+    private int powerSpent;
+
+    public MatchTimer Timer {
+        get {
+            timer ??= Scene.GetFirstEntity<MatchTimer>();
+            return timer;
+        }
+    }
+    private MatchTimer timer;
+
 
     private Dictionary<PlayerAction, Attack> attacks = new();
 
@@ -59,12 +72,6 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
 
-
-
-
-    private (float Cooldown, float Remaining)[] globalCooldowns = new (float Cooldown, float Remaining)[4];
-
-
     public float MovespeedModifier { get; set; } = 1f;
 
     public Player() {
@@ -79,7 +86,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public virtual void Press(PlayerAction action) { }
     public virtual void Release(PlayerAction action) { }
 
-    public override void Update(Time time, float delta) {
+    public override void Update() {
 
         UpdateKnockback();
         if (CanMove) UpdateMovement();
@@ -88,11 +95,6 @@ public abstract class Player : Entity, IControllable, IReceivable {
             Math.Clamp(Position.X, 5f, Game.Window.Size.X - 5f),
             Math.Clamp(Position.Y, 5f, Game.Window.Size.Y - 5f)
         );
-
-        // update cooldowns
-        for (int index = 0; index < globalCooldowns.Length; index++) {
-            globalCooldowns[index].Remaining -= delta;
-        }
 
         var order = Game.Input.GetActionOrder();
 
@@ -106,7 +108,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
             if (attack.Cooldown <= 0) attack.Cooldown = 0;
             else attack.Cooldown -= Game.Delta;
 
-            if (attack.Cooldown > 0 || attack.Disabled) return;
+            if (Power < attack.Cost || attack.Cooldown > 0 || attack.Disabled) return;
 
             Time cooldownOverflow = Math.Abs(attack.Cooldown);
 
@@ -143,9 +145,10 @@ public abstract class Player : Entity, IControllable, IReceivable {
             if (currentlyHeldAttacks.TryGetValue(attack, out var heldState)) {
 
 
+
                 if (attack.Cooldown <= 0) attack.PlayerHold(this, Math.Abs(attack.Cooldown), Game.Time - heldState.Time, heldState.Focused);
 
-                if (Game.Input.IsActionReleaseBuffered(action)) {
+                if (Game.Input.IsActionReleaseBuffered(action) || Power < attack.Cost) {
                     attack.PlayerRelease(this, Math.Abs(attack.Cooldown), Game.Time - heldState.Time, heldState.Focused);
 
                     currentlyHeldAttacks.Remove(attack);
@@ -187,15 +190,27 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
         RenderCooldowns();
+        RenderPower();
 
         foreach (var attack in attacks.Values) {
             attack.PlayerRender(this);
         }
     }
 
-    public override void Finalize(Time time, float delta) { }
+    private void RenderPower() {
+        var text = new Text();
+        text.Font = Game.DefaultFont;
+        text.CharacterSize = 14;
+        text.DisplayedString = Power.ToString();
+        text.Origin = new Vector2f(0f, text.GetLocalBounds().Height);
+        text.Position = new Vector2f(5f, Game.Window.Size.Y - 30f);
+
+        Game.Window.Draw(text);
+    }
+
+    public override void PostRender() { }
 
     public override void Collide(Entity entity) {
         if (Game.Time - InvulnerabilityTime < InvulnerabilityDuration) return;
@@ -256,6 +271,11 @@ public abstract class Player : Entity, IControllable, IReceivable {
         }
     }
 
+    public void SpendPower(int amount) {
+        var powerOverflow = Math.Max((Timer.Power + powerGainedFromGrazing - powerSpent) - 400, 0);
+        powerSpent += powerOverflow + amount;
+    }
+
     public void SpawnProjectile(Projectile projectile) {
         projectile.SetId(totalSpawnedProjectiles);
 
@@ -288,7 +308,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
             text.DisplayedString = name.ToString();
 
-            rect.FillColor = Color.White;
+            rect.FillColor = Power < attack.Cost ? new Color(230, 180, 190) : Color.White;
             rect.Position = new Vector2f(4f + offset * 52f, Game.Window.Size.Y - 54f);
             rect.Size = new Vector2f(48f, 48f);
             rect.Origin = new Vector2f(0f, rect.Size.Y);

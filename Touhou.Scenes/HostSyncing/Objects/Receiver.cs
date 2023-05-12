@@ -30,11 +30,11 @@ public class Receiver : Entity, IReceivable {
         }
     }
 
-    public override void Update(Time time, float delta) { }
+    public override void Update() { }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
         Game.Window.Draw(this.text);
     }
 
-    public override void Finalize(Time time, float delta) { }
+    public override void PostRender() { }
 }

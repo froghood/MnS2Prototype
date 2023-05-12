@@ -38,7 +38,7 @@ public abstract class Projectile : Entity {
     protected abstract float FuncY(float time);
     protected virtual Vector2f Adjust(float time, Vector2f position) => position;
 
-    public override void Update(Time time, float delta) {
+    public override void Update() {
         PrevPosition = Position;
 
         var lifeTime = (Game.Time - SpawnTime).AsSeconds();
@@ -61,7 +61,7 @@ public abstract class Projectile : Entity {
 
     }
 
-    public override void Finalize(Time time, float delta) { }
+    public override void PostRender() { }
 
     public void SetId(int id) {
         HasId = true;
@@ -166,7 +166,7 @@ public abstract class Projectile : Entity {
     //         //return _flipped * _speed * (MathF.Pow(1f - t, 3f) + 3f * MathF.Pow(1f - t, 2f) * t + 3f * c * (1f - t) * MathF.Pow(t, 2f) - 1f);
     //     }
 
-    //     public override void Render(Time time, float delta) {
+    //     public override void Render() {
     //         _shape.Position = Position;
     //         _shape.Rotation = 180f / MathF.PI * MathF.Atan2(Position.Y - PrevPosition.Y, Position.X - PrevPosition.X);
     //         Game.Window.Draw(_shape);

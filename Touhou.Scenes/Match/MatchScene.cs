@@ -38,11 +38,13 @@ public class MatchScene : Scene {
 
     public override void OnInitialize() {
 
+        AddEntity(new MatchTimer(startTime));
+
         Game.Network.ResetPing();
         if (hosting) Game.Network.StartLatencyCorrection();
 
-        //var player = new PlayerReimu() { Position = new Vector2f(Game.Window.Size.X / (hosting ? 3f : 1.5f), Game.Window.Size.Y / 2f) };
-        var player = new PlayerReimu() { Position = new Vector2f(80f, Game.Window.Size.Y / 2f) };
+        var player = new PlayerReimu() { Position = new Vector2f(Game.Window.Size.X / (hosting ? 3f : 1.5f), Game.Window.Size.Y / 2f) };
+        //var player = new PlayerReimu() { Position = new Vector2f(80f, Game.Window.Size.Y / 2f) };
         var opponent = new OpponentReimu(new Vector2f(Game.Window.Size.X / (!hosting ? 3f : 1.5f), Game.Window.Size.Y / 2f));
 
         AddEntity(player);
@@ -75,9 +77,11 @@ public class MatchScene : Scene {
         AddEntity(new ValueDisplay<Time>(() => Game.Network.TheirPerceivedLatency) { Position = new Vector2f(0f, 70f), Color = Color.White, CharacterSize = 14 });
 
         AddEntity(new ValueDisplay<Vector2f>(() => player.Position) { Position = new Vector2f(0f, 100f), Color = Color.White, CharacterSize = 14 });
+
+
     }
 
-    // public override void OnRender(Time time, float delta) {
+    // public override void OnRender() {
 
 
     //     if (_gameManager.StartTime - Game.Network.Time > 0 && _gameManager.StartTime - Game.Network.Time <= 3000) {
@@ -86,7 +90,7 @@ public class MatchScene : Scene {
     //         Game.Window.Draw(text);
     //     }
 
-    //     _gameManager.OnRender(time, delta);
+    //     _gameManager.OnRender();
 
     //     _fpsSamples.Enqueue(delta);
 

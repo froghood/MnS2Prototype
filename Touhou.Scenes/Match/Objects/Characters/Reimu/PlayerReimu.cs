@@ -253,8 +253,8 @@ public class PlayerReimu : Player {
     //     Game.Network.Send(packet);
     // }
 
-    public override void Render(Time time, float delta) {
-        base.Render(time, delta);
+    public override void Render() {
+        base.Render();
         var rect = new RectangleShape(new Vector2f(20f, 20f));
         rect.Origin = rect.Size / 2f;
         rect.Position = Position;

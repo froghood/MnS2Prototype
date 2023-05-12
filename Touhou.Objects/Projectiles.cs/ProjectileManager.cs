@@ -16,38 +16,38 @@
 //         this.gameManager = gameManager;
 //     }
 
-//     public void OnUpdate(Time time, float delta) {
+//     public void OnUpdate() {
 //         foreach (var projectile in this.playerProjectiles) {
-//             projectile.Update(time, delta);
+//             projectile.Update();
 //             if (projectile.Destroyed) this.projectilesById.Remove(projectile.Id);
 
 //         }
 //         this.playerProjectiles = this.playerProjectiles.Where(e => !e.Destroyed).ToList();
 
 //         foreach (var projectile in this.opponentProjectiles) {
-//             projectile.Update(time, delta);
+//             projectile.Update();
 //             if (projectile.Destroyed) this.projectilesById.Remove(projectile.Id);
 //         }
 //         this.opponentProjectiles = this.opponentProjectiles.Where(e => !e.Destroyed).ToList();
 //     }
 
-//     public void OnRender(Time time, float delta) {
+//     public void OnRender() {
 //         foreach (var projectile in this.playerProjectiles) {
-//             projectile.Render(time, delta);
+//             projectile.Render();
 //         }
 
 //         foreach (var projectile in this.opponentProjectiles) {
-//             projectile.Render(time, delta);
+//             projectile.Render();
 //         }
 //     }
 
-//     public void OnFinalize(Time time, float delta) {
+//     public void OnPostRender() {
 //         foreach (var projectile in this.playerProjectiles) {
-//             projectile.Finalize(time, delta);
+//             projectile.PostRender();
 //         }
 
 //         foreach (var projectile in this.opponentProjectiles) {
-//             projectile.Finalize(time, delta);
+//             projectile.PostRender();
 //         }
 //     }
 

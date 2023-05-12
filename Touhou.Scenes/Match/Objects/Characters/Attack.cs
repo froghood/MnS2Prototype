@@ -12,7 +12,7 @@ public abstract class Attack {
     public bool Focusable { get; protected init; }
     public bool Holdable { get; protected init; }
 
-    public bool Cost { get; protected init; }
+    public int Cost { get; protected init; }
 
     public abstract void PlayerPress(Player player, Time cooldownOverflow, bool focused);
     public abstract void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused);

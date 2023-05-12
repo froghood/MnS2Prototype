@@ -18,11 +18,11 @@ public class Receiver : Entity, IReceivable {
         Game.Scenes.PushScene<ClientSyncingScene>();
     }
 
-    public override void Update(Time time, float delta) { }
+    public override void Update() { }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
         Game.Window.Draw(text);
     }
 
-    public override void Finalize(Time time, float delta) { }
+    public override void PostRender() { }
 }

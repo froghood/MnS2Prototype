@@ -24,11 +24,12 @@ public class ReimuSpellA : Attack {
     private readonly float startingVelocityModifier = 2f;
     private readonly float velocityFalloff = 0.25f;
 
-    private readonly Time spellCooldown = Time.InSeconds(0.5f);
+    private readonly Time spellCooldown = Time.InSeconds(1f);
     private readonly Time globalCooldown = Time.InSeconds(0.15f);
 
     public ReimuSpellA() {
         Holdable = true;
+        Cost = 8;
     }
 
 
@@ -68,7 +69,9 @@ public class ReimuSpellA : Attack {
                 };
                 projectile.CollisionFilters.Add(0);
                 player.SpawnProjectile(projectile);
+
             }
+            player.SpendPower(Cost);
 
             var packet = new Packet(PacketType.SpellA).In(Game.Network.Time - cooldownOverflow + timeOffset).In(player.Position).In(angle);
             Game.Network.Send(packet);

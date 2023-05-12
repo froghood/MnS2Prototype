@@ -68,7 +68,7 @@ public abstract class Opponent : Entity, IReceivable {
         packet.ResetReadPosition();
     }
 
-    public override void Update(Time time, float delta) {
+    public override void Update() {
 
         if (isHit) {
             UpdateKnockback();
@@ -91,7 +91,7 @@ public abstract class Opponent : Entity, IReceivable {
         Position = (knockbackEndPosition - knockbackStartPosition) * easing + knockbackStartPosition;
     }
 
-    public override void DebugRender(Time time, float delta) {
+    public override void DebugRender() {
         var circle = new CircleShape(5);
         circle.Origin = new Vector2f(circle.Radius, circle.Radius);
 
@@ -108,8 +108,8 @@ public abstract class Opponent : Entity, IReceivable {
         Game.Window.Draw(circle);
     }
 
-    public override void Finalize(Time time, float delta) {
-        interpolationTime = MathF.Min(interpolationTime + delta * 0.5f, 1f);
+    public override void PostRender() {
+        interpolationTime = MathF.Min(interpolationTime + Game.Delta.AsSeconds() * 0.5f, 1f);
     }
 
     protected void AddAttack(PacketType type, Attack attack) => attacks[type] = attack;

@@ -32,14 +32,14 @@ public class DistributionGraph : Entity {
         }
     }
 
-    public override void Update(Time time, float delta) {
+    public override void Update() {
         foreach (var graph in graphs.Values) {
             if (graph.ValueDelegate != null) graph.Samples.Add(graph.ValueDelegate.Invoke());
             while (graph.Samples.Count > graph.MaxSamples) graph.Samples.RemoveAt(0);
         }
     }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
 
         // background
         rectangle.Size = Size;
@@ -128,7 +128,7 @@ public class DistributionGraph : Entity {
 
     }
 
-    public override void Finalize(Time time, float delta) {
+    public override void PostRender() {
 
     }
 

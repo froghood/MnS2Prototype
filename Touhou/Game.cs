@@ -90,7 +90,7 @@ internal static class Game {
         Debug.Fields.Add("update");
         Debug.Fields.Add("collision");
         Debug.Fields.Add("render");
-        Debug.Fields.Add("finalize");
+        Debug.Fields.Add("postRender");
 
         Scenes.PushScene<MainScene>(settings);
     }
@@ -120,13 +120,13 @@ internal static class Game {
             //Window.DispatchEvents();
 
             var updateStartTime = clock.ElapsedTime.AsMicroseconds();
-            _sceneManager.Current.Update(Time, deltaAsFloat);
+            _sceneManager.Current.Update();
             //Debug.Fields.Set("update", TimeAsFloat(clock.ElapsedTime.AsMicroseconds() - updateStartTime));
 
             var renderStartTime = clock.ElapsedTime.AsMicroseconds();
             Window.Clear(ClearColor);
             //Window.SetView(view);
-            _sceneManager.Current.Render(Time, deltaAsFloat);
+            _sceneManager.Current.Render();
             //_sceneManager.Current.DebugRender(Time, deltaAsFloat);
 
             inputManager.Render();
@@ -134,7 +134,7 @@ internal static class Game {
 
             //Debug.Fields.Set("render", TimeAsFloat(clock.ElapsedTime.AsMicroseconds() - renderStartTime));
 
-            _sceneManager.Current.Finalize(Time, deltaAsFloat);
+            _sceneManager.Current.PostRender();
 
             previousTime = Time;
         }

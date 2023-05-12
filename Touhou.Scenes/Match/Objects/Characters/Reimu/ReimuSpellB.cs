@@ -29,6 +29,7 @@ public class ReimuSpellB : Attack {
     public ReimuSpellB() {
         Holdable = true;
         Focusable = true;
+        Cost = 100;
 
     }
 
@@ -76,6 +77,8 @@ public class ReimuSpellB : Attack {
 
         projectile.CollisionFilters.Add(0);
         player.SpawnProjectile(projectile);
+
+        player.SpendPower(Cost);
 
         player.ApplyCooldowns(globalCooldown - cooldownOverflow, PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
         player.ApplyCooldowns(spellCooldown - cooldownOverflow, PlayerAction.SpellB);

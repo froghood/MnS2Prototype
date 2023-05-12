@@ -44,13 +44,13 @@ public class LinearAmulet : Projectile {
         return 0f;
     }
 
-    public override void Update(Time time, float delta) {
+    public override void Update() {
         shape.FillColor = Color;
 
-        base.Update(time, delta);
+        base.Update();
     }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
         shape.Position = Position;
         //float scale = 1f + 2f * MathF.Min(Time - SpawnTime, 0f) / -SpawnTime;
         //byte alpha = (byte)(255 - 255 * MathF.Min(Time - SpawnTime, 0f) / -SpawnTime);
@@ -59,9 +59,9 @@ public class LinearAmulet : Projectile {
         Game.Window.Draw(shape);
     }
 
-    public override void Finalize(Time time, float delta) { }
+    public override void PostRender() { }
 
-    public override void DebugRender(Time time, float delta) {
+    public override void DebugRender() {
         foreach (CircleHitbox hitbox in Hitboxes) {
             hitboxShape.Position = hitbox.Position;
             hitboxShape.Radius = hitbox.Radius;

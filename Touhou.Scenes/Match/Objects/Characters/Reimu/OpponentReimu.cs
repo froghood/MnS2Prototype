@@ -30,7 +30,7 @@ public class OpponentReimu : Opponent {
 
     }
 
-    public override void Render(Time time, float delta) {
+    public override void Render() {
         var rect = new RectangleShape(new Vector2f(20f, 20f));
         rect.Origin = rect.Size / 2f;
         rect.Position = Position;
