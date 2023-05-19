@@ -51,9 +51,9 @@ public class Receiver : Entity, IReceivable {
                 var minResponse = timeResponses.MinBy(e => (long)e.RoundTripTime);
                 Game.Network.TimeOffset += minResponse.Offset;
 
-                var gameStartTime = Game.Network.Time + Time.InSeconds(3);
-                Game.Network.Send(new Packet(PacketType.SyncFinished).In(gameStartTime));
-                Game.Scenes.PushScene<MatchScene>(false, gameStartTime);
+                var matchStartTime = Game.Network.Time + Time.InSeconds(3);
+                Game.Network.Send(new Packet(PacketType.SyncFinished).In(matchStartTime));
+                Game.Scenes.PushScene<MatchScene>(false, matchStartTime);
             }
         }
     }

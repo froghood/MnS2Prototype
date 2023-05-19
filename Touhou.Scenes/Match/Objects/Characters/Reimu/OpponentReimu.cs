@@ -16,27 +16,27 @@ public class OpponentReimu : Opponent {
         AddAttack(PacketType.SpellB, new ReimuSpellB());
     }
 
-    public override void Receive(Packet packet, IPEndPoint endPoint) {
-        base.Receive(packet, endPoint);
+    //public override void Receive(Packet packet, IPEndPoint endPoint) {
+    //base.Receive(packet, endPoint);
 
-        // switch (packet.Type) {
-        //     case PacketType.Primary: Primary(packet); break;
-        //     case PacketType.Secondary: Secondary(packet); break;
-        //     case PacketType.SpellA: SpellA(packet); break;
-        //     case PacketType.SpellB: SpellB(packet); break;
-        // }
+    // switch (packet.Type) {
+    //     case PacketType.Primary: Primary(packet); break;
+    //     case PacketType.Secondary: Secondary(packet); break;
+    //     case PacketType.SpellA: SpellA(packet); break;
+    //     case PacketType.SpellB: SpellB(packet); break;
+    // }
 
 
 
-    }
+    //}
 
-    public override void Render() {
-        var rect = new RectangleShape(new Vector2f(20f, 20f));
-        rect.Origin = rect.Size / 2f;
-        rect.Position = Position;
-        rect.FillColor = new Color(255, 0, 100);
-        Game.Window.Draw(rect);
-    }
+    //public override void Render() {
+    // var rect = new RectangleShape(new Vector2f(20f, 20f));
+    // rect.Origin = rect.Size / 2f;
+    // rect.Position = Position;
+    // rect.FillColor = new Color(255, 0, 100);
+    // Game.Window.Draw(rect);
+    //}
 
     // protected override void Primary(Packet packet) {
 

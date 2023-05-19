@@ -20,7 +20,7 @@ public class PlayerReimu : Player {
     private Time spellATime;
     private float spellAOffsetIncrement;
 
-    public PlayerReimu() {
+    public PlayerReimu(bool hosting) : base(hosting) {
         Speed = 300f;
         FocusedSpeed = 150f;
 
@@ -253,46 +253,46 @@ public class PlayerReimu : Player {
     //     Game.Network.Send(packet);
     // }
 
-    public override void Render() {
-        base.Render();
-        var rect = new RectangleShape(new Vector2f(20f, 20f));
-        rect.Origin = rect.Size / 2f;
-        rect.Position = Position;
-        rect.FillColor = attackHold ? new Color(0, 255, 200) : new Color(0, 255, 100);
-        Game.Window.Draw(rect);
+    //public override void Render() {
+    //base.Render();
+    // var rect = new RectangleShape(new Vector2f(20f, 20f));
+    // rect.Origin = rect.Size / 2f;
+    // rect.Position = Position;
+    // rect.FillColor = Color;
+    // Game.Window.Draw(rect);
 
-        if (Game.Time - InvulnerabilityTime < InvulnerabilityDuration) {
-            float currentDuration = (Game.Time - InvulnerabilityTime) / (float)Game.MICROSECOND;
-            byte alpha = (byte)(MathF.Floor(currentDuration * 5f) % 1f * 255f);
-            rect.FillColor = new Color(255, 255, 255, alpha);
-            Game.Window.Draw(rect);
-        }
+    // if (Game.Time - InvulnerabilityTime < InvulnerabilityDuration) {
+    //     float currentDuration = (Game.Time - InvulnerabilityTime) / (float)Game.MICROSECOND;
+    //     byte alpha = (byte)(MathF.Floor(currentDuration * 5f) % 1f * 255f);
+    //     rect.FillColor = new Color(255, 255, 255, alpha);
+    //     Game.Window.Draw(rect);
+    // }
 
 
-        int numVertices = 32;
-        float aimRange = MathF.PI / 180f * 140f;
-        float fullRange = aimRange * 2;
-        float increment = fullRange / (numVertices - 1);
+    // int numVertices = 32;
+    // float aimRange = MathF.PI / 180f * 140f;
+    // float fullRange = aimRange * 2;
+    // float increment = fullRange / (numVertices - 1);
 
-        float angleToOpponent = AngleToOpponent;
+    // float angleToOpponent = AngleToOpponent;
 
-        if (attackHold) { // ~7 frames at 60fps
-            var vertexArray = new VertexArray(PrimitiveType.TriangleFan);
-            vertexArray.Append(new Vertex(Position, new Color(255, 255, 255, 50)));
-            for (int i = 0; i < numVertices; i++) {
-                vertexArray.Append(new Vertex(Position + new Vector2f(
-                    MathF.Cos(angleToOpponent + aimRange - increment * i) * 40f,
-                    MathF.Sin(angleToOpponent + aimRange - increment * i) * 40f
-                ), new Color(255, 255, 255, 10)));
-            }
-            Game.Window.Draw(vertexArray);
+    // if (attackHold) { // ~7 frames at 60fps
+    //     var vertexArray = new VertexArray(PrimitiveType.TriangleFan);
+    //     vertexArray.Append(new Vertex(Position, new Color(255, 255, 255, 50)));
+    //     for (int i = 0; i < numVertices; i++) {
+    //         vertexArray.Append(new Vertex(Position + new Vector2f(
+    //             MathF.Cos(angleToOpponent + aimRange - increment * i) * 40f,
+    //             MathF.Sin(angleToOpponent + aimRange - increment * i) * 40f
+    //         ), new Color(255, 255, 255, 10)));
+    //     }
+    //     Game.Window.Draw(vertexArray);
 
-            var shape = new RectangleShape(new Vector2f(40f, 2f));
-            shape.Origin = new Vector2f(0f, 1f);
-            shape.Position = Position;
-            shape.Rotation = 180f / MathF.PI * (AngleToOpponent + aimOffset);
-            shape.FillColor = new Color(255, (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset)), (byte)MathF.Round(255f - 100f * Math.Abs(normalizedAimOffset)));
-            Game.Window.Draw(shape);
-        }
-    }
+    //     var shape = new RectangleShape(new Vector2f(40f, 2f));
+    //     shape.Origin = new Vector2f(0f, 1f);
+    //     shape.Position = Position;
+    //     shape.Rotation = 180f / MathF.PI * (AngleToOpponent + aimOffset);
+    //     shape.FillColor = new Color(255, (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset)), (byte)MathF.Round(255f - 100f * Math.Abs(normalizedAimOffset)));
+    //     Game.Window.Draw(shape);
+    // }
+    //}
 }

@@ -21,8 +21,6 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public bool CanMove { get; private set; } = true;
 
-    public int HitCount { get; private set; }
-
     public Time InvulnerabilityTime { get; private set; }
     public Time InvulnerabilityDuration { get; private set; }
     public Time KnockbackTime { get; private set; }
@@ -31,11 +29,18 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public Time KnockbackDuration { get; private set; }
 
     // power
-    public int Power { get => Math.Min(Timer.TotalPowerGeneration + powerGainedFromGrazing - powerSpent, 400); }
+    public int Power { get => Math.Min(Timer.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     private int powerGainedFromGrazing;
     private int powerSpent;
 
     private float smoothPower;
+
+    // hearts
+
+    public int HeartCount { get; private set; } = 3;
+
+    private bool isDead;
+    private Time deathTime;
 
     public MatchTimer Timer {
         get {
@@ -65,6 +70,12 @@ public abstract class Player : Entity, IControllable, IReceivable {
         }
     }
     private Opponent opponent;
+    private bool hosting;
+    private bool isDeathConfirmed;
+    private Time deathConfirmationTime;
+
+    public Color Color { get; set; } = new Color(0, 255, 100);
+
 
     public float AngleToOpponent {
         get {
@@ -76,7 +87,10 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public float MovespeedModifier { get; set; } = 1f;
 
-    public Player() {
+    public Player(bool hosting) {
+
+        this.hosting = hosting;
+
         CanCollide = true;
         CollisionType = CollisionType.Player;
         CollisionGroups.Add(0);
@@ -91,7 +105,19 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public override void Update() {
 
-        if (!Timer.MatchStarted) return;
+        if (isDeathConfirmed && Game.Time >= deathConfirmationTime + Time.InSeconds(2f)) {
+            var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
+
+            var matchRestartPacket = new Packet(PacketType.MatchRestart).In(matchStartTime);
+            Game.Network.Send(matchRestartPacket);
+
+            Game.Command(() => {
+                Game.Scenes.PopScene();
+                Game.Scenes.PushScene<MatchScene>(hosting, matchStartTime);
+            });
+        }
+
+        if (!Timer.MatchStarted || isDead) return;
 
         UpdateKnockback();
         if (CanMove) UpdateMovement();
@@ -196,6 +222,27 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
     public override void Render() {
+
+        if (!isDead) {
+            var rect = new RectangleShape(new Vector2f(20f, 20f));
+            rect.Origin = rect.Size / 2f;
+            rect.Position = Position;
+            rect.FillColor = Color;
+            Game.Window.Draw(rect);
+        }
+
+        // hearts (temp)
+
+        var text = new Text();
+        text.Font = Game.DefaultFont;
+        text.CharacterSize = 14;
+        text.Style = Text.Styles.Bold;
+        text.DisplayedString = $"Hearts: {HeartCount}";
+        text.Origin = new Vector2f(0f, text.GetLocalBounds().Height);
+        text.Position = new Vector2f(5f, Game.Window.Size.Y - 130f);
+        Game.Window.Draw(text);
+
+
         RenderCooldowns();
         RenderPower();
 
@@ -254,7 +301,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public override void PostRender() { }
 
     public void Hit(Entity entity) {
-        if (Game.Time - InvulnerabilityTime < InvulnerabilityDuration) return;
+        if (Game.Time - InvulnerabilityTime < InvulnerabilityDuration || isDead) return;
 
         System.Console.WriteLine("collide");
 
@@ -264,17 +311,32 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
             var angleToOpponent = AngleToOpponent + MathF.PI;
 
-            HitCount++;
+            HeartCount--;
+            if (HeartCount <= 0) {
+                Die();
+                return;
+            }
 
-            ApplyInvulnerability(Time.InSeconds(2)); // 2s
+            Scene.AddEntity(new HitExplosion(Position, 0.5f, 100f, Color));
+
             ApplyKnockback(angleToOpponent, 100f, Time.InSeconds(1)); // 1s
-
-            //projectile.Destroy();
+            ApplyInvulnerability(Time.InSeconds(2)); // 2s
 
             var packet = new Packet(PacketType.Hit).In(Game.Network.Time).In(Position).In(angleToOpponent);
             Game.Network.Send(packet);
 
         }
+    }
+
+    private void Die() {
+
+        isDead = true;
+        deathTime = Game.Network.Time;
+
+        Scene.AddEntity(new HitExplosion(Position, 1f, 500f, Color));
+
+        var packet = new Packet(PacketType.Death).In(deathTime).In(Position);
+        Game.Network.Send(packet);
     }
 
     public void Graze(Entity entity) {
@@ -321,7 +383,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
     public void SpendPower(int amount) {
-        var powerOverflow = Math.Max((Timer.TotalPowerGeneration + powerGainedFromGrazing - powerSpent) - 400, 0);
+        var powerOverflow = Math.Max((Timer.TotalPowerGenerated + powerGainedFromGrazing - powerSpent) - 400, 0);
         powerSpent += powerOverflow + amount;
     }
 
@@ -362,7 +424,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
             rect.Size = new Vector2f(48f, 48f);
             rect.Origin = new Vector2f(0f, rect.Size.Y);
 
-            cooldownShader.SetUniform("texture", Shader.CurrentTexture);
+            //cooldownShader.SetUniform("texture", Shader.CurrentTexture);
             cooldownShader.SetUniform("duration", attack.Cooldown.AsSeconds() / attack.CooldownDuration.AsSeconds());
             cooldownShader.SetUniform("position", new Vector2f(rect.Position.X, Game.Window.Size.Y - rect.Position.Y));
             cooldownShader.SetUniform("size", rect.Size);
@@ -375,11 +437,6 @@ public abstract class Player : Entity, IControllable, IReceivable {
             if (attack.Disabled) {
                 Game.Window.Draw(rect);
             }
-            //else if (attack.Cooldown > 0) {
-            //     rect.Size = new Vector2f(48f, attack.Cooldown.AsSeconds() / attack.CooldownDuration.AsSeconds() * 48f);
-            //     rect.Origin = new Vector2f(0f, rect.Size.Y);
-            //     Game.Window.Draw(rect);
-            // }
 
             offset++;
         }
@@ -388,9 +445,56 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public void Receive(Packet packet, IPEndPoint endPoint) {
         switch (packet.Type) {
             case PacketType.DestroyProjectile:
-                packet.Out(out int id);
+                packet.Out(out int id, true);
                 if (projectiles.TryGetValue(id, out var projectile)) projectile.Destroy();
                 break;
+            case PacketType.Death:
+
+
+                // received death before death confirmation: resolve tie
+                if (isDead) {
+                    packet.Out(out Time theirDeathTime, true);
+
+                    // send confirmation if opponent died before we did
+                    if (theirDeathTime < deathTime || (theirDeathTime == deathTime && hosting)) {
+
+
+
+
+
+                        Game.Network.Send(new Packet(PacketType.DeathConfirmation));
+
+                        // give us a point
+                    }
+
+
+                } else {
+                    ApplyInvulnerability(Time.InSeconds(9999f));
+
+                    Game.Network.Send(new Packet(PacketType.DeathConfirmation));
+
+                    // give us a point
+                }
+
+
+                break;
+            case PacketType.DeathConfirmation:
+
+                isDeathConfirmed = true;
+                deathConfirmationTime = Game.Time;
+
+
+
+                break;
+            case PacketType.MatchRestart:
+                packet.Out(out Time startTime, true);
+
+                Game.Command(() => {
+                    Game.Scenes.PopScene();
+                    Game.Scenes.PushScene<MatchScene>(hosting, startTime);
+                });
+                break;
+
         }
     }
 

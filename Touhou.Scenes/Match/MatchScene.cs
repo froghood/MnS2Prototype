@@ -39,7 +39,7 @@ public class MatchScene : Scene {
         Game.Network.ResetPing();
         if (hosting) Game.Network.StartLatencyCorrection();
 
-        var player = new PlayerReimu() { Position = new Vector2f(Game.Window.Size.X / (hosting ? 3f : 1.5f), Game.Window.Size.Y / 2f) };
+        var player = new PlayerReimu(hosting) { Position = new Vector2f(Game.Window.Size.X / (hosting ? 3f : 1.5f), Game.Window.Size.Y / 2f) };
         //var player = new PlayerReimu() { Position = new Vector2f(80f, Game.Window.Size.Y / 2f) };
         var opponent = new OpponentReimu(new Vector2f(Game.Window.Size.X / (!hosting ? 3f : 1.5f), Game.Window.Size.Y / 2f));
 

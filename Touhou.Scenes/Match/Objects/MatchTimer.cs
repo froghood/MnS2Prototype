@@ -21,7 +21,7 @@ public class MatchTimer : Entity {
         (Time.InSeconds(99f), 20)
     };
 
-    public int TotalPowerGeneration {
+    public int TotalPowerGenerated {
         get {
             float powerGen = 0f;
             foreach (var breakpoint in powerGenerationIncreaseBreakpoints) {

@@ -22,6 +22,9 @@ public abstract class Opponent : Entity, IReceivable {
     private Time knockbackDuration;
 
     private Dictionary<PacketType, Attack> attacks = new();
+    private bool isDead;
+
+    public Color Color { get; set; } = new Color(255, 0, 100);
 
     public Opponent(Vector2f startingPosition) {
         basePosition = startingPosition;
@@ -33,7 +36,7 @@ public abstract class Opponent : Entity, IReceivable {
 
 
         if (packet.Type == PacketType.VelocityChange) {
-            packet.Out(out Time theirTime).Out(out Vector2f theirPosition).Out(out Vector2f theirVelocity);
+            packet.Out(out Time theirTime, true).Out(out Vector2f theirPosition).Out(out Vector2f theirVelocity);
 
             var latency = Game.Network.Time - theirTime;
 
@@ -46,7 +49,9 @@ public abstract class Opponent : Entity, IReceivable {
 
             isHit = false;
         } else if (packet.Type == PacketType.Hit) {
-            packet.Out(out Time theirTime).Out(out Vector2f theirPosition).Out(out float angle);
+            packet.Out(out Time theirTime, true).Out(out Vector2f theirPosition).Out(out float angle);
+
+            Scene.AddEntity(new HitExplosion(theirPosition, 0.5f, 100f, Color));
 
             var latency = Game.Network.Time - theirTime;
 
@@ -55,6 +60,11 @@ public abstract class Opponent : Entity, IReceivable {
             knockbackStartPosition = theirPosition;
             knockbackEndPosition = theirPosition + new Vector2f(100f * MathF.Cos(angle), 100f * MathF.Sin(angle));
             knockbackDuration = Time.InSeconds(1);
+        } else if (packet.Type == PacketType.Death) {
+            isDead = true;
+            packet.Out(out Time _, true).Out(out Vector2f theirPosition);
+
+            Scene.AddEntity(new HitExplosion(theirPosition, 1f, 500f, Color));
         }
 
         if (attacks.TryGetValue(packet.Type, out var attack)) {
@@ -89,6 +99,15 @@ public abstract class Opponent : Entity, IReceivable {
         var easing = 1f - MathF.Pow(1f - t, 5f);
 
         Position = (knockbackEndPosition - knockbackStartPosition) * easing + knockbackStartPosition;
+    }
+
+    public override void Render() {
+        if (isDead) return;
+        var rect = new RectangleShape(new Vector2f(20f, 20f));
+        rect.Origin = rect.Size / 2f;
+        rect.Position = Position;
+        rect.FillColor = Color;
+        Game.Window.Draw(rect);
     }
 
     public override void DebugRender() {

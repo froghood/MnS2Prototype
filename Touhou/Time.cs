@@ -17,6 +17,8 @@ public struct Time {
     public static Time operator -(Time left, Time right) => left.microseconds - right.microseconds;
     public static Time operator *(Time left, Time right) => left.microseconds * right.microseconds;
 
+    public static Time operator *(Time left, double scalar) => (long)(left.microseconds * scalar);
+
     public static implicit operator long(Time duration) => duration.microseconds;
     public static implicit operator Time(long amount) => new Time(amount);
     public static implicit operator Time(SFML.System.Time time) => new Time(time.AsMicroseconds());

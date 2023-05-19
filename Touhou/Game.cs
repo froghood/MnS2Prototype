@@ -50,7 +50,7 @@ internal static class Game {
     private static RectangleShape rectangle = new();
 
     private static View view;
-
+    private static Queue<Action> commandBuffer = new();
 
     static Game() {
         Window = new RenderWindow(new VideoMode(1280, 720), "mns2", Styles.Close, new ContextSettings(24, 8, 16));
@@ -137,6 +137,8 @@ internal static class Game {
             _sceneManager.Current.PostRender();
 
             previousTime = Time;
+
+            while (commandBuffer.Count > 0) commandBuffer.Dequeue().Invoke();
         }
     }
 
@@ -150,5 +152,9 @@ internal static class Game {
 
     public static void DrawSprite(Drawable drawable, int layer) {
 
+    }
+
+    public static void Command(Action action) {
+        commandBuffer.Enqueue(action);
     }
 }

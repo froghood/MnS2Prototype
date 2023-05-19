@@ -45,11 +45,11 @@ public class Packet {
         return this;
     }
 
-    public Packet Out<T>(out T data) where T : struct {
+    public Packet Out<T>(out T data, bool fromStart = false) where T : struct {
         var size = Marshal.SizeOf(typeof(T));
         var buffer = new byte[size];
         var ptr = Marshal.AllocHGlobal(size);
-        stream.Position = readPosition;
+        stream.Position = fromStart ? 0 : readPosition;
         stream.Read(buffer, 0, size);
         readPosition = stream.Position;
         Marshal.Copy(buffer, 0, ptr, size);

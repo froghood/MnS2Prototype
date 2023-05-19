@@ -11,8 +11,11 @@ public enum PacketType : byte {
     SpellA,
     SpellB,
     Bomb,
-    Hit,
     Graze,
+    Hit,
+    Death,
+    DeathConfirmation,
+    MatchRestart,
     UpdateProjectile,
     DestroyProjectile,
 }
