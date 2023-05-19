@@ -17,14 +17,15 @@ public class ReimuSpellB : Attack {
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
     // pattern
+    private readonly int grazeAmount = 20;
     private readonly float unfocusedVelocity = 100f;
     private readonly float unfocusedSize = 20f;
 
     private readonly float focusedVelocity = 50f;
     private readonly float focusedSize = 30f;
 
-    private readonly Time globalCooldown = Time.InSeconds(0.15f);
-    private readonly Time spellCooldown = Time.InSeconds(1f);
+    private readonly Time globalCooldown = Time.InSeconds(0.25f);
+    private readonly Time spellCooldown = Time.InSeconds(0.5f);
 
     public ReimuSpellB() {
         Holdable = true;
@@ -75,7 +76,7 @@ public class ReimuSpellB : Attack {
             Velocity = focused ? focusedVelocity : unfocusedVelocity,
         };
 
-        projectile.CollisionFilters.Add(0);
+        projectile.CollisionGroups.Add(0);
         player.SpawnProjectile(projectile);
 
         player.SpendPower(Cost);
@@ -102,10 +103,11 @@ public class ReimuSpellB : Attack {
         var projectile = new YinYang(position, angle, focused ? focusedSize : unfocusedSize) {
             InterpolatedOffset = delta.AsSeconds(),
             Color = new Color(255, 0, 0),
+            GrazeAmount = grazeAmount,
             Velocity = focused ? focusedVelocity : unfocusedVelocity,
         };
 
-        projectile.CollisionFilters.Add(1);
+        projectile.CollisionGroups.Add(1);
         opponent.Scene.AddEntity(projectile);
     }
 

@@ -13,7 +13,7 @@ public abstract class Entity {
 
     public bool CanCollide { get; set; } = true;
     public CollisionType CollisionType { get; protected set; }
-    public List<int> CollisionFilters { get; private set; } = new();
+    public List<int> CollisionGroups { get; private set; } = new();
     public List<Hitbox> Hitboxes { get; private set; } = new();
 
     public abstract void Update();
@@ -26,6 +26,4 @@ public abstract class Entity {
         IsDestroyed = true;
         Destroyed?.Invoke();
     }
-
-    public virtual void Collide(Entity entity) { }
 }

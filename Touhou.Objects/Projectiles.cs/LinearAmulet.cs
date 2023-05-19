@@ -77,7 +77,7 @@ public class LinearAmulet : Projectile {
         }
     }
 
-    public override void Collide(Entity entity) {
+    public void Collision(Entity entity) {
         shape.FillColor = new Color(255, 255, 0);
         //Destroy();
     }

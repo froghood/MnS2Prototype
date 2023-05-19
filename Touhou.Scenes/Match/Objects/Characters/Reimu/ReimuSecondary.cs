@@ -8,13 +8,14 @@ namespace Touhou.Scenes.Match.Objects.Characters;
 public class ReimuSecondary : Attack {
 
     // pattern
+    private readonly int grazeAmount = 1;
     private readonly int numShots = 2;
     private readonly float spacing = 30f; // pixels
     private readonly float velocity = 350f;
     private readonly float startingVelocityModifier = 4f;
     private readonly float velocityFalloff = 0.25f;
 
-    private readonly Time cooldown = Time.InSeconds(0.08f);
+    private readonly Time cooldown = Time.InSeconds(0.15f);
 
     public ReimuSecondary() {
         Holdable = true;
@@ -40,7 +41,7 @@ public class ReimuSecondary : Attack {
                 GoalVelocity = velocity,
                 VelocityFalloff = velocityFalloff,
             };
-            projectile.CollisionFilters.Add(0);
+            projectile.CollisionGroups.Add(0);
             player.SpawnProjectile(projectile);
         }
 
@@ -70,11 +71,13 @@ public class ReimuSecondary : Attack {
 
                 Color = new Color(255, 0, 0),
 
+                GrazeAmount = grazeAmount,
+
                 StartingVelocity = velocity * startingVelocityModifier,
                 GoalVelocity = velocity,
                 VelocityFalloff = velocityFalloff
             };
-            projectile.CollisionFilters.Add(1);
+            projectile.CollisionGroups.Add(1);
 
             opponent.Scene.AddEntity(projectile);
         }

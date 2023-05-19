@@ -6,7 +6,7 @@ namespace Touhou.Objects {
 
         public float Radius { get; private set; }
 
-        public CircleHitbox(Entity entity, Vector2f offset, float radius) : base(entity, offset) {
+        public CircleHitbox(Entity entity, Vector2f offset, float radius, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionCallback) {
             Radius = radius;
         }
 

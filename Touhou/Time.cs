@@ -8,10 +8,10 @@ public struct Time {
     public Time(long microseconds) => this.microseconds = microseconds;
 
     public static Time InSeconds(float seconds) => new Time((long)Math.Round(seconds * 1000000f));
-    public static Time InMilliseconds(long milliseconds) => new Time(milliseconds * 1000);
+    public static Time InMilliseconds(double milliseconds) => new Time((long)Math.Round(milliseconds * 1000d));
 
     public float AsSeconds() => microseconds / 1000000f;
-    public long AsMilliseconds() => (long)Math.Round(microseconds / 1000d);
+    public double AsMilliseconds() => microseconds / 1000d;
 
     public static Time operator +(Time left, Time right) => left.microseconds + right.microseconds;
     public static Time operator -(Time left, Time right) => left.microseconds - right.microseconds;

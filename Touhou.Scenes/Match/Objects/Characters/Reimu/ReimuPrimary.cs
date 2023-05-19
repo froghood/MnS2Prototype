@@ -17,6 +17,7 @@ public class ReimuPrimary : Attack {
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
     // pattern
+    private readonly int grazeAmount = 5;
     private readonly int numShots = 5;
 
     private readonly float unfocusedSpacing = 0.3f; // radians
@@ -29,7 +30,7 @@ public class ReimuPrimary : Attack {
     private readonly float startingVelocityModifier = 4f;
 
     private readonly Time primaryCooldown = Time.InSeconds(0.4f);
-    private readonly Time globalCooldown = Time.InSeconds(0.15f);
+    private readonly Time globalCooldown = Time.InSeconds(0.25f);
 
     public ReimuPrimary() {
         Focusable = true;
@@ -76,7 +77,7 @@ public class ReimuPrimary : Attack {
                     GoalVelocity = focusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.CollisionFilters.Add(0);
+                projectile.CollisionGroups.Add(0);
                 player.SpawnProjectile(projectile);
             }
         } else {
@@ -88,7 +89,7 @@ public class ReimuPrimary : Attack {
                     GoalVelocity = unfocusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.CollisionFilters.Add(0);
+                projectile.CollisionGroups.Add(0);
                 player.SpawnProjectile(projectile);
             }
         }
@@ -117,11 +118,12 @@ public class ReimuPrimary : Attack {
                 var projectile = new LinearAmulet(position + offset, angle) {
                     InterpolatedOffset = delta.AsSeconds(),
                     Color = new Color(255, 0, 0),
+                    GrazeAmount = grazeAmount,
                     StartingVelocity = focusedVelocity * startingVelocityModifier,
                     GoalVelocity = focusedVelocity,
                     VelocityFalloff = velocityFalloff
                 };
-                projectile.CollisionFilters.Add(1);
+                projectile.CollisionGroups.Add(1);
                 opponent.Scene.AddEntity(projectile);
             }
         } else {
@@ -129,11 +131,12 @@ public class ReimuPrimary : Attack {
                 var projectile = new LinearAmulet(position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1)) {
                     InterpolatedOffset = delta.AsSeconds(),
                     Color = new Color(255, 0, 0),
+                    GrazeAmount = grazeAmount,
                     StartingVelocity = unfocusedVelocity * startingVelocityModifier,
                     GoalVelocity = unfocusedVelocity,
                     VelocityFalloff = velocityFalloff
                 };
-                projectile.CollisionFilters.Add(1);
+                projectile.CollisionGroups.Add(1);
                 opponent.Scene.AddEntity(projectile);
             }
         }

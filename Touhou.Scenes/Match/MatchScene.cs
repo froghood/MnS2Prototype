@@ -13,10 +13,6 @@ namespace Touhou.Scenes.Match;
 
 public class MatchScene : Scene {
 
-    //private Queue<float> _fpsSamples = new();
-
-    //private Clock _retryTimer = new();
-
     private readonly bool hosting;
     private readonly Time startTime;
 
@@ -70,13 +66,13 @@ public class MatchScene : Scene {
 
         AddEntity(latencyGraph);
 
-        AddEntity(new ValueDisplay<float>(() => Game.FPS) { Color = Color.White, CharacterSize = 14 });
-        AddEntity(new ValueDisplay<Time>(() => Game.Network.Time) { Position = new Vector2f(0f, 20f), Color = Color.White, CharacterSize = 14 });
+        AddEntity(new ValueDisplay<string>(() => $"FPS: {Game.FPS}") { Color = Color.White, CharacterSize = 14 });
+        AddEntity(new ValueDisplay<string>(() => $"Network Time: {Game.Network.Time.AsSeconds()}") { Position = new Vector2f(0f, 20f), Color = Color.White, CharacterSize = 14 });
 
-        AddEntity(new ValueDisplay<Time>(() => Game.Network.PerceivedLatency) { Position = new Vector2f(0f, 50f), Color = Color.White, CharacterSize = 14 });
-        AddEntity(new ValueDisplay<Time>(() => Game.Network.TheirPerceivedLatency) { Position = new Vector2f(0f, 70f), Color = Color.White, CharacterSize = 14 });
+        AddEntity(new ValueDisplay<string>(() => $"Lat: {Game.Network.PerceivedLatency.AsMilliseconds()}") { Position = new Vector2f(0f, 50f), Color = Color.White, CharacterSize = 14 });
+        AddEntity(new ValueDisplay<string>(() => $"Their Lat: {Game.Network.TheirPerceivedLatency.AsMilliseconds()}") { Position = new Vector2f(0f, 70f), Color = Color.White, CharacterSize = 14 });
 
-        AddEntity(new ValueDisplay<Vector2f>(() => player.Position) { Position = new Vector2f(0f, 100f), Color = Color.White, CharacterSize = 14 });
+        AddEntity(new ValueDisplay<string>(() => $"Pos: {player.Position.X}, {player.Position.Y}") { Position = new Vector2f(0f, 100f), Color = Color.White, CharacterSize = 14 });
 
 
     }

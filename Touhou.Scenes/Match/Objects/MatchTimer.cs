@@ -7,28 +7,40 @@ namespace Touhou.Scenes.Match.Objects;
 public class MatchTimer : Entity {
 
     public Time StartTime { get; }
+    public Time EndTime { get; }
     public Time CurrentReal { get => Game.Network.Time - StartTime; }
     public Time Current { get; private set; }
 
-    public int Power {
-        get {
-            float p1 = 20 * MathF.Min(MathF.Max(MathF.Floor(Current.AsSeconds() * 5) / 5 - 0, 0f), 30f);
-            float p2 = 25 * MathF.Min(MathF.Max(MathF.Floor(Current.AsSeconds() * 5) / 5 - 30, 0f), 20f);
-            float p3 = 35 * MathF.Min(MathF.Max(MathF.Floor(Current.AsSeconds() * 5) / 5 - 50, 0f), 20f);
-            float p4 = 50 * MathF.Min(MathF.Max(MathF.Floor(Current.AsSeconds() * 5) / 5 - 70, 0f), 20f);
-            float p5 = 70 * MathF.Max(MathF.Floor(Current.AsSeconds() * 5) / 5 - 90, 0f);
-
-            return (int)MathF.Round(p1 + p2 + p3 + p4 + p5);
-        }
-    }
+    public bool MatchStarted { get => Game.Network.Time >= StartTime; }
 
     private Text text = new();
 
+    private List<(Time Time, int Increase)> powerGenerationIncreaseBreakpoints = new() {
+        (Time.InSeconds(0f), 10),
+        (Time.InSeconds(49f), 10),
+        (Time.InSeconds(99f), 20)
+    };
+
+    public int TotalPowerGeneration {
+        get {
+            float powerGen = 0f;
+            foreach (var breakpoint in powerGenerationIncreaseBreakpoints) {
+                powerGen += MathF.Max(MathF.Floor((Current - breakpoint.Time).AsSeconds() * 5f) / 5f, 0f) * breakpoint.Increase;
+            }
+
+            return (int)MathF.Round(powerGen);
+        }
+    }
+
+
+
     public MatchTimer(Time startTime) {
         StartTime = startTime;
+        EndTime = startTime + Time.InSeconds(99f);
 
         text.Font = Game.DefaultFont;
         text.CharacterSize = 20;
+        text.Style = Text.Styles.Bold;
     }
 
     public override void Update() {
@@ -36,12 +48,25 @@ public class MatchTimer : Entity {
     }
 
     public override void Render() {
-        text.DisplayedString = Current.AsSeconds().ToString();
-        var bounds = text.GetLocalBounds();
-        text.Origin = new Vector2f(bounds.Width * 0.5f, 0f);
+        var displayTime = MathF.Max(MathF.Ceiling((EndTime - StartTime - Current).AsSeconds()), 0f);
+        text.DisplayedString = displayTime.ToString();
+        text.CharacterSize = 20;
+        text.Origin = new Vector2f(text.GetLocalBounds().Width * 0.5f, 0f);
         text.Position = new Vector2f(Game.Window.Size.X * 0.5f, 0f + 30f);
-
         Game.Window.Draw(text);
+
+        int powerPerSecond = 0;
+        foreach (var breakpoint in powerGenerationIncreaseBreakpoints) {
+            if (Current >= breakpoint.Time) powerPerSecond += breakpoint.Increase;
+        }
+
+        text.DisplayedString = $"{powerPerSecond}/s";
+        text.CharacterSize = 12;
+        text.Origin = new Vector2f(text.GetLocalBounds().Width * 0.5f, 0f);
+        text.Position = new Vector2f(Game.Window.Size.X * 0.5f, 0f + 55f);
+        Game.Window.Draw(text);
+
+
     }
     public override void PostRender() { }
 }

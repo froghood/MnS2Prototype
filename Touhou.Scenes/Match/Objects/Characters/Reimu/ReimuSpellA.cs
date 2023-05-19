@@ -15,17 +15,18 @@ public class ReimuSpellA : Attack {
     private Time timeThreshold;
 
     // pattern
+    private readonly int grazeAmount = 5;
     private readonly Time rateOfFire = Time.InSeconds(0.1f);
     private readonly float angleOffsetAcceleration = 1f;
 
     private readonly int numShots = 5;
-    private readonly float velocity = 225f;
+    private readonly float velocity = 300f;
 
     private readonly float startingVelocityModifier = 2f;
     private readonly float velocityFalloff = 0.25f;
 
     private readonly Time spellCooldown = Time.InSeconds(1f);
-    private readonly Time globalCooldown = Time.InSeconds(0.15f);
+    private readonly Time globalCooldown = Time.InSeconds(0.25f);
 
     public ReimuSpellA() {
         Holdable = true;
@@ -67,7 +68,7 @@ public class ReimuSpellA : Attack {
                     GoalVelocity = velocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.CollisionFilters.Add(0);
+                projectile.CollisionGroups.Add(0);
                 player.SpawnProjectile(projectile);
 
             }
@@ -103,12 +104,12 @@ public class ReimuSpellA : Attack {
                 InterpolatedOffset = delta.AsSeconds(),
 
                 Color = new Color(255, 0, 0),
-
+                GrazeAmount = grazeAmount,
                 StartingVelocity = velocity * startingVelocityModifier,
                 GoalVelocity = velocity,
                 VelocityFalloff = velocityFalloff,
             };
-            projectile.CollisionFilters.Add(1);
+            projectile.CollisionGroups.Add(1);
             opponent.Scene.AddEntity(projectile);
         }
     }

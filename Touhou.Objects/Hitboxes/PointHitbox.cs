@@ -3,7 +3,7 @@ using SFML.System;
 
 namespace Touhou.Objects {
     public class PointHitbox : Hitbox {
-        public PointHitbox(Entity entity, Vector2f offset) : base(entity, offset) { }
+        public PointHitbox(Entity entity, Vector2f offset, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionCallback) { }
 
 
 

@@ -7,7 +7,7 @@ namespace Touhou.Objects {
         public float Height { get; private set; }
         public float Angle { get; private set; }
 
-        public RectangleHitbox(Entity entity, Vector2f offset, float width, float height, float angle) : base(entity, offset) {
+        public RectangleHitbox(Entity entity, Vector2f offset, float width, float height, float angle, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionCallback) {
             Width = width;
             Height = height;
             Angle = angle;

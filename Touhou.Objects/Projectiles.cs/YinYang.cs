@@ -7,6 +7,7 @@ public class YinYang : Projectile {
 
 
     public float Velocity { get; init; }
+
     private float radius;
 
     private CircleShape circle;
@@ -30,7 +31,7 @@ public class YinYang : Projectile {
         boundsShape.OutlineThickness = 1f;
 
         CollisionType = CollisionType.Projectile;
-        Hitboxes.Add(new CircleHitbox(this, -new Vector2f(0f, 0f), this.radius));
+        Hitboxes.Add(new CircleHitbox(this, -new Vector2f(0f, 0f), this.radius, (_) => { }));
     }
 
     public override void Render() {

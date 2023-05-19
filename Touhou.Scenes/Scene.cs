@@ -68,7 +68,7 @@ public abstract class Scene {
     private void CheckCollisions(Entity entity, ref int numCollisions) {
         if (!entity.CanCollide || entity.IsDestroyed) return;
 
-        var collidedEntities = new HashSet<Entity>();
+        //var collidedHitboxes = new HashSet<Hitbox>();
 
         foreach (var hitbox in entity.Hitboxes) {
             var checkedHitboxes = new HashSet<Hitbox>();
@@ -81,10 +81,23 @@ public abstract class Scene {
 
             for (int x = regionX; x < regionWidth; x++) {
                 for (int y = regionY; y < regionHeight; y++) {
+
                     if (entity.IsDestroyed) return;
+
                     if (collisionGrid.TryGet(x, y, out var otherHitboxes)) {
                         foreach (var otherHitbox in otherHitboxes) {
-                            if (otherHitbox.Entity.IsDestroyed || checkedHitboxes.Contains(otherHitbox) || collidedEntities.Contains(otherHitbox.Entity)) continue;
+
+                            // ignore checked hitboxes
+                            if (checkedHitboxes.Contains(otherHitbox)) continue;
+                            checkedHitboxes.Add(otherHitbox);
+
+                            // ignore hitboxes of destroyed entites
+                            if (otherHitbox.Entity.IsDestroyed) continue;
+
+                            // ignore collisions between entities own hitboxes
+                            if (otherHitbox.Entity == entity) continue;
+
+                            // ignore collisions between entities that share collision groups
                             if (SharesCollisionGroup(entity, otherHitbox.Entity)) continue;
 
                             bool collided = ((Func<bool>)(otherHitbox switch {
@@ -95,12 +108,9 @@ public abstract class Scene {
                             })).Invoke();
 
                             if (collided) {
-                                entity.Collide(otherHitbox.Entity);
-                                otherHitbox.Entity.Collide(entity);
-                                collidedEntities.Add(otherHitbox.Entity);
+                                hitbox.Collide(otherHitbox.Entity);
+                                otherHitbox.Collide(entity);
                                 numCollisions++;
-                            } else {
-                                checkedHitboxes.Add(otherHitbox);
                             }
                         }
                     }
@@ -111,8 +121,8 @@ public abstract class Scene {
     }
 
     private static bool SharesCollisionGroup(Entity entity, Entity other) {
-        foreach (int group in entity.CollisionFilters) {
-            if (other.CollisionFilters.Contains(group)) return true;
+        foreach (int group in entity.CollisionGroups) {
+            if (other.CollisionGroups.Contains(group)) return true;
         }
         return false;
     }

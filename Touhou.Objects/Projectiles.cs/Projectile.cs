@@ -16,10 +16,13 @@ public abstract class Projectile : Entity {
     public int Id { get; private set; }
     public bool HasId { get; private set; }
 
-    public Vector2f PrevPosition { get; set; }
+    public Vector2f PrevPosition { get; protected set; }
     public bool DestroyedOnScreenExit { get; set; } = true;
 
     public Color Color { get; set; } = Color.White;
+
+    public bool Grazed { get; private set; }
+    public int GrazeAmount { get; set; }
 
     private float preCos;
     private float preSin;
@@ -33,6 +36,8 @@ public abstract class Projectile : Entity {
         this.preCos = MathF.Cos(Direction);
         this.preSin = MathF.Sin(Direction);
     }
+
+    public void Graze() => Grazed = true;
 
     protected abstract float FuncX(float time);
     protected abstract float FuncY(float time);

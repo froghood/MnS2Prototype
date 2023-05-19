@@ -31,9 +31,11 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public Time KnockbackDuration { get; private set; }
 
     // power
-    public int Power { get => Math.Min(Timer.Power + powerGainedFromGrazing - powerSpent, 400); }
+    public int Power { get => Math.Min(Timer.TotalPowerGeneration + powerGainedFromGrazing - powerSpent, 400); }
     private int powerGainedFromGrazing;
     private int powerSpent;
+
+    private float smoothPower;
 
     public MatchTimer Timer {
         get {
@@ -77,8 +79,9 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public Player() {
         CanCollide = true;
         CollisionType = CollisionType.Player;
-        CollisionFilters.Add(0);
-        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 0.5f));
+        CollisionGroups.Add(0);
+        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 0.5f, Hit));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 25f, Graze));
 
         cooldownShader = new Shader(null, null, "assets/Cooldown.frag");
     }
@@ -87,6 +90,8 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public virtual void Release(PlayerAction action) { }
 
     public override void Update() {
+
+        if (!Timer.MatchStarted) return;
 
         UpdateKnockback();
         if (CanMove) UpdateMovement();
@@ -200,19 +205,55 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
     private void RenderPower() {
+
+        var rect = new RectangleShape();
+        rect.Size = new Vector2f(
+            Power / 400f * 204f,
+            5
+        );
+        rect.Origin = new Vector2f(0f, rect.Size.Y);
+        rect.Position = new Vector2f(4f, Game.Window.Size.Y - 106f);
+        rect.FillColor = Color.White;
+
+        Game.Window.Draw(rect);
+
+
+        //smoothPower += MathF.Min(MathF.Abs(Power - smoothPower) * 0.99f, 50f * Game.Delta.AsSeconds()) * MathF.Sign(Power - smoothPower);
+
+        smoothPower += MathF.Min(MathF.Abs(Power - smoothPower), Game.Delta.AsSeconds() * 80f) * MathF.Sign(Power - smoothPower);
+
+
+        rect.Size = new Vector2f(
+            -(Power - smoothPower) / 400 * 204f,
+            5
+        );
+        rect.Position = new Vector2f(
+            4f + Power / 400f * 204f,
+            Game.Window.Size.Y - 106f
+        );
+        rect.FillColor = new Color(255, 200, 120);
+        Game.Window.Draw(rect);
+
+
         var text = new Text();
         text.Font = Game.DefaultFont;
         text.CharacterSize = 14;
         text.DisplayedString = Power.ToString();
         text.Origin = new Vector2f(0f, text.GetLocalBounds().Height);
-        text.Position = new Vector2f(5f, Game.Window.Size.Y - 30f);
+        text.Position = new Vector2f(5f, Game.Window.Size.Y - 40f);
+
+        Game.Window.Draw(text);
+
+        text.DisplayedString = smoothPower.ToString();
+        text.Origin = new Vector2f(0f, text.GetLocalBounds().Height);
+        text.Position = new Vector2f(5f, Game.Window.Size.Y - 26f);
 
         Game.Window.Draw(text);
     }
 
     public override void PostRender() { }
 
-    public override void Collide(Entity entity) {
+    public void Hit(Entity entity) {
         if (Game.Time - InvulnerabilityTime < InvulnerabilityDuration) return;
 
         System.Console.WriteLine("collide");
@@ -233,6 +274,14 @@ public abstract class Player : Entity, IControllable, IReceivable {
             var packet = new Packet(PacketType.Hit).In(Game.Network.Time).In(Position).In(angleToOpponent);
             Game.Network.Send(packet);
 
+        }
+    }
+
+    public void Graze(Entity entity) {
+        if (entity is Projectile projectile) {
+            if (projectile.Grazed) return;
+            powerGainedFromGrazing += projectile.GrazeAmount;
+            projectile.Graze();
         }
     }
 
@@ -272,7 +321,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
     public void SpendPower(int amount) {
-        var powerOverflow = Math.Max((Timer.Power + powerGainedFromGrazing - powerSpent) - 400, 0);
+        var powerOverflow = Math.Max((Timer.TotalPowerGeneration + powerGainedFromGrazing - powerSpent) - 400, 0);
         powerSpent += powerOverflow + amount;
     }
 
@@ -313,7 +362,11 @@ public abstract class Player : Entity, IControllable, IReceivable {
             rect.Size = new Vector2f(48f, 48f);
             rect.Origin = new Vector2f(0f, rect.Size.Y);
 
-            Game.Window.Draw(rect);
+            cooldownShader.SetUniform("texture", Shader.CurrentTexture);
+            cooldownShader.SetUniform("duration", attack.Cooldown.AsSeconds() / attack.CooldownDuration.AsSeconds());
+            cooldownShader.SetUniform("position", new Vector2f(rect.Position.X, Game.Window.Size.Y - rect.Position.Y));
+            cooldownShader.SetUniform("size", rect.Size);
+            Game.Window.Draw(rect, new RenderStates(cooldownShader));
 
             text.Position = new Vector2f(4f + offset * 52f, Game.Window.Size.Y - 54f - rect.Size.Y);
             Game.Window.Draw(text);
@@ -321,11 +374,12 @@ public abstract class Player : Entity, IControllable, IReceivable {
             rect.FillColor = new Color(0, 0, 0, 80);
             if (attack.Disabled) {
                 Game.Window.Draw(rect);
-            } else if (attack.Cooldown > 0) {
-                rect.Size = new Vector2f(48f, attack.Cooldown.AsSeconds() / attack.CooldownDuration.AsSeconds() * 48f);
-                rect.Origin = new Vector2f(0f, rect.Size.Y);
-                Game.Window.Draw(rect);
             }
+            //else if (attack.Cooldown > 0) {
+            //     rect.Size = new Vector2f(48f, attack.Cooldown.AsSeconds() / attack.CooldownDuration.AsSeconds() * 48f);
+            //     rect.Origin = new Vector2f(0f, rect.Size.Y);
+            //     Game.Window.Draw(rect);
+            // }
 
             offset++;
         }
