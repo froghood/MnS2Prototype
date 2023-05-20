@@ -1,5 +1,5 @@
 {
-    "Hosting": false,
     "Address": "73.105.56.125",
-    "Port": "6189"
+    "Port": "6189",
+    "SoundVolume": 2
 }

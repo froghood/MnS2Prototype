@@ -8,16 +8,13 @@ namespace Touhou.Scenes.Main;
 
 public class MainScene : Scene {
 
-    private readonly Settings settings;
 
-    public MainScene(Settings settings) {
-        this.settings = settings;
-    }
+    public MainScene() { }
 
     public override void OnInitialize() {
         Game.ClearColor = new Color(20, 20, 25);
 
-        var controller = new Controller(this.settings);
+        var controller = new Controller();
         AddEntity(controller);
 
     }

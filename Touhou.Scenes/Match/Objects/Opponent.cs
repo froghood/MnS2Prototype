@@ -60,11 +60,16 @@ public abstract class Opponent : Entity, IReceivable {
             knockbackStartPosition = theirPosition;
             knockbackEndPosition = theirPosition + new Vector2f(100f * MathF.Cos(angle), 100f * MathF.Sin(angle));
             knockbackDuration = Time.InSeconds(1);
+
+            Game.Sounds.Play("se_pldead00");
+
         } else if (packet.Type == PacketType.Death) {
             isDead = true;
             packet.Out(out Time _, true).Out(out Vector2f theirPosition);
 
             Scene.AddEntity(new HitExplosion(theirPosition, 1f, 500f, Color));
+
+            Game.Sounds.Play("se_enep01");
         }
 
         if (attacks.TryGetValue(packet.Type, out var attack)) {

@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using Newtonsoft.Json;
+using SFML.Audio;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+using Touhou.Audio;
 using Touhou.Debugging;
 using Touhou.Net;
 using Touhou.Scenes;
@@ -22,8 +24,11 @@ internal static class Game {
     public static InputManager Input { get => inputManager; }
     public static RenderWindow Window { get; private set; }
     public static Network Network { get => network; }
-    public static SceneManager Scenes { get => _sceneManager; }
-    public static Fields Stats { get => _stats; }
+    public static SceneManager Scenes { get => sceneManager; }
+    public static SoundPlayer Sounds { get => soundPlayer; }
+
+    public static Settings Settings { get; private set; }
+    public static Fields Stats { get => stats; }
     public static Debug Debug { get; private set; } = new();
 
 
@@ -35,12 +40,12 @@ internal static class Game {
 
     public static Font DefaultFont { get; private set; }
 
-    private static Fields _stats = new();
+    private static Fields stats = new();
 
     private static Queue<float> frameTimes = new();
     private static InputManager inputManager = new();
     private static Network network = new();
-    private static SceneManager _sceneManager = new();
+    private static SceneManager sceneManager = new();
     //private static SpriteAtlas spriteAtlas = new();
 
     private static Clock clock = new();
@@ -51,8 +56,14 @@ internal static class Game {
 
     private static View view;
     private static Queue<Action> commandBuffer = new();
+    private static SoundPlayer soundPlayer;
 
     static Game() {
+
+        Settings = new Settings("./Settings.json");
+
+        soundPlayer = new SoundPlayer();
+
         Window = new RenderWindow(new VideoMode(1280, 720), "mns2", Styles.Close, new ContextSettings(24, 8, 16));
         DefaultFont = new Font("assets/arial.ttf");
 
@@ -61,8 +72,7 @@ internal static class Game {
 
     public static void Init(string[] args) {
 
-        var json = File.ReadAllText("./Settings.json");
-        var settings = JsonConvert.DeserializeObject<Settings>(json);
+        soundPlayer.Load("./assets/sounds");
 
         //spriteAtlas.LoadSprites("./assets/sprites");
 
@@ -75,10 +85,10 @@ internal static class Game {
 
         inputManager.AttachEvents(Window);
 
-        inputManager.ActionPressed += (actionData) => _sceneManager.Current.Press(actionData);
-        inputManager.ActionReleased += (action) => _sceneManager.Current.Release(action);
+        inputManager.ActionPressed += (actionData) => sceneManager.Current.Press(actionData);
+        inputManager.ActionReleased += (action) => sceneManager.Current.Release(action);
 
-        network.PacketReceived += (packet, endPoint) => _sceneManager.Current.Receive(packet, endPoint);
+        network.PacketReceived += (packet, endPoint) => sceneManager.Current.Receive(packet, endPoint);
 
         // Stats.BackgroundColor = new Color(0, 0, 0, 80);
         // Stats.Size = new Vector2f(300f, 150f);
@@ -92,7 +102,7 @@ internal static class Game {
         Debug.Fields.Add("render");
         Debug.Fields.Add("postRender");
 
-        Scenes.PushScene<MainScene>(settings);
+        Scenes.PushScene<MainScene>();
     }
 
     public static void Run() {
@@ -120,13 +130,13 @@ internal static class Game {
             //Window.DispatchEvents();
 
             var updateStartTime = clock.ElapsedTime.AsMicroseconds();
-            _sceneManager.Current.Update();
+            sceneManager.Current.Update();
             //Debug.Fields.Set("update", TimeAsFloat(clock.ElapsedTime.AsMicroseconds() - updateStartTime));
 
             var renderStartTime = clock.ElapsedTime.AsMicroseconds();
             Window.Clear(ClearColor);
             //Window.SetView(view);
-            _sceneManager.Current.Render();
+            sceneManager.Current.Render();
             //_sceneManager.Current.DebugRender(Time, deltaAsFloat);
 
             inputManager.Render();
@@ -134,7 +144,7 @@ internal static class Game {
 
             //Debug.Fields.Set("render", TimeAsFloat(clock.ElapsedTime.AsMicroseconds() - renderStartTime));
 
-            _sceneManager.Current.PostRender();
+            sceneManager.Current.PostRender();
 
             previousTime = Time;
 

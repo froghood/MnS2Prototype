@@ -8,21 +8,19 @@ using Touhou.Scenes.Connecting;
 namespace Touhou.Scenes.Main.Objects;
 
 public class Controller : Entity, IControllable {
-    private readonly Settings settings;
     private readonly Text text;
 
-    public Controller(Settings settings) {
-        this.settings = settings;
+    public Controller() {
         this.text = new Text($"Press {PlayerAction.Primary} to host, {PlayerAction.Secondary} to connect", Game.DefaultFont, 14);
     }
 
     public void Press(PlayerAction action) {
         if (action == PlayerAction.Primary) {
-            Game.Scenes.PushScene<HostingScene>(this.settings.Port);
+            Game.Scenes.PushScene<HostingScene>(Game.Settings.Port);
         }
 
         if (action == PlayerAction.Secondary) {
-            Game.Scenes.PushScene<ConnectingScene>(new IPEndPoint(IPAddress.Parse(this.settings.Address), this.settings.Port));
+            Game.Scenes.PushScene<ConnectingScene>(new IPEndPoint(IPAddress.Parse(Game.Settings.Address), Game.Settings.Port));
         }
     }
 
