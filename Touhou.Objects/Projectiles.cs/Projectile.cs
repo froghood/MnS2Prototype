@@ -13,7 +13,7 @@ public abstract class Projectile : Entity {
     public Time SpawnTime { get; }
 
     public float InterpolatedOffset { get; init; }
-    public int Id { get; private set; }
+    public uint Id { get; private set; }
     public bool HasId { get; private set; }
 
     public Vector2f PrevPosition { get; protected set; }
@@ -68,7 +68,7 @@ public abstract class Projectile : Entity {
 
     public override void PostRender() { }
 
-    public void SetId(int id) {
+    public void SetId(uint id) {
         HasId = true;
         Id = id;
     }

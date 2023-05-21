@@ -58,9 +58,8 @@ public abstract class Player : Entity, IControllable, IReceivable {
     private Dictionary<Attack, (Time Time, bool Focused)> currentlyHeldAttacks = new();
 
 
-    private Dictionary<int, Projectile> projectiles = new();
-
-    private int totalSpawnedProjectiles = 0;
+    private Dictionary<uint, Projectile> projectiles = new();
+    private uint totalSpawnedProjectiles;
 
 
     public Opponent Opponent {
@@ -307,9 +306,10 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
         if (entity is Projectile projectile) {
 
-            System.Console.WriteLine("projectile");
-
-            var angleToOpponent = AngleToOpponent + MathF.PI;
+            projectile.Destroy();
+            // must toggle to last bit because the opponents' projectile ids are opposite
+            var destroyProjectilePacket = new Packet(PacketType.DestroyProjectile).In(projectile.Id ^ 0x80000000);
+            Game.Network.Send(destroyProjectilePacket);
 
             HeartCount--;
             if (HeartCount <= 0) {
@@ -317,13 +317,19 @@ public abstract class Player : Entity, IControllable, IReceivable {
                 return;
             }
 
+
+
+
+
             Scene.AddEntity(new HitExplosion(Position, 0.5f, 100f, Color));
+
+            var angleToOpponent = AngleToOpponent + MathF.PI;
 
             ApplyKnockback(angleToOpponent, 100f, Time.InSeconds(1)); // 1s
             ApplyInvulnerability(Time.InSeconds(2)); // 2s
 
-            var packet = new Packet(PacketType.Hit).In(Game.Network.Time).In(Position).In(angleToOpponent);
-            Game.Network.Send(packet);
+            var hitPacket = new Packet(PacketType.Hit).In(Game.Network.Time).In(Position).In(angleToOpponent);
+            Game.Network.Send(hitPacket);
 
             Game.Sounds.Play("se_pldead00");
             if (HeartCount == 1) Game.Sounds.Play("se_life1");
@@ -452,10 +458,15 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public void Receive(Packet packet, IPEndPoint endPoint) {
         switch (packet.Type) {
+
             case PacketType.DestroyProjectile:
-                packet.Out(out int id, true);
-                if (projectiles.TryGetValue(id, out var projectile)) projectile.Destroy();
+                packet.Out(out uint id, true);
+                if (projectiles.TryGetValue(id, out var projectile)) {
+                    projectile.Destroy();
+                    projectiles.Remove(id);
+                }
                 break;
+
             case PacketType.Death:
 
 

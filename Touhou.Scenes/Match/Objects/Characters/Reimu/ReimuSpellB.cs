@@ -108,7 +108,7 @@ public class ReimuSpellB : Attack {
         };
 
         projectile.CollisionGroups.Add(1);
-        opponent.Scene.AddEntity(projectile);
+        opponent.SpawnProjectile(projectile);
     }
 
     public override void PlayerRender(Player player) {

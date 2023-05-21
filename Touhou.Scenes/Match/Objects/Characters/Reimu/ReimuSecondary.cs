@@ -79,7 +79,7 @@ public class ReimuSecondary : Attack {
             };
             projectile.CollisionGroups.Add(1);
 
-            opponent.Scene.AddEntity(projectile);
+            opponent.SpawnProjectile(projectile);
         }
     }
 }

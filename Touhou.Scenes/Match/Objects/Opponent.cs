@@ -24,6 +24,10 @@ public abstract class Opponent : Entity, IReceivable {
     private Dictionary<PacketType, Attack> attacks = new();
     private bool isDead;
 
+    // projectile tracking
+    private Dictionary<uint, Projectile> projectiles = new();
+    private uint totalSpawnedProjectiles;
+
     public Color Color { get; set; } = new Color(255, 0, 100);
 
     public Opponent(Vector2f startingPosition) {
@@ -134,6 +138,17 @@ public abstract class Opponent : Entity, IReceivable {
 
     public override void PostRender() {
         interpolationTime = MathF.Min(interpolationTime + Game.Delta.AsSeconds() * 0.5f, 1f);
+    }
+
+    public void SpawnProjectile(Projectile projectile) {
+        // flips the last bit to a 1 to signify the projectile being the opponents
+        projectile.SetId(totalSpawnedProjectiles ^ 0x80000000);
+
+        projectile.Destroyed += () => projectiles.Remove(projectile.Id);
+        projectiles.Add(projectile.Id, projectile);
+        Scene.AddEntity(projectile);
+
+        totalSpawnedProjectiles++;
     }
 
     protected void AddAttack(PacketType type, Attack attack) => attacks[type] = attack;

@@ -124,7 +124,7 @@ public class ReimuPrimary : Attack {
                     VelocityFalloff = velocityFalloff
                 };
                 projectile.CollisionGroups.Add(1);
-                opponent.Scene.AddEntity(projectile);
+                opponent.SpawnProjectile(projectile);
             }
         } else {
             for (int index = 0; index < numShots; index++) {
@@ -137,7 +137,7 @@ public class ReimuPrimary : Attack {
                     VelocityFalloff = velocityFalloff
                 };
                 projectile.CollisionGroups.Add(1);
-                opponent.Scene.AddEntity(projectile);
+                opponent.SpawnProjectile(projectile);
             }
         }
     }

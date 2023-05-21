@@ -110,7 +110,7 @@ public class ReimuSpellA : Attack {
                 VelocityFalloff = velocityFalloff,
             };
             projectile.CollisionGroups.Add(1);
-            opponent.Scene.AddEntity(projectile);
+            opponent.SpawnProjectile(projectile);
         }
     }
 }
