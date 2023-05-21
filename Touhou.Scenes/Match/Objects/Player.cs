@@ -95,7 +95,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
         CollisionType = CollisionType.Player;
         CollisionGroups.Add(0);
         Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 0.5f, Hit));
-        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 25f, Graze));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 50f, Graze));
 
         cooldownShader = new Shader(null, null, "assets/Cooldown.frag");
     }
@@ -346,7 +346,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public void Graze(Entity entity) {
         if (entity is Projectile projectile) {
-            if (projectile.Grazed) return;
+            if (isDead || projectile.Grazed) return;
             powerGainedFromGrazing += projectile.GrazeAmount;
 
             Game.Sounds.Play("se_graze");

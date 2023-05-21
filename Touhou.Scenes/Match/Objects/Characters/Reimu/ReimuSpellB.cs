@@ -18,11 +18,11 @@ public class ReimuSpellB : Attack {
 
     // pattern
     private readonly int grazeAmount = 20;
-    private readonly float unfocusedVelocity = 100f;
-    private readonly float unfocusedSize = 20f;
+    private readonly float unfocusedVelocity = 120f;
+    private readonly float unfocusedSize = 30f;
 
-    private readonly float focusedVelocity = 50f;
-    private readonly float focusedSize = 30f;
+    private readonly float focusedVelocity = 40f;
+    private readonly float focusedSize = 40f;
 
     private readonly Time globalCooldown = Time.InSeconds(0.25f);
     private readonly Time spellCooldown = Time.InSeconds(0.5f);
@@ -30,7 +30,7 @@ public class ReimuSpellB : Attack {
     public ReimuSpellB() {
         Holdable = true;
         Focusable = true;
-        Cost = 100;
+        Cost = 80;
 
     }
 

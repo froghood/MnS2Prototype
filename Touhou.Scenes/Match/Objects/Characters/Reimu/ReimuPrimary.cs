@@ -12,8 +12,8 @@ public class ReimuPrimary : Attack {
     private float aimOffset;
 
     // aiming
-    private readonly float aimRange = 140f; // degrees
-    private readonly float aimStrength = 0.1f;
+    private readonly float aimRange = 80f; // degrees
+    private readonly float aimStrength = 0.2f;
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
     // pattern
@@ -21,10 +21,10 @@ public class ReimuPrimary : Attack {
     private readonly int numShots = 5;
 
     private readonly float unfocusedSpacing = 0.3f; // radians
-    private readonly float unfocusedVelocity = 150f;
+    private readonly float unfocusedVelocity = 115f;
 
-    private readonly float focusedSpacing = 20f; // pixels
-    private readonly float focusedVelocity = 350f;
+    private readonly float focusedSpacing = 18f; // pixels
+    private readonly float focusedVelocity = 300f;
 
     private readonly float velocityFalloff = 0.25f;
     private readonly float startingVelocityModifier = 4f;
@@ -144,8 +144,8 @@ public class ReimuPrimary : Attack {
 
     public override void PlayerRender(Player player) {
         int numVertices = 32;
-        float aimRange = MathF.PI / 180f * 140f;
-        float fullRange = aimRange * 2;
+        float aimRangeInRads = MathF.PI / 180f * aimRange;
+        float fullRange = aimRangeInRads * 2;
         float increment = fullRange / (numVertices - 1);
 
         float angleToOpponent = player.AngleToOpponent;
@@ -155,8 +155,8 @@ public class ReimuPrimary : Attack {
             vertexArray.Append(new Vertex(player.Position, new Color(255, 255, 255, 50)));
             for (int i = 0; i < numVertices; i++) {
                 vertexArray.Append(new Vertex(player.Position + new Vector2f(
-                    MathF.Cos(angleToOpponent + aimRange - increment * i) * 40f,
-                    MathF.Sin(angleToOpponent + aimRange - increment * i) * 40f
+                    MathF.Cos(angleToOpponent + aimRangeInRads - increment * i) * 40f,
+                    MathF.Sin(angleToOpponent + aimRangeInRads - increment * i) * 40f
                 ), new Color(255, 255, 255, 10)));
             }
             Game.Window.Draw(vertexArray);
