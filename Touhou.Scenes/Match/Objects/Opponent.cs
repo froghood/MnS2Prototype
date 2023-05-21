@@ -142,13 +142,13 @@ public abstract class Opponent : Entity, IReceivable {
 
     public void SpawnProjectile(Projectile projectile) {
         // flips the last bit to a 1 to signify the projectile being the opponents
-        projectile.SetId(totalSpawnedProjectiles ^ 0x80000000);
+        // projectile.SetId(totalSpawnedProjectiles ^ 0x80000000);
 
-        projectile.Destroyed += () => projectiles.Remove(projectile.Id);
-        projectiles.Add(projectile.Id, projectile);
+        // projectile.Destroyed += () => projectiles.Remove(projectile.Id);
+        // projectiles.Add(projectile.Id, projectile);
         Scene.AddEntity(projectile);
 
-        totalSpawnedProjectiles++;
+        // totalSpawnedProjectiles++;
     }
 
     protected void AddAttack(PacketType type, Attack attack) => attacks[type] = attack;

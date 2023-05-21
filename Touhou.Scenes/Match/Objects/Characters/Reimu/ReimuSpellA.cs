@@ -6,108 +6,71 @@ using Touhou.Objects;
 namespace Touhou.Scenes.Match.Objects.Characters;
 
 public class ReimuSpellA : Attack {
-
-    private float startingAngle;
-
-    private float angleOffset;
-    private float angleOffsetVelocity;
-
-    private Time timeThreshold;
-
-    // pattern
-    private readonly int grazeAmount = 5;
-    private readonly Time rateOfFire = Time.InSeconds(0.1f);
-    private readonly float angleOffsetAcceleration = 1f;
-
-    private readonly int numShots = 5;
-    private readonly float velocity = 300f;
-
-    private readonly float startingVelocityModifier = 2f;
-    private readonly float velocityFalloff = 0.25f;
-
-    private readonly Time spellCooldown = Time.InSeconds(1f);
-    private readonly Time globalCooldown = Time.InSeconds(0.25f);
+    private readonly int numShots = 30;
+    private readonly float velocity = 600;
+    private readonly float deceleration = 900;
+    private readonly Time spawnDelay = Time.InSeconds(0.15f);
+    private readonly int grazeAmount = 1;
 
     public ReimuSpellA() {
-        Holdable = true;
-        Cost = 8;
+        Cost = 80;
     }
 
-
-
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        startingAngle = player.AngleToOpponent;
 
-        System.Console.WriteLine(startingAngle);
+        var arcAngle = MathF.Tau / numShots;
 
-        angleOffsetVelocity = 0f;
-        angleOffset = 0f;
-        timeThreshold = Game.Time - cooldownOverflow;
+        var angle = player.AngleToOpponent + arcAngle / 2f;
 
-        player.MovespeedModifier = 0.2f;
 
-        player.DisableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+        for (int i = 0; i < numShots; i++) {
+
+            var projectile = new TargetingAmulet(player.Position, angle + arcAngle * i, false, velocity, deceleration, cooldownOverflow) {
+                SpawnDelay = spawnDelay,
+                DestroyedOnScreenExit = false,
+                CanCollide = false,
+                Color = new Color(0, 255, 0, 100),
+            };
+            projectile.CollisionGroups.Add(0);
+            player.SpawnProjectile(projectile);
+        }
+
+        player.ApplyCooldowns(Time.InSeconds(0.5f), PlayerAction.SpellA);
+        player.ApplyCooldowns(Time.InSeconds(0.25f), PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+
+        player.SpendPower(Cost);
+
+        var packet = new Packet(PacketType.SpellA).In(Game.Network.Time - cooldownOverflow).In(player.Position).In(angle);
+        Game.Network.Send(packet);
     }
 
 
 
     public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
-
-        while (Game.Time >= timeThreshold) {
-
-            Time timeOffset = Game.Time - timeThreshold;
-            timeThreshold += rateOfFire;
-
-            float angle = startingAngle + angleOffset / 360f * MathF.Tau + MathF.PI;
-
-            for (int i = 0; i < numShots; i++) {
-                var projectile = new LinearAmulet(player.Position, angle + MathF.Tau / numShots * i, cooldownOverflow + timeOffset) {
-                    CanCollide = false,
-                    Color = new Color(0, 255, 0, 100),
-                    StartingVelocity = velocity * startingVelocityModifier,
-                    GoalVelocity = velocity,
-                    VelocityFalloff = velocityFalloff,
-                };
-                projectile.CollisionGroups.Add(0);
-                player.SpawnProjectile(projectile);
-
-            }
-            player.SpendPower(Cost);
-
-            var packet = new Packet(PacketType.SpellA).In(Game.Network.Time - cooldownOverflow + timeOffset).In(player.Position).In(angle);
-            Game.Network.Send(packet);
-
-            angleOffsetVelocity += angleOffsetAcceleration;
-            angleOffset += angleOffsetVelocity;
-        }
+        throw new NotImplementedException();
     }
 
 
 
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
-        player.MovespeedModifier = 1f;
-
-        player.ApplyCooldowns(spellCooldown, PlayerAction.SpellA);
-        player.ApplyCooldowns(globalCooldown, PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
-
-        player.EnableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+        throw new NotImplementedException();
     }
 
 
-
     public override void OpponentPress(Opponent opponent, Packet packet) {
-        packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle);
-        var delta = Game.Network.Time - theirTime;
+
+        packet.Out(out Time time, true).Out(out Vector2f position).Out(out float angle);
+        var delta = Game.Network.Time - time;
+
+        var arcAngle = MathF.Tau / numShots;
 
         for (int i = 0; i < numShots; i++) {
-            var projectile = new LinearAmulet(position, angle + MathF.Tau / numShots * i) {
+            var projectile = new TargetingAmulet(position, angle + arcAngle * i, true, velocity, deceleration) {
+                SpawnDelay = spawnDelay,
                 InterpolatedOffset = delta.AsSeconds(),
-
+                DestroyedOnScreenExit = false,
                 Color = new Color(255, 0, 0),
-                GrazeAmount = grazeAmount,
-                StartingVelocity = velocity * startingVelocityModifier,
-                GoalVelocity = velocity,
-                VelocityFalloff = velocityFalloff,
+                GrazeAmount = grazeAmount
             };
             projectile.CollisionGroups.Add(1);
             opponent.SpawnProjectile(projectile);

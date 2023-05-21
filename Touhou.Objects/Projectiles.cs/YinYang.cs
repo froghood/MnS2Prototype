@@ -14,7 +14,7 @@ public class YinYang : Projectile {
     private CircleShape hitboxShape;
     private RectangleShape boundsShape;
 
-    public YinYang(Vector2f origin, float direction, float radius, Time spawnTimeOffset = default(Time)) : base(origin, direction, spawnTimeOffset) {
+    public YinYang(Vector2f origin, float direction, bool isRemote, float radius, Time spawnTimeOffset = default(Time)) : base(origin, direction, isRemote, spawnTimeOffset) {
 
 
         circle = new CircleShape();

@@ -1,19 +1,28 @@
+using System.Net;
 using SFML.Graphics;
 using SFML.System;
+using Touhou.Net;
+using Touhou.Scenes.Match.Objects;
 
 namespace Touhou.Objects;
 
 
 
-public abstract class Projectile : Entity {
+public abstract class Projectile : Entity, IReceivable {
 
-    //public GameManager GameManager { get; private init; }
+    public static uint totalLocalProjectiles;
+    public static uint totalRemoteProjectiles = 0x80000000;
     public Vector2f Origin { get; }
     public float Direction { get; }
+    public bool IsRemote { get; }
     public Time SpawnTime { get; }
 
+    public uint Id { get; }
+
+    public Time SpawnDelay { get; init; }
+
     public float InterpolatedOffset { get; init; }
-    public uint Id { get; private set; }
+
     public bool HasId { get; private set; }
 
     public Vector2f PrevPosition { get; protected set; }
@@ -24,13 +33,22 @@ public abstract class Projectile : Entity {
     public bool Grazed { get; private set; }
     public int GrazeAmount { get; set; }
 
+
     private float preCos;
     private float preSin;
-
-    protected Projectile(Vector2f origin, float direction, Time spawnTimeOffset = default(Time)) {
+    protected Projectile(Vector2f origin, float direction, bool isRemote, Time spawnTimeOffset = default(Time)) {
         Origin = origin;
         Direction = direction;
+        IsRemote = isRemote;
         SpawnTime = Game.Time - spawnTimeOffset;
+
+        if (isRemote) {
+            Id = totalRemoteProjectiles;
+            totalRemoteProjectiles++;
+        } else {
+            Id = totalLocalProjectiles;
+            totalLocalProjectiles++;
+        }
 
         Position = Origin;
         this.preCos = MathF.Cos(Direction);
@@ -42,16 +60,18 @@ public abstract class Projectile : Entity {
     protected abstract float FuncX(float time);
     protected abstract float FuncY(float time);
     protected virtual Vector2f Adjust(float time, Vector2f position) => position;
+    protected virtual void Tick(float time) { }
 
-    public override void Update() {
+    public sealed override void Update() {
         PrevPosition = Position;
 
-        var lifeTime = (Game.Time - SpawnTime).AsSeconds();
+        var lifeTime = MathF.Max((Game.Time - SpawnTime).AsSeconds() - SpawnDelay.AsSeconds(), 0f);
 
         float realTime = lifeTime + EaseOutCubic(Math.Clamp(lifeTime / 2f, 0f, 1f)) * InterpolatedOffset;
 
         //var realTime = InterpolateOffset ? Time + EaseOutSine(Math.Clamp(Time / 2f, 0f, 1f)) * TimeOffset : Time + TimeOffset;
         Position = Adjust(realTime, SamplePosition(realTime));
+        Tick(realTime);
 
         if (DestroyedOnScreenExit) {
             foreach (var hitbox in Hitboxes) {
@@ -66,12 +86,15 @@ public abstract class Projectile : Entity {
 
     }
 
+
+
     public override void PostRender() { }
 
-    public void SetId(uint id) {
-        HasId = true;
-        Id = id;
-    }
+    // public void SetId(uint id) {
+    //     if (HasId) return;
+    //     HasId = true;
+    //     Id = id;
+    // }
 
     protected Vector2f SamplePosition(float time) {
         var x = FuncX(time);
@@ -82,6 +105,13 @@ public abstract class Projectile : Entity {
     private float EaseOutSine(float t) => MathF.Sin(t * MathF.PI / 2f);
     private float EaseOutQuad(float t) => 2f * t - t * t;
     private float EaseOutCubic(float t) => 1f - MathF.Pow(1f - t, 3f);
+
+    public virtual void Receive(Packet packet, IPEndPoint endPoint) {
+        if (packet.Type != PacketType.DestroyProjectile) return;
+
+        packet.Out(out uint id, true);
+        if (id == Id) Destroy();
+    }
 
 
     // private abstract class WrappingProjectile : Projectile {

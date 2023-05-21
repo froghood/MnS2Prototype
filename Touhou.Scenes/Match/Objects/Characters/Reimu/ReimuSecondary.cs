@@ -34,7 +34,7 @@ public class ReimuSecondary : Attack {
 
         for (int index = 0; index < numShots; index++) {
             var offset = new Vector2f(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (spacing * index - spacing / 2f * (numShots - 1));
-            var projectile = new LinearAmulet(player.Position + offset, angle, cooldownOverflow) {
+            var projectile = new LinearAmulet(player.Position + offset, angle, false, cooldownOverflow) {
                 CanCollide = false,
                 Color = new Color(0, 255, 0, 100),
                 StartingVelocity = velocity * startingVelocityModifier,
@@ -66,7 +66,7 @@ public class ReimuSecondary : Attack {
 
         for (int index = 0; index < numShots; index++) {
             var offset = new Vector2f(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (spacing * index - spacing / 2f * (numShots - 1));
-            var projectile = new LinearAmulet(position + offset, angle) {
+            var projectile = new LinearAmulet(position + offset, angle, true) {
                 InterpolatedOffset = delta.AsSeconds(),
 
                 Color = new Color(255, 0, 0),

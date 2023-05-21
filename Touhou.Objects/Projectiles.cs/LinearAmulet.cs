@@ -13,7 +13,7 @@ public class LinearAmulet : Projectile {
     private CircleShape hitboxShape;
     private RectangleShape boundsShape;
 
-    public LinearAmulet(Vector2f origin, float direction, Time spawnTimeOffset = default(Time)) : base(origin, direction, spawnTimeOffset) {
+    public LinearAmulet(Vector2f origin, float direction, bool isRemote, Time spawnTimeOffset = default(Time)) : base(origin, direction, isRemote, spawnTimeOffset) {
 
         shape = new RectangleShape(new Vector2f(20f, 15f));
         shape.Origin = shape.Size / 2f;
@@ -35,22 +35,17 @@ public class LinearAmulet : Projectile {
 
     protected override float FuncX(float t) {
 
-        float _t = MathF.Max(t - 0.15f, 0f);
-        var a = MathF.Min(_t, VelocityFalloff);
-        return (StartingVelocity * MathF.Pow(a, 2) - GoalVelocity * MathF.Pow(a, 2) + 2 * GoalVelocity * a * _t - 2 * StartingVelocity * a * _t) / (2 * VelocityFalloff) + StartingVelocity * _t;
+        var a = MathF.Min(t, VelocityFalloff);
+        return (StartingVelocity * MathF.Pow(a, 2) - GoalVelocity * MathF.Pow(a, 2) + 2 * GoalVelocity * a * t - 2 * StartingVelocity * a * t) / (2 * VelocityFalloff) + StartingVelocity * t;
     }
 
     protected override float FuncY(float t) {
         return 0f;
     }
 
-    public override void Update() {
-        shape.FillColor = Color;
-
-        base.Update();
-    }
 
     public override void Render() {
+        shape.FillColor = Color;
         shape.Position = Position;
         //float scale = 1f + 2f * MathF.Min(Time - SpawnTime, 0f) / -SpawnTime;
         //byte alpha = (byte)(255 - 255 * MathF.Min(Time - SpawnTime, 0f) / -SpawnTime);

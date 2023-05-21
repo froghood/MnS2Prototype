@@ -402,13 +402,12 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
     public void SpawnProjectile(Projectile projectile) {
-        projectile.SetId(totalSpawnedProjectiles);
 
-        projectile.Destroyed += () => projectiles.Remove(projectile.Id);
-        projectiles.Add(projectile.Id, projectile);
+        // projectile.Destroyed += () => projectiles.Remove(projectile.Id);
+        // projectiles.Add(projectile.Id, projectile);
         Scene.AddEntity(projectile);
 
-        totalSpawnedProjectiles++;
+        // totalSpawnedProjectiles++;
     }
 
     private void ChangeVelocity(Vector2f newVelocity) {

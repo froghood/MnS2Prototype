@@ -17,6 +17,7 @@ public class ReimuPrimary : Attack {
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
     // pattern
+    private readonly Time spawnDelay = Time.InSeconds(0.15f);
     private readonly int grazeAmount = 5;
     private readonly int numShots = 5;
 
@@ -70,7 +71,8 @@ public class ReimuPrimary : Attack {
         if (focused) {
             for (int index = 0; index < numShots; index++) {
                 var offset = new Vector2f(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
-                var projectile = new LinearAmulet(player.Position + offset, angle, cooldownOverflow) {
+                var projectile = new LinearAmulet(player.Position + offset, angle, false, cooldownOverflow) {
+                    SpawnDelay = spawnDelay,
                     CanCollide = false,
                     Color = new Color(0, 255, 0, 100),
                     StartingVelocity = focusedVelocity * startingVelocityModifier,
@@ -82,7 +84,8 @@ public class ReimuPrimary : Attack {
             }
         } else {
             for (int index = 0; index < numShots; index++) {
-                var projectile = new LinearAmulet(player.Position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), cooldownOverflow) {
+                var projectile = new LinearAmulet(player.Position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), false, cooldownOverflow) {
+                    SpawnDelay = spawnDelay,
                     CanCollide = false,
                     Color = new Color(0, 255, 0, 100),
                     StartingVelocity = unfocusedVelocity * startingVelocityModifier,
@@ -115,7 +118,8 @@ public class ReimuPrimary : Attack {
         if (focused) {
             for (int index = 0; index < numShots; index++) {
                 var offset = new Vector2f(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
-                var projectile = new LinearAmulet(position + offset, angle) {
+                var projectile = new LinearAmulet(position + offset, angle, true) {
+                    SpawnDelay = spawnDelay,
                     InterpolatedOffset = delta.AsSeconds(),
                     Color = new Color(255, 0, 0),
                     GrazeAmount = grazeAmount,
@@ -128,7 +132,8 @@ public class ReimuPrimary : Attack {
             }
         } else {
             for (int index = 0; index < numShots; index++) {
-                var projectile = new LinearAmulet(position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1)) {
+                var projectile = new LinearAmulet(position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), true) {
+                    SpawnDelay = spawnDelay,
                     InterpolatedOffset = delta.AsSeconds(),
                     Color = new Color(255, 0, 0),
                     GrazeAmount = grazeAmount,

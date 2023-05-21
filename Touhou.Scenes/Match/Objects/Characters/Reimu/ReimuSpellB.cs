@@ -70,7 +70,7 @@ public class ReimuSpellB : Attack {
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
         float angle = player.AngleToOpponent + aimOffset;
 
-        var projectile = new YinYang(player.Position, angle, focused ? focusedSize : unfocusedSize, cooldownOverflow) {
+        var projectile = new YinYang(player.Position, angle, false, focused ? focusedSize : unfocusedSize, cooldownOverflow) {
             CanCollide = false,
             Color = new Color(0, 255, 0, 100),
             Velocity = focused ? focusedVelocity : unfocusedVelocity,
@@ -100,7 +100,7 @@ public class ReimuSpellB : Attack {
         packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle).Out(out bool focused);
         Time delta = Game.Network.Time - theirTime;
 
-        var projectile = new YinYang(position, angle, focused ? focusedSize : unfocusedSize) {
+        var projectile = new YinYang(position, angle, true, focused ? focusedSize : unfocusedSize) {
             InterpolatedOffset = delta.AsSeconds(),
             Color = new Color(255, 0, 0),
             GrazeAmount = grazeAmount,
