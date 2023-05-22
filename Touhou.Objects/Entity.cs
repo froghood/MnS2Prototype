@@ -16,9 +16,9 @@ public abstract class Entity {
     public List<int> CollisionGroups { get; private set; } = new();
     public List<Hitbox> Hitboxes { get; private set; } = new();
 
-    public abstract void Update();
-    public abstract void Render();
-    public abstract void PostRender();
+    public virtual void Update() { }
+    public virtual void Render() { }
+    public virtual void PostRender() { }
 
     public virtual void DebugRender() { }
 

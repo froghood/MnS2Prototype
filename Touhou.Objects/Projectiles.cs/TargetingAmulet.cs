@@ -6,7 +6,7 @@ using Touhou.Scenes.Match.Objects;
 
 namespace Touhou.Objects;
 
-public class TargetingAmulet : Projectile {
+public class TargetingAmulet : ParametricProjectile {
     private readonly float seekingTime = 1.5f;
     private readonly float velocity;
     private readonly float deceleration;
@@ -36,33 +36,33 @@ public class TargetingAmulet : Projectile {
         return 0f;
     }
 
-    protected override void Tick(float t) {
-        if (t >= seekingTime && IsRemote) {
-            Destroy();
+    // protected override void Tick(float t) {
+    //     if (t >= seekingTime && IsRemote) {
+    //         Destroy();
 
-            var timeOverflow = Time.InSeconds(t - seekingTime);
+    //         var timeOverflow = Time.InSeconds(t - seekingTime);
 
-            var player = Scene.GetFirstEntity<Player>();
-            var opponent = Scene.GetFirstEntity<Opponent>();
+    //         var player = Scene.GetFirstEntity<Player>();
+    //         var opponent = Scene.GetFirstEntity<Opponent>();
 
-            var angle = MathF.Atan2(player.Position.Y - Position.Y, player.Position.X - Position.X);
+    //         var angle = MathF.Atan2(player.Position.Y - Position.Y, player.Position.X - Position.X);
 
-            var projectile = new LinearAmulet(Position, angle, false, timeOverflow) {
-                GrazeAmount = 1,
-                Color = Color,
-                StartingVelocity = 300f,
-                GoalVelocity = 300f,
-            };
-            if (Grazed) projectile.Graze();
+    //         var projectile = new LinearAmulet(Position, angle, false, timeOverflow) {
+    //             GrazeAmount = 1,
+    //             Color = Color,
+    //             StartingVelocity = 300f,
+    //             GoalVelocity = 300f,
+    //         };
+    //         if (Grazed) projectile.Graze();
 
-            opponent.SpawnProjectile(projectile);
+    //         opponent.Scene.AddEntity(projectile);
 
-            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time - timeOverflow).In(Position).In(angle);
-            Game.Network.Send(packet);
+    //         var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time - timeOverflow).In(Position).In(angle);
+    //         Game.Network.Send(packet);
 
 
-        }
-    }
+    //     }
+    // }
 
     public override void Render() {
         shape.FillColor = Color;
@@ -70,23 +70,59 @@ public class TargetingAmulet : Projectile {
         Game.Window.Draw(shape);
     }
 
-    public override void Receive(Packet packet, IPEndPoint endPoint) {
-        base.Receive(packet, endPoint);
-        if (packet.Type != PacketType.UpdateProjectile) return;
+    // public override void Receive(Packet packet, IPEndPoint endPoint) {
+    //     base.Receive(packet, endPoint);
+    //     if (packet.Type != PacketType.UpdateProjectile) return;
 
-        packet.Out(out uint id, true);
+    //     packet.Out(out uint id, true);
 
-        if (Id != id) return;
+    //     if (Id != id) return;
 
+    //     Destroy();
+
+    //     packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle);
+    //     var delta = Game.Network.Time - theirTime;
+
+    //     var player = Scene.GetFirstEntity<Player>();
+
+    //     var projectile = new LinearAmulet(Position, angle, true) {
+
+    //         InterpolatedOffset = delta.AsSeconds(),
+    //         CanCollide = false,
+    //         Color = Color,
+    //         StartingVelocity = 300f,
+    //         GoalVelocity = 300f,
+    //     };
+
+
+    //     player.Scene.AddEntity(projectile);
+    // }
+
+
+    public void LocalTarget(Vector2f targetPosition, Time timeOverflow) {
+        Destroy();
+        var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
+
+        var projectile = new LinearAmulet(Position, angle, false, timeOverflow) {
+            GrazeAmount = 1,
+            Color = Color,
+            StartingVelocity = 300f,
+            GoalVelocity = 300f,
+        };
+        projectile.CollisionGroups.Add(1);
+        if (Grazed) projectile.Graze();
+
+        Scene.AddEntity(projectile);
+    }
+
+    public void RemoteTarget(Time theirTime, Vector2f targetPosition) {
         Destroy();
 
-        packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle);
-        var delta = Game.Network.Time - theirTime;
 
-        var player = Scene.GetFirstEntity<Player>();
+        var delta = Game.Network.Time - theirTime;
+        var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
         var projectile = new LinearAmulet(Position, angle, true) {
-
             InterpolatedOffset = delta.AsSeconds(),
             CanCollide = false,
             Color = Color,
@@ -94,6 +130,6 @@ public class TargetingAmulet : Projectile {
             GoalVelocity = 300f,
         };
 
-        player.SpawnProjectile(projectile);
+        Scene.AddEntity(projectile);
     }
 }

@@ -18,6 +18,11 @@ public class ReimuSpellA : Attack {
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
 
+
+        var localGroup = new LocalTargetingAmuletGroup();
+        player.Scene.AddEntity(localGroup);
+
+
         var arcAngle = MathF.Tau / numShots;
 
         var angle = player.AngleToOpponent + arcAngle / 2f;
@@ -31,8 +36,8 @@ public class ReimuSpellA : Attack {
                 CanCollide = false,
                 Color = new Color(0, 255, 0, 100),
             };
-            projectile.CollisionGroups.Add(0);
-            player.SpawnProjectile(projectile);
+            localGroup.Add(projectile);
+            player.Scene.AddEntity(projectile);
         }
 
         player.ApplyCooldowns(Time.InSeconds(0.5f), PlayerAction.SpellA);
@@ -62,6 +67,11 @@ public class ReimuSpellA : Attack {
         packet.Out(out Time time, true).Out(out Vector2f position).Out(out float angle);
         var delta = Game.Network.Time - time;
 
+
+        var remoteGroup = new RemoteTargetingAmuletGroup(Time.InSeconds(1.5f), delta);
+        opponent.Scene.AddEntity(remoteGroup);
+
+
         var arcAngle = MathF.Tau / numShots;
 
         for (int i = 0; i < numShots; i++) {
@@ -73,7 +83,8 @@ public class ReimuSpellA : Attack {
                 GrazeAmount = grazeAmount
             };
             projectile.CollisionGroups.Add(1);
-            opponent.SpawnProjectile(projectile);
+            remoteGroup.Add(projectile);
+            opponent.Scene.AddEntity(projectile);
         }
     }
 }

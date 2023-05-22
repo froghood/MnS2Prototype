@@ -55,7 +55,7 @@ public class PlayerReimu : Player {
         //         .Build();
 
         AddAttack(PlayerAction.Primary, new ReimuPrimary());
-        AddAttack(PlayerAction.Secondary, new ReimuSecondary());
+        AddAttack(PlayerAction.Secondary, new ReimuSecondaryBeta());
         AddAttack(PlayerAction.SpellA, new ReimuSpellA());
         AddAttack(PlayerAction.SpellB, new ReimuSpellB());
     }

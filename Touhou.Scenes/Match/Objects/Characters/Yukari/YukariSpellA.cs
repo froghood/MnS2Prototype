@@ -69,7 +69,7 @@ public class YukariSpellA : Attack {
                     VelocityFalloff = velocityFalloff,
                 };
                 projectile.CollisionGroups.Add(0);
-                player.SpawnProjectile(projectile);
+                player.Scene.AddEntity(projectile);
 
             }
             player.SpendPower(Cost);
@@ -110,7 +110,7 @@ public class YukariSpellA : Attack {
                 VelocityFalloff = velocityFalloff,
             };
             projectile.CollisionGroups.Add(1);
-            opponent.SpawnProjectile(projectile);
+            opponent.Scene.AddEntity(projectile);
         }
     }
 }

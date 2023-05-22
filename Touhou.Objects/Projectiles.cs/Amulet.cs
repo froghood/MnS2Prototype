@@ -3,7 +3,7 @@ using SFML.System;
 
 namespace Touhou.Objects;
 
-public class LinearAmulet : Projectile {
+public class LinearAmulet : ParametricProjectile {
 
     public float StartingVelocity { get; init; } = 1f;
     public float GoalVelocity { get; init; } = 1f;
@@ -35,8 +35,8 @@ public class LinearAmulet : Projectile {
 
     protected override float FuncX(float t) {
 
-        var a = MathF.Min(t, VelocityFalloff);
-        return (StartingVelocity * MathF.Pow(a, 2) - GoalVelocity * MathF.Pow(a, 2) + 2 * GoalVelocity * a * t - 2 * StartingVelocity * a * t) / (2 * VelocityFalloff) + StartingVelocity * t;
+        var _t = MathF.Min(t, VelocityFalloff);
+        return (StartingVelocity * MathF.Pow(_t, 2) - GoalVelocity * MathF.Pow(_t, 2) + 2 * GoalVelocity * _t * t - 2 * StartingVelocity * _t * t) / (2 * VelocityFalloff) + StartingVelocity * t;
     }
 
     protected override float FuncY(float t) {
@@ -70,11 +70,6 @@ public class LinearAmulet : Projectile {
 
 
         }
-    }
-
-    public void Collision(Entity entity) {
-        shape.FillColor = new Color(255, 255, 0);
-        //Destroy();
     }
 }
 

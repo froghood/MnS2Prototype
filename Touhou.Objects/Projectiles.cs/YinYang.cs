@@ -3,7 +3,7 @@ using SFML.System;
 
 namespace Touhou.Objects;
 
-public class YinYang : Projectile {
+public class YinYang : ParametricProjectile {
 
 
     public float Velocity { get; init; }

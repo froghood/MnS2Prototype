@@ -10,9 +10,11 @@ public class ReimuSpellB : Attack {
     private bool attackHold;
     private float normalizedAimOffset;
     private float aimOffset;
+    private float sizeCharge = 20f;
+    private float velocityCharge = 150f;
 
     // aiming
-    private readonly float aimRange = 140f; // degrees
+    private readonly float aimRange = 30f; // degrees
     private readonly float aimStrength = 0.1f;
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
@@ -29,7 +31,7 @@ public class ReimuSpellB : Attack {
 
     public ReimuSpellB() {
         Holdable = true;
-        Focusable = true;
+        //Focusable = true;
         Cost = 80;
 
     }
@@ -38,6 +40,10 @@ public class ReimuSpellB : Attack {
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
         player.DisableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
+
+        player.MovespeedModifier = 0.1f;
+
+
     }
 
 
@@ -58,6 +64,11 @@ public class ReimuSpellB : Attack {
             } else {
                 normalizedAimOffset -= normalizedAimOffset * 0.1f;
             }
+
+            sizeCharge = MathF.Min(sizeCharge + Game.Delta.AsSeconds() * 15f, 50f);
+            velocityCharge = MathF.Max(velocityCharge - Game.Delta.AsSeconds() * 45f, 50f);
+
+
         } else {
             attackHold = false;
         }
@@ -70,14 +81,20 @@ public class ReimuSpellB : Attack {
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
         float angle = player.AngleToOpponent + aimOffset;
 
-        var projectile = new YinYang(player.Position, angle, false, focused ? focusedSize : unfocusedSize, cooldownOverflow) {
+        // var projectile = new YinYang(player.Position, angle, false, focused ? focusedSize : unfocusedSize, cooldownOverflow) {
+        //     CanCollide = false,
+        //     Color = new Color(0, 255, 0, 100),
+        //     Velocity = focused ? focusedVelocity : unfocusedVelocity,
+        // };
+
+        var projectile = new YinYang(player.Position, angle, false, sizeCharge, cooldownOverflow) {
             CanCollide = false,
             Color = new Color(0, 255, 0, 100),
-            Velocity = focused ? focusedVelocity : unfocusedVelocity,
+            Velocity = velocityCharge
         };
 
         projectile.CollisionGroups.Add(0);
-        player.SpawnProjectile(projectile);
+        player.Scene.AddEntity(projectile);
 
         player.SpendPower(Cost);
 
@@ -86,35 +103,50 @@ public class ReimuSpellB : Attack {
 
         player.EnableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
 
+
+
+        player.MovespeedModifier = 1f;
+
+        //var packet = new Packet(PacketType.SpellB).In(Game.Network.Time - cooldownOverflow).In(player.Position).In(angle).In(focused);
+        var packet = new Packet(PacketType.SpellB).In(Game.Network.Time - cooldownOverflow).In(player.Position).In(angle).In(sizeCharge).In(velocityCharge);
+        Game.Network.Send(packet);
+
         attackHold = false;
         aimOffset = 0f;
         normalizedAimOffset = 0f;
-
-        var packet = new Packet(PacketType.SpellB).In(Game.Network.Time - cooldownOverflow).In(player.Position).In(angle).In(focused);
-        Game.Network.Send(packet);
+        sizeCharge = 20f;
+        velocityCharge = 140f;
     }
 
 
 
     public override void OpponentPress(Opponent opponent, Packet packet) {
-        packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle).Out(out bool focused);
+        //packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle).Out(out bool focused);
+        packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle).Out(out float size).Out(out float velocity);
         Time delta = Game.Network.Time - theirTime;
 
-        var projectile = new YinYang(position, angle, true, focused ? focusedSize : unfocusedSize) {
+        // var projectile = new YinYang(position, angle, true, focused ? focusedSize : unfocusedSize) {
+        //     InterpolatedOffset = delta.AsSeconds(),
+        //     Color = new Color(255, 0, 0),
+        //     GrazeAmount = grazeAmount,
+        //     Velocity = focused ? focusedVelocity : unfocusedVelocity,
+        // };
+
+        var projectile = new YinYang(position, angle, true, size) {
             InterpolatedOffset = delta.AsSeconds(),
             Color = new Color(255, 0, 0),
             GrazeAmount = grazeAmount,
-            Velocity = focused ? focusedVelocity : unfocusedVelocity,
+            Velocity = velocity,
         };
 
         projectile.CollisionGroups.Add(1);
-        opponent.SpawnProjectile(projectile);
+        opponent.Scene.AddEntity(projectile);
     }
 
     public override void PlayerRender(Player player) {
         int numVertices = 32;
-        float aimRange = MathF.PI / 180f * 140f;
-        float fullRange = aimRange * 2;
+        float aimRangeInRads = MathF.PI / 180f * aimRange;
+        float fullRange = aimRangeInRads * 2;
         float increment = fullRange / (numVertices - 1);
 
         float angleToOpponent = player.AngleToOpponent;
@@ -124,8 +156,8 @@ public class ReimuSpellB : Attack {
             vertexArray.Append(new Vertex(player.Position, new Color(255, 255, 255, 50)));
             for (int i = 0; i < numVertices; i++) {
                 vertexArray.Append(new Vertex(player.Position + new Vector2f(
-                    MathF.Cos(angleToOpponent + aimRange - increment * i) * 40f,
-                    MathF.Sin(angleToOpponent + aimRange - increment * i) * 40f
+                    MathF.Cos(angleToOpponent + aimRangeInRads - increment * i) * 40f,
+                    MathF.Sin(angleToOpponent + aimRangeInRads - increment * i) * 40f
                 ), new Color(255, 255, 255, 10)));
             }
             Game.Window.Draw(vertexArray);
@@ -136,6 +168,14 @@ public class ReimuSpellB : Attack {
             shape.Rotation = 180f / MathF.PI * (player.AngleToOpponent + aimOffset);
             shape.FillColor = new Color(255, (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset)), (byte)MathF.Round(255f - 100f * Math.Abs(normalizedAimOffset)));
             Game.Window.Draw(shape);
+
+            var circle = new CircleShape(sizeCharge);
+            circle.Origin = new Vector2f(1f, 1f) * circle.Radius;
+            circle.Position = player.Position;
+            circle.OutlineThickness = 1f;
+            circle.OutlineColor = new Color(255, 255, 255, 80);
+            circle.FillColor = Color.Transparent;
+            Game.Window.Draw(circle);
         }
     }
 }

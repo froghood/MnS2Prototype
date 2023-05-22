@@ -58,7 +58,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
     private Dictionary<Attack, (Time Time, bool Focused)> currentlyHeldAttacks = new();
 
 
-    private Dictionary<uint, Projectile> projectiles = new();
+    private Dictionary<uint, ParametricProjectile> projectiles = new();
     private uint totalSpawnedProjectiles;
 
 
@@ -304,7 +304,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
         System.Console.WriteLine("collide");
 
-        if (entity is Projectile projectile) {
+        if (entity is ParametricProjectile projectile) {
 
             projectile.Destroy();
             // must toggle to last bit because the opponents' projectile ids are opposite
@@ -331,8 +331,8 @@ public abstract class Player : Entity, IControllable, IReceivable {
             var hitPacket = new Packet(PacketType.Hit).In(Game.Network.Time).In(Position).In(angleToOpponent);
             Game.Network.Send(hitPacket);
 
-            Game.Sounds.Play("se_pldead00");
-            if (HeartCount == 1) Game.Sounds.Play("se_life1");
+            Game.Sounds.Play("hit");
+            if (HeartCount == 1) Game.Sounds.Play("low_hearts");
 
         }
     }
@@ -344,18 +344,18 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
         Scene.AddEntity(new HitExplosion(Position, 1f, 500f, Color));
 
-        Game.Sounds.Play("se_enep01");
+        Game.Sounds.Play("death");
 
         var packet = new Packet(PacketType.Death).In(deathTime).In(Position);
         Game.Network.Send(packet);
     }
 
     public void Graze(Entity entity) {
-        if (entity is Projectile projectile) {
+        if (entity is ParametricProjectile projectile) {
             if (isDead || projectile.Grazed) return;
             powerGainedFromGrazing += projectile.GrazeAmount;
 
-            Game.Sounds.Play("se_graze");
+            Game.Sounds.Play("graze");
 
             projectile.Graze();
         }
@@ -399,15 +399,6 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public void SpendPower(int amount) {
         var powerOverflow = Math.Max((Timer.TotalPowerGenerated + powerGainedFromGrazing - powerSpent) - 400, 0);
         powerSpent += powerOverflow + amount;
-    }
-
-    public void SpawnProjectile(Projectile projectile) {
-
-        // projectile.Destroyed += () => projectiles.Remove(projectile.Id);
-        // projectiles.Add(projectile.Id, projectile);
-        Scene.AddEntity(projectile);
-
-        // totalSpawnedProjectiles++;
     }
 
     private void ChangeVelocity(Vector2f newVelocity) {

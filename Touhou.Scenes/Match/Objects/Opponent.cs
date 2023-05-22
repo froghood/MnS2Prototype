@@ -25,7 +25,7 @@ public abstract class Opponent : Entity, IReceivable {
     private bool isDead;
 
     // projectile tracking
-    private Dictionary<uint, Projectile> projectiles = new();
+    private Dictionary<uint, ParametricProjectile> projectiles = new();
     private uint totalSpawnedProjectiles;
 
     public Color Color { get; set; } = new Color(255, 0, 100);
@@ -65,7 +65,7 @@ public abstract class Opponent : Entity, IReceivable {
             knockbackEndPosition = theirPosition + new Vector2f(100f * MathF.Cos(angle), 100f * MathF.Sin(angle));
             knockbackDuration = Time.InSeconds(1);
 
-            Game.Sounds.Play("se_pldead00");
+            Game.Sounds.Play("hit");
 
         } else if (packet.Type == PacketType.Death) {
             isDead = true;
@@ -73,7 +73,7 @@ public abstract class Opponent : Entity, IReceivable {
 
             Scene.AddEntity(new HitExplosion(theirPosition, 1f, 500f, Color));
 
-            Game.Sounds.Play("se_enep01");
+            Game.Sounds.Play("death");
         }
 
         if (attacks.TryGetValue(packet.Type, out var attack)) {
@@ -138,17 +138,6 @@ public abstract class Opponent : Entity, IReceivable {
 
     public override void PostRender() {
         interpolationTime = MathF.Min(interpolationTime + Game.Delta.AsSeconds() * 0.5f, 1f);
-    }
-
-    public void SpawnProjectile(Projectile projectile) {
-        // flips the last bit to a 1 to signify the projectile being the opponents
-        // projectile.SetId(totalSpawnedProjectiles ^ 0x80000000);
-
-        // projectile.Destroyed += () => projectiles.Remove(projectile.Id);
-        // projectiles.Add(projectile.Id, projectile);
-        Scene.AddEntity(projectile);
-
-        // totalSpawnedProjectiles++;
     }
 
     protected void AddAttack(PacketType type, Attack attack) => attacks[type] = attack;

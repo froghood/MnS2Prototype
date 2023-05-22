@@ -34,7 +34,6 @@ namespace Touhou.Scenes.Match.Objects {
         }
         public override void PostRender() {
             lifeTime = MathF.Min(lifeTime + Game.Delta.AsSeconds() / duration, 1f);
-            System.Console.WriteLine(lifeTime);
 
             if (lifeTime >= 1f) Destroy();
         }
