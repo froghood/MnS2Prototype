@@ -22,12 +22,13 @@ internal static class Game {
 
     public static Color ClearColor { get; set; }
     public static InputManager Input { get => inputManager; }
-    public static RenderWindow Window { get; private set; }
+    public static RenderWindow Window { get; }
     public static Network Network { get => network; }
     public static SceneManager Scenes { get => sceneManager; }
     public static SoundPlayer Sounds { get => soundPlayer; }
 
-    public static Settings Settings { get; private set; }
+    public static Settings Settings { get; }
+    public static Random Random { get; }
     public static Fields Stats { get => stats; }
     public static Debug Debug { get; private set; } = new();
 
@@ -61,6 +62,8 @@ internal static class Game {
     static Game() {
 
         Settings = new Settings("./Settings.json");
+
+        Random = new Random();
 
         soundPlayer = new SoundPlayer();
 

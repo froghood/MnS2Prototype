@@ -304,7 +304,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
         System.Console.WriteLine("collide");
 
-        if (entity is ParametricProjectile projectile) {
+        if (entity is Projectile projectile) {
 
             projectile.Destroy();
             // must toggle to last bit because the opponents' projectile ids are opposite
@@ -376,7 +376,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public void ApplyCooldowns(Time duration, params PlayerAction[] actions) {
         foreach (var action in actions) {
-            if (attacks.TryGetValue(action, out var attack)) {
+            if (attacks.TryGetValue(action, out var attack) && duration > attack.Cooldown) {
                 attack.CooldownDuration = duration;
                 attack.Cooldown = duration;
             }
