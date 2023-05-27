@@ -8,7 +8,7 @@ using Touhou.Audio;
 using Touhou.Debugging;
 using Touhou.Net;
 using Touhou.Scenes;
-using Touhou.Scenes.Main;
+
 using Color = SFML.Graphics.Color;
 using Debug = Touhou.Debugging.Debug;
 

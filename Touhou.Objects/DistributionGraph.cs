@@ -93,6 +93,21 @@ public class DistributionGraph : Entity {
             }
         }
 
+        // averages
+        rectangle.FillColor = new Color(0, 100, 255, 200);
+        rectangle.Position = Position + new Vector2f() {
+            X = Size.X / 2f + GetAverage(graphs.First().Value) / largestSample * Size.X / 2f,
+            Y = Size.Y * 0.25f
+        };
+        Game.Window.Draw(rectangle);
+
+        rectangle.FillColor = new Color(255, 200, 0, 200);
+        rectangle.Position = Position + new Vector2f() {
+            X = Size.X / 2f + GetPrunedAverage(graphs.First().Value, 50) / largestSample * Size.X / 2f,
+            Y = Size.Y * 0.25f
+        };
+        Game.Window.Draw(rectangle);
+
 
 
         rectangle.Size = new Vector2f(2f, 2f);
@@ -132,6 +147,51 @@ public class DistributionGraph : Entity {
 
     }
 
+    private float GetAverage((List<float> Samples, Func<float> ValueDelegate, int MaxSamples, Color Color) graph) {
+        float total = 0f;
+        foreach (var sample in graph.Samples) {
+            total += sample;
+        }
 
+        return total / graph.Samples.Count;
+    }
+
+    private float GetPrunedAverage((List<float> Samples, Func<float> ValueDelegate, int MaxSamples, Color Color) graph, int numToPrune) {
+
+        float total = 0f;
+        int count = graph.Samples.Count;
+        foreach (var sample in graph.Samples) {
+            total += sample;
+        }
+
+        if (count <= numToPrune) {
+            return total / count;
+        }
+
+        var prunedSamples = new HashSet<int>();
+
+        for (int n = 0; n < numToPrune; n++) {
+
+            var influences = new List<(float InfleunceAmount, int Index)>();
+            float average = total / count;
+
+            for (int i = 0; i < graph.Samples.Count; i++) {
+                if (prunedSamples.Contains(i)) continue;
+                float sample = graph.Samples[i];
+
+                float influenceAmount = MathF.Abs(average - (total - sample) / (count - 1));
+                influences.Add((influenceAmount, i));
+
+            }
+
+            var largestInfluence = influences.MaxBy(e => e.InfleunceAmount);
+            prunedSamples.Add(largestInfluence.Index);
+
+            total -= graph.Samples[largestInfluence.Index];
+            count--;
+        }
+
+        return total / count;
+    }
 
 }

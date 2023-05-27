@@ -3,7 +3,7 @@ using SFML.Graphics;
 using SFML.System;
 using Touhou.Net;
 
-namespace Touhou.Objects;
+namespace Touhou.Objects.Projectiles;
 
 public class LocalHomingAmulet : Projectile {
 
@@ -21,6 +21,7 @@ public class LocalHomingAmulet : Projectile {
     private Vector2f visualOffset;
     private float interpolationTime;
     private bool isHoming = true;
+    private bool hasStartedMoving;
     private readonly RectangleShape rect;
     private readonly CircleShape circle;
 
@@ -44,6 +45,13 @@ public class LocalHomingAmulet : Projectile {
     }
 
     public override void Update() {
+
+
+        var lifeTime = Game.Time - SpawnTime;
+
+
+        if (!hasStartedMoving && lifeTime < Time.InSeconds(0.25f)) return;
+
 
         if (!isHoming) {
             Position += new Vector2f(MathF.Cos(angle), MathF.Sin(angle)) * velocity * Game.Delta.AsSeconds();
@@ -127,6 +135,8 @@ public class LocalHomingAmulet : Projectile {
 
         visualOffset = visualPosition - Position;
         interpolationTime = 1f;
+
+        hasStartedMoving = true;
     }
 
     public override void Render() {

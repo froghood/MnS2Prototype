@@ -1,8 +1,8 @@
 using SFML.Graphics;
 using SFML.System;
-using Touhou.Scenes.Match.Objects;
+using Touhou.Objects.Characters;
 
-namespace Touhou.Objects;
+namespace Touhou.Objects.Projectiles;
 
 public class HomingAmuletBeta : ParametricProjectile {
     private float velocity;

@@ -1,9 +1,9 @@
 using SFML.Graphics;
 using SFML.System;
 using Touhou.Net;
-using Touhou.Scenes.Match.Objects;
+using Touhou.Objects.Characters;
 
-namespace Touhou.Objects;
+namespace Touhou.Objects.Projectiles;
 
 public class RemoteHomingAmulet : Projectile {
 
@@ -59,6 +59,7 @@ public class RemoteHomingAmulet : Projectile {
     public override void Update() {
 
         var lifeTime = Game.Time - SpawnTime;
+        if (lifeTime < Time.InSeconds(0.25f)) return;
 
         if (isHoming && Game.Time >= SpawnTime + Time.InSeconds(3f)) {
             isHoming = false;

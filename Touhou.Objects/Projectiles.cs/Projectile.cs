@@ -2,7 +2,7 @@ using System.Net;
 using SFML.Graphics;
 using Touhou.Net;
 
-namespace Touhou.Objects;
+namespace Touhou.Objects.Projectiles;
 
 public abstract class Projectile : Entity, IReceivable {
 

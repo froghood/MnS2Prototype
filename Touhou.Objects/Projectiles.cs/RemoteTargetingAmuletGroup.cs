@@ -1,9 +1,9 @@
 using System.Net;
 using SFML.System;
 using Touhou.Net;
-using Touhou.Scenes.Match.Objects;
+using Touhou.Objects.Characters;
 
-namespace Touhou.Objects;
+namespace Touhou.Objects.Projectiles;
 
 public class RemoteTargetingAmuletGroup : Projectile {
 

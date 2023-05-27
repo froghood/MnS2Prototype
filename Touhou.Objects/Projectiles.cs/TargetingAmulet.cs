@@ -2,9 +2,9 @@ using System.Net;
 using SFML.Graphics;
 using SFML.System;
 using Touhou.Net;
-using Touhou.Scenes.Match.Objects;
+using Touhou.Objects.Characters;
 
-namespace Touhou.Objects;
+namespace Touhou.Objects.Projectiles;
 
 public class TargetingAmulet : ParametricProjectile {
     private readonly float seekingTime = 1.5f;

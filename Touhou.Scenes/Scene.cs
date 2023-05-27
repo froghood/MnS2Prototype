@@ -160,11 +160,5 @@ public abstract class Scene {
     public virtual void OnDeactivate() { }
     public virtual void OnReactivate() { }
     public virtual void OnTerminate() { }
-    public virtual void OnPress(PlayerAction action) { }
-    public virtual void OnRelease(PlayerAction action) { }
-    public virtual void OnReceive(Packet packet, IPEndPoint endPoint) { }
-    public virtual void OnUpdate() { }
-    public virtual void OnRender() { }
-    public virtual void OnPostRender() { }
     public virtual void OnDisconnect() { }
 }

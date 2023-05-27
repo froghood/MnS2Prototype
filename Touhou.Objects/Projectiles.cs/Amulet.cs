@@ -1,7 +1,7 @@
 using SFML.Graphics;
 using SFML.System;
 
-namespace Touhou.Objects;
+namespace Touhou.Objects.Projectiles;
 
 public class LinearAmulet : ParametricProjectile {
 

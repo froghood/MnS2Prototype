@@ -53,7 +53,7 @@ public class Network {
 
     private Time connectionTime;
     private Queue<Time> correctionSamples = new();
-    private const int maxLatencyCorrectionSamples = 20;
+    private const int maxLatencyCorrectionSamples = 100;
     private bool isLatencyCorrectionProfiling;
     private int profilingCount;
 
@@ -219,9 +219,9 @@ public class Network {
 
         correctionSamples.Enqueue(Time - theirTime);
 
-        while (correctionSamples.Count > maxLatencyCorrectionSamples) correctionSamples.Dequeue();
+        while (correctionSamples.Count > maxLatencyCorrectionSamples) correctionSamples.Dequeue(); // dequeue old
 
-        PerceivedLatency = GetAverageLatency();
+        PerceivedLatency = GetAverageLatency(50);
 
         if (isLatencyCorrectionProfiling) {
             profilingCount++;
@@ -295,13 +295,44 @@ public class Network {
         return sizeTimeStamps.Sum(e => e.Size);
     }
 
-    private Time GetAverageLatency() {
-        double latencySum = 0d;
-        foreach (var sample in correctionSamples) {
-            latencySum += (double)sample;
+    private Time GetAverageLatency(int numToPrune) {
+
+        var samples = correctionSamples.ToList();
+
+        Time total = default(Time);
+        int count = samples.Count;
+        foreach (var sample in samples) {
+            total += sample;
         }
 
-        return (long)Math.Round(latencySum / correctionSamples.Count);
+        if (count <= numToPrune) {
+            return (long)Math.Round((double)total / count);
+        }
+
+        var prunedSamples = new HashSet<int>();
+
+        for (int n = 0; n < numToPrune; n++) {
+            var influences = new List<(double InfluenceAmount, int Index)>();
+
+            double average = (double)total / count;
+
+            for (int i = 0; i < samples.Count; i++) {
+                if (prunedSamples.Contains(i)) continue;
+
+                var sample = samples[i];
+
+                double influenceAmount = Math.Abs(average - (double)(total - sample) / (count - 1));
+                influences.Add((influenceAmount, i));
+            }
+
+            var largestInfluence = influences.MaxBy(e => e.InfluenceAmount);
+            prunedSamples.Add(largestInfluence.Index);
+
+            total -= samples[largestInfluence.Index];
+            count--;
+        }
+
+        return (long)Math.Round((double)total / count);
     }
 
     public void StartLatencyCorrection() => isLatencyCorrectionProfiling = true;
