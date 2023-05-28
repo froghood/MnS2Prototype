@@ -54,7 +54,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
         var lifeTime = MathF.Max((Game.Time - SpawnTime).AsSeconds() - SpawnDelay.AsSeconds(), 0f);
 
-        realTime = lifeTime + EaseOutCubic(Math.Clamp(lifeTime / 2f, 0f, 1f)) * InterpolatedOffset;
+        realTime = lifeTime + Easing.Out(Math.Clamp(lifeTime / 2f, 0f, 1f), 3f) * InterpolatedOffset;
 
         //var realTime = InterpolateOffset ? Time + EaseOutSine(Math.Clamp(Time / 2f, 0f, 1f)) * TimeOffset : Time + TimeOffset;
         Position = Adjust(realTime, SamplePosition(realTime));
@@ -75,12 +75,6 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     protected float SampleTangent(float t) => Direction + FuncAngle(t);
 
     protected float SampleNormal(float t) => Direction + FuncAngle(t) + MathF.PI / 2f;
-
-
-
-    private float EaseOutSine(float t) => MathF.Sin(t * MathF.PI / 2f);
-    private float EaseOutQuad(float t) => 2f * t - t * t;
-    private float EaseOutCubic(float t) => 1f - MathF.Pow(1f - t, 3f);
 
 
 

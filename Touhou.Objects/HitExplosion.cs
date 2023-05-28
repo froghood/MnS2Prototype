@@ -27,7 +27,7 @@ namespace Touhou.Objects {
         }
 
         public override void Render() {
-            circle.Radius = (1f - MathF.Pow(1f - lifeTime, 5f)) * radius;
+            circle.Radius = Easing.Out(lifeTime, 5f) * radius;
             circle.FillColor = new Color(color.R, color.G, color.B, transparency);
             circle.Origin = new Vector2f(1f, 1f) * circle.Radius;
             Game.Window.Draw(circle);

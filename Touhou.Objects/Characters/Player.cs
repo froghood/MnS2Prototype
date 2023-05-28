@@ -214,9 +214,8 @@ public abstract class Player : Entity, IControllable, IReceivable {
         }
 
         var t = MathF.Min((Game.Time - KnockbackTime) / (float)KnockbackDuration, 1f);
-        var easing = 1f - MathF.Pow(1f - t, 5f);
 
-        Position = (KnockbackEndPosition - KnockbackStartPosition) * easing + KnockbackStartPosition;
+        Position = (KnockbackEndPosition - KnockbackStartPosition) * Easing.Out(t, 5f) + KnockbackStartPosition;
 
     }
 

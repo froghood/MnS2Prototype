@@ -107,8 +107,8 @@ public abstract class Opponent : Entity, IReceivable {
         } else {
             basePosition += velocity * Game.Delta.AsSeconds();
             Position = basePosition +
-                predictedOffset * EaseInOutCubic(predictedOffsetInterpolationTime) +
-                smoothingOffset * EaseInOctic(smoothingOffsetInterpolationTime);
+                predictedOffset * Easing.InOut(predictedOffsetInterpolationTime, 3f) +
+                smoothingOffset * Easing.In(smoothingOffsetInterpolationTime, 8f);
         }
 
         Position = new Vector2f() {
@@ -119,9 +119,8 @@ public abstract class Opponent : Entity, IReceivable {
 
     private void UpdateKnockback() {
         var t = MathF.Min((Game.Time - knockbackTime).AsSeconds() / knockbackDuration.AsSeconds(), 1f);
-        var easing = 1f - MathF.Pow(1f - t, 5f);
 
-        Position = (knockbackEndPosition - knockbackStartPosition) * easing + knockbackStartPosition;
+        Position = (knockbackEndPosition - knockbackStartPosition) * Easing.Out(t, 5f) + knockbackStartPosition;
     }
 
     public override void Render() {
@@ -159,10 +158,4 @@ public abstract class Opponent : Entity, IReceivable {
     }
 
     protected void AddAttack(PacketType type, Attack attack) => attacks[type] = attack;
-
-
-    private float EaseInOctic(float t) => MathF.Pow(t, 8f);
-    private float EaseInOutCubic(float t) {
-        return t < 0.5 ? 4 * t * t * t : 1 - MathF.Pow(-2 * t + 2, 3) / 2;
-    }
 }
