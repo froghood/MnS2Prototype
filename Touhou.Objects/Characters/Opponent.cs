@@ -10,13 +10,14 @@ using Touhou.Objects.Characters;
 namespace Touhou.Objects.Characters;
 public abstract class Opponent : Entity, IReceivable {
 
+
     private Vector2f basePosition;
-    private Vector2f predictedPosition;
+    private Vector2f predictedOffset;
     private Vector2f interpolatedPosition;
-    private float interpolationTime;
+    private float predictedOffsetInterpolationTime;
     private Vector2f velocity;
-    private Vector2f visualOffset;
-    private float visualInterpolationTime;
+    private Vector2f smoothingOffset;
+    private float smoothingOffsetInterpolationTime;
 
 
 
@@ -37,8 +38,6 @@ public abstract class Opponent : Entity, IReceivable {
 
     public Opponent(Vector2f startingPosition) {
         basePosition = startingPosition;
-        predictedPosition = startingPosition;
-        Position = Position;
     }
 
     public virtual void Receive(Packet packet, IPEndPoint endPoint) {
@@ -49,12 +48,21 @@ public abstract class Opponent : Entity, IReceivable {
 
             var latency = Game.Network.Time - theirTime;
 
-            velocity = theirVelocity;
+
+            System.Console.WriteLine(smoothingOffset);
+
             basePosition = theirPosition;
+            smoothingOffset = Position - basePosition;
 
-            predictedPosition = basePosition + velocity * latency.AsSeconds();
 
-            interpolationTime = 0f;
+            Position = basePosition + smoothingOffset;
+
+            velocity = theirVelocity;
+
+            predictedOffset = velocity * latency.AsSeconds();
+
+            predictedOffsetInterpolationTime = 0f;
+            smoothingOffsetInterpolationTime = 1f;
 
             isHit = false;
         } else if (packet.Type == PacketType.Hit) {
@@ -67,7 +75,7 @@ public abstract class Opponent : Entity, IReceivable {
             isHit = true;
             knockbackTime = Game.Time - latency;
             knockbackStartPosition = theirPosition;
-            knockbackEndPosition = theirPosition + new Vector2f(100f * MathF.Cos(angle), 100f * MathF.Sin(angle));
+            knockbackEndPosition = theirPosition + new Vector2f(MathF.Cos(angle), MathF.Sin(angle)) * 100f;
             knockbackDuration = Time.InSeconds(1);
 
             Game.Sounds.Play("hit");
@@ -98,8 +106,9 @@ public abstract class Opponent : Entity, IReceivable {
             UpdateKnockback();
         } else {
             basePosition += velocity * Game.Delta.AsSeconds();
-            predictedPosition += velocity * Game.Delta.AsSeconds();
-            Position = basePosition + (predictedPosition - basePosition) * EaseInOutCubic(interpolationTime);
+            Position = basePosition +
+                predictedOffset * EaseInOutCubic(predictedOffsetInterpolationTime) +
+                smoothingOffset * EaseInOctic(smoothingOffsetInterpolationTime);
         }
 
         Position = new Vector2f() {
@@ -109,7 +118,7 @@ public abstract class Opponent : Entity, IReceivable {
     }
 
     private void UpdateKnockback() {
-        var t = MathF.Min((Game.Time - knockbackTime) / (float)knockbackDuration, 1f);
+        var t = MathF.Min((Game.Time - knockbackTime).AsSeconds() / knockbackDuration.AsSeconds(), 1f);
         var easing = 1f - MathF.Pow(1f - t, 5f);
 
         Position = (knockbackEndPosition - knockbackStartPosition) * easing + knockbackStartPosition;
@@ -133,20 +142,26 @@ public abstract class Opponent : Entity, IReceivable {
         Game.Window.Draw(circle);
 
         circle.FillColor = new Color(255, 100, 0);
-        circle.Position = predictedPosition;
+        circle.Position = predictedOffset;
         Game.Window.Draw(circle);
 
         circle.FillColor = new Color(0, 255, 0);
         circle.Position = interpolatedPosition;
         Game.Window.Draw(circle);
+
+
     }
 
     public override void PostRender() {
-        interpolationTime = MathF.Min(interpolationTime + Game.Delta.AsSeconds() * 0.5f, 1f);
+        predictedOffsetInterpolationTime = MathF.Min(predictedOffsetInterpolationTime + Game.Delta.AsSeconds() * 0.5f, 1f);
+        smoothingOffsetInterpolationTime = MathF.Max(smoothingOffsetInterpolationTime - Game.Delta.AsSeconds(), 0f);
+
     }
 
     protected void AddAttack(PacketType type, Attack attack) => attacks[type] = attack;
 
+
+    private float EaseInOctic(float t) => MathF.Pow(t, 8f);
     private float EaseInOutCubic(float t) {
         return t < 0.5 ? 4 * t * t * t : 1 - MathF.Pow(-2 * t + 2, 3) / 2;
     }
