@@ -73,7 +73,7 @@ public abstract class Opponent : Entity, IReceivable {
             var latency = Game.Network.Time - theirTime;
 
             isHit = true;
-            knockbackTime = Game.Time - latency;
+            knockbackTime = Game.Time;
             knockbackStartPosition = theirPosition;
             knockbackEndPosition = theirPosition + new Vector2f(MathF.Cos(angle), MathF.Sin(angle)) * 100f;
             knockbackDuration = Time.InSeconds(1);
@@ -121,6 +121,7 @@ public abstract class Opponent : Entity, IReceivable {
         var t = MathF.Min((Game.Time - knockbackTime).AsSeconds() / knockbackDuration.AsSeconds(), 1f);
 
         Position = (knockbackEndPosition - knockbackStartPosition) * Easing.Out(t, 5f) + knockbackStartPosition;
+        //if (t == 1f) isHit = false;
     }
 
     public override void Render() {

@@ -362,6 +362,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     private void ApplyKnockback(float angle, float strength, Time duration) {
         CanMove = false;
+        Velocity = new Vector2f(0f, 0f);
         KnockbackTime = Game.Time;
         KnockbackStartPosition = Position;
         KnockbackEndPosition = Position + new Vector2f(strength * MathF.Cos(angle), strength * MathF.Sin(angle));
