@@ -31,8 +31,7 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     private Dictionary<PacketType, Attack> attacks = new();
-
-
+    private bool matchStarted;
 
     public Color Color { get; set; } = new Color(255, 0, 100);
 
@@ -41,6 +40,12 @@ public abstract class Opponent : Entity, IReceivable {
     }
 
     public virtual void Receive(Packet packet, IPEndPoint endPoint) {
+
+        if (packet.Type == PacketType.MatchStart) {
+            matchStarted = true;
+        }
+
+        if (!matchStarted) return;
 
 
         if (packet.Type == PacketType.VelocityChange) {

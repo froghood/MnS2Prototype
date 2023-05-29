@@ -107,7 +107,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
         if (isDeathConfirmed && Game.Time >= deathConfirmationTime + Time.InSeconds(2f)) {
             var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
 
-            var matchRestartPacket = new Packet(PacketType.MatchRestart).In(matchStartTime);
+            var matchRestartPacket = new Packet(PacketType.Rematch).In(matchStartTime);
             Game.Network.Send(matchRestartPacket);
 
             Game.Command(() => {
@@ -487,7 +487,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
 
                 break;
-            case PacketType.MatchRestart:
+            case PacketType.Rematch:
                 packet.Out(out Time startTime, true);
 
                 Game.Command(() => {

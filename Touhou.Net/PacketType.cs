@@ -5,6 +5,7 @@ public enum PacketType : byte {
     TimeRequest,
     TimeResponse,
     SyncFinished,
+    MatchStart,
     VelocityChange,
     Primary,
     Secondary,
@@ -15,7 +16,7 @@ public enum PacketType : byte {
     Hit,
     Death,
     DeathConfirmation,
-    MatchRestart,
+    Rematch,
     UpdateProjectile,
     DestroyProjectile,
 }

@@ -1,5 +1,6 @@
 using SFML.Graphics;
 using SFML.System;
+using Touhou.Net;
 using Touhou.Objects;
 
 namespace Touhou.Objects;
@@ -11,7 +12,7 @@ public class MatchTimer : Entity {
     public Time CurrentReal { get => Game.Network.Time - StartTime; }
     public Time Current { get; private set; }
 
-    public bool MatchStarted { get => Game.Network.Time >= StartTime; }
+    public bool MatchStarted { get; private set; }
 
     private Text text = new();
 
@@ -45,6 +46,12 @@ public class MatchTimer : Entity {
 
     public override void Update() {
         Current = Math.Max(Current, CurrentReal);
+
+        if (!MatchStarted && Game.Network.Time >= StartTime) {
+            MatchStarted = true;
+
+            Game.Network.Send(new Packet(PacketType.MatchStart));
+        }
     }
 
     public override void Render() {
