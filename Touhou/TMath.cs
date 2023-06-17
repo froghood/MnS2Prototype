@@ -8,7 +8,8 @@ public static class TMathF {
     // }
 
     public static float Mod(float n, float d) {
-        return ((n % d) + d) % d;
+        //return ((n % d) + d) % d;
+        return n - d * MathF.Floor(n / d);
     }
 
     public static float NormalizeAngle(float a) {

@@ -32,12 +32,14 @@ public class RemoteHomingAmulet : Projectile {
     private RectangleShape rect;
     private CircleShape circle;
 
-    public RemoteHomingAmulet(Vector2f position, float startAngle, float turnRadius, float velocity, float hitboxRadius, Time spawnTimeOffset = default) : base(true, spawnTimeOffset) {
+    public RemoteHomingAmulet(Vector2f position, float startAngle, float turnRadius, float velocity, float hitboxRadius, Time spawnTimeOffset = default(Time)) : base(true, spawnTimeOffset) {
         Position = position;
         angle = startAngle;
         this.turnRadius = turnRadius;
         this.velocity = velocity;
         this.hitboxRadius = hitboxRadius;
+
+        System.Console.WriteLine($"{position}, {startAngle}, {turnRadius}, {velocity}, {hitboxRadius}, {spawnTimeOffset}");
 
         turnPosition = Position + new Vector2f() {
             X = turnRadius * MathF.Cos(angle + MathF.PI / 2f),
@@ -61,7 +63,7 @@ public class RemoteHomingAmulet : Projectile {
         var lifeTime = Game.Time - SpawnTime;
         if (lifeTime < Time.InSeconds(0.25f)) return;
 
-        if (isHoming && Game.Time >= SpawnTime + Time.InSeconds(3f)) {
+        if (isHoming && Game.Time >= SpawnTime + Time.InSeconds(4f)) {
             isHoming = false;
 
             var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(false).In(Game.Network.Time).In(Position).In(angle);
@@ -168,10 +170,26 @@ public class RemoteHomingAmulet : Projectile {
     }
 
     public override void Render() {
-        rect.FillColor = isHoming ? Color : new Color(170, 0, 200);
-        rect.Position = Position;
-        rect.Rotation += 360f * Game.Delta.AsSeconds() * 2f;
-        Game.Window.Draw(rect);
+        // rect.FillColor = isHoming ? Color : new Color(170, 0, 200);
+        // rect.Position = Position;
+        // rect.Rotation += 360f * Game.Delta.AsSeconds() * 2f;
+        // Game.Draw(rect, 0);
+
+        rotation += 360f * Game.Delta.AsSeconds() * 2f;
+
+        var states = new SpriteStates() {
+            Origin = new Vector2f(0.5f, 0.5f),
+            Position = Position,
+            Rotation = rotation,
+            Scale = new Vector2f(1f, 1f) * 0.4f
+        };
+
+        var color = isHoming ? Color : new Color(170, 0, 200);
+
+        var shader = new TShader("projectileColor");
+        shader.SetUniform("color", color);
+
+        Game.DrawSprite("spinningamulet", states, shader, Layers.Projectiles2);
 
 
         // if (side == 0 || !isHoming) return;
@@ -182,6 +200,6 @@ public class RemoteHomingAmulet : Projectile {
         // circle.FillColor = Color.Transparent;
         // circle.OutlineColor = new Color(255, 255, 255, 30);
         // circle.OutlineThickness = 1f;
-        // Game.Window.Draw(circle);
+        // Game.Draw(circle, 0);
     }
 }

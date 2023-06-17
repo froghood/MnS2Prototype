@@ -33,10 +33,18 @@ public class Packet {
     }
 
     public Packet In<T>(T data) where T : struct {
-        var size = Marshal.SizeOf(data);
+
+        // gross but gotta do it
+
+        bool isEnum = typeof(T).IsEnum;
+
+        var type = isEnum ? Enum.GetUnderlyingType(typeof(T)) : typeof(T);
+        object _data = isEnum ? Convert.ChangeType(data, type) : data;
+
+        var size = Marshal.SizeOf(type);
         var buffer = new byte[size];
         var ptr = Marshal.AllocHGlobal(size);
-        Marshal.StructureToPtr(data, ptr, true);
+        Marshal.StructureToPtr(_data, ptr, true);
         Marshal.Copy(ptr, buffer, 0, size);
         Marshal.FreeHGlobal(ptr);
         stream.Position = writePosition;
@@ -46,14 +54,18 @@ public class Packet {
     }
 
     public Packet Out<T>(out T data, bool fromStart = false) where T : struct {
-        var size = Marshal.SizeOf(typeof(T));
+
+        var type = typeof(T).IsEnum ? Enum.GetUnderlyingType(typeof(T)) : typeof(T);
+
+
+        var size = Marshal.SizeOf(type);
         var buffer = new byte[size];
         var ptr = Marshal.AllocHGlobal(size);
         stream.Position = fromStart ? 0 : readPosition;
         stream.Read(buffer, 0, size);
         readPosition = stream.Position;
         Marshal.Copy(buffer, 0, ptr, size);
-        data = (T)Marshal.PtrToStructure(ptr, typeof(T));
+        data = (T)Marshal.PtrToStructure(ptr, type);
         Marshal.FreeHGlobal(ptr);
         return this;
     }

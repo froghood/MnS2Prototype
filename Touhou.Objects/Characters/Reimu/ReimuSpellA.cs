@@ -8,8 +8,8 @@ namespace Touhou.Objects.Characters;
 
 public class ReimuSpellA : Attack {
     private readonly int numShots = 30;
-    private readonly float velocity = 600;
-    private readonly float deceleration = 900;
+    private readonly float velocity = 500;
+    private readonly float deceleration = 500;
     private readonly Time spawnDelay = Time.InSeconds(0.15f);
     private readonly int grazeAmount = 1;
 
@@ -44,10 +44,15 @@ public class ReimuSpellA : Attack {
         player.ApplyCooldowns(Time.InSeconds(1f), PlayerAction.SpellA);
         player.ApplyCooldowns(Time.InSeconds(0.25f), PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
 
-        player.SpendPower(Cost);
+        var packet = new Packet(PacketType.AttackReleased)
+        .In(PlayerAction.SpellA)
+        .In(Game.Network.Time - cooldownOverflow)
+        .In(player.Position)
+        .In(angle);
 
-        var packet = new Packet(PacketType.SpellA).In(Game.Network.Time - cooldownOverflow).In(player.Position).In(angle);
         Game.Network.Send(packet);
+
+        player.SpendPower(Cost);
     }
 
 
@@ -63,9 +68,9 @@ public class ReimuSpellA : Attack {
     }
 
 
-    public override void OpponentPress(Opponent opponent, Packet packet) {
+    public override void OpponentReleased(Opponent opponent, Packet packet) {
 
-        packet.Out(out Time time, true).Out(out Vector2f position).Out(out float angle);
+        packet.Out(out Time time).Out(out Vector2f position).Out(out float angle);
         var delta = Game.Network.Time - time;
 
 

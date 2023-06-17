@@ -21,7 +21,7 @@ public class Debug {
         rect.FillColor = fill;
         rect.OutlineColor = Color.Transparent;
         rect.Origin = origin;
-        Game.Window.Draw(rect);
+        Game.Draw(rect, 0);
     }
 
     public void DrawRectOutline(Vector2f position, Vector2f size, Color stroke, float thickness = 1f) {
@@ -30,7 +30,7 @@ public class Debug {
         rect.FillColor = Color.Transparent;
         rect.OutlineColor = stroke;
         rect.OutlineThickness = thickness;
-        Game.Window.Draw(rect);
+        Game.Draw(rect, 0);
     }
 
     public void DrawLine(Vector2f positionA, Vector2f positionB, Color stroke) {

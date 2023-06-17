@@ -128,7 +128,7 @@ public class InputManager {
             text.Origin = new Vector2f(text.GetLocalBounds().Width, 0f);
             text.Position = new Vector2f(Game.Window.Size.X - 2f, offset);
 
-            Game.Window.Draw(text);
+            Game.Draw(text, 0);
 
             offset += 20f;
         }

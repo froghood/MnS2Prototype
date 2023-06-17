@@ -8,27 +8,33 @@ namespace Touhou.Objects.Characters;
 
 public class ReimuSpellB : Attack {
 
+    // aiming
     private bool attackHold;
     private float normalizedAimOffset;
     private float aimOffset;
-    private float sizeCharge = 20f;
-    private float velocityCharge = 150f;
-
-    // aiming
-    private readonly float aimRange = 30f; // degrees
+    private float chargeTime = 0f;
+    private readonly float aimRange = 40f; // degrees
     private readonly float aimStrength = 0.1f;
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
     // pattern
     private readonly int grazeAmount = 20;
-    private readonly float unfocusedVelocity = 120f;
-    private readonly float unfocusedSize = 30f;
+    private readonly Time maxChargeTime = Time.InSeconds(2f);
 
-    private readonly float focusedVelocity = 40f;
-    private readonly float focusedSize = 40f;
+    private readonly float minRadius = 20f;
+    private readonly float maxRadius = 60f;
+    private readonly float minVelocity = 120f;
+    private readonly float maxVelocity = 60f;
 
-    private readonly Time globalCooldown = Time.InSeconds(0.25f);
-    private readonly Time spellCooldown = Time.InSeconds(0.5f);
+
+
+    // cooldowns
+    private readonly Time primaryCooldown = Time.InSeconds(0.5f);
+    private readonly Time secondaryCooldown = Time.InSeconds(0.5f);
+    private readonly Time spellACooldown = Time.InSeconds(0.5f);
+    private readonly Time spellBCooldown = Time.InSeconds(1f);
+
+
 
     public ReimuSpellB() {
         Holdable = true;
@@ -66,8 +72,7 @@ public class ReimuSpellB : Attack {
                 normalizedAimOffset -= normalizedAimOffset * 0.1f;
             }
 
-            sizeCharge = MathF.Min(sizeCharge + Game.Delta.AsSeconds() * 15f, 50f);
-            velocityCharge = MathF.Max(velocityCharge - Game.Delta.AsSeconds() * 45f, 50f);
+            chargeTime = MathF.Min(chargeTime + Game.Delta.AsSeconds() / maxChargeTime.AsSeconds(), 1f);
 
 
         } else {
@@ -88,10 +93,13 @@ public class ReimuSpellB : Attack {
         //     Velocity = focused ? focusedVelocity : unfocusedVelocity,
         // };
 
-        var projectile = new YinYang(player.Position, angle, false, sizeCharge, cooldownOverflow) {
+        var radius = minRadius + (maxRadius - minRadius) * chargeTime;
+        var velocity = minVelocity + (maxVelocity - minVelocity) * chargeTime;
+
+        var projectile = new YinYang(player.Position, angle, false, radius, cooldownOverflow) {
             CanCollide = false,
             Color = new Color(0, 255, 0, 100),
-            Velocity = velocityCharge
+            Velocity = velocity
         };
 
         projectile.CollisionGroups.Add(0);
@@ -99,39 +107,36 @@ public class ReimuSpellB : Attack {
 
         player.SpendPower(Cost);
 
-        player.ApplyCooldowns(globalCooldown - cooldownOverflow, PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
-        player.ApplyCooldowns(spellCooldown - cooldownOverflow, PlayerAction.SpellB);
+        player.ApplyCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
+        player.ApplyCooldowns(secondaryCooldown - cooldownOverflow, PlayerAction.Secondary);
+        player.ApplyCooldowns(spellACooldown - cooldownOverflow, PlayerAction.SpellA);
+        player.ApplyCooldowns(spellBCooldown - cooldownOverflow, PlayerAction.SpellB);
 
         player.EnableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
 
-
-
         player.MovespeedModifier = 1f;
 
-        //var packet = new Packet(PacketType.SpellB).In(Game.Network.Time - cooldownOverflow).In(player.Position).In(angle).In(focused);
-        var packet = new Packet(PacketType.SpellB).In(Game.Network.Time - cooldownOverflow).In(player.Position).In(angle).In(sizeCharge).In(velocityCharge);
+        var packet = new Packet(PacketType.AttackReleased)
+        .In(PlayerAction.SpellB)
+        .In(Game.Network.Time - cooldownOverflow)
+        .In(player.Position)
+        .In(angle)
+        .In(radius).In(velocity);
+
         Game.Network.Send(packet);
 
         attackHold = false;
         aimOffset = 0f;
         normalizedAimOffset = 0f;
-        sizeCharge = 20f;
-        velocityCharge = 140f;
+
+        chargeTime = 0f;
     }
 
 
 
-    public override void OpponentPress(Opponent opponent, Packet packet) {
-        //packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle).Out(out bool focused);
+    public override void OpponentReleased(Opponent opponent, Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle).Out(out float size).Out(out float velocity);
         Time delta = Game.Network.Time - theirTime;
-
-        // var projectile = new YinYang(position, angle, true, focused ? focusedSize : unfocusedSize) {
-        //     InterpolatedOffset = delta.AsSeconds(),
-        //     Color = new Color(255, 0, 0),
-        //     GrazeAmount = grazeAmount,
-        //     Velocity = focused ? focusedVelocity : unfocusedVelocity,
-        // };
 
         var projectile = new YinYang(position, angle, true, size) {
             InterpolatedOffset = delta.AsSeconds(),
@@ -145,38 +150,50 @@ public class ReimuSpellB : Attack {
     }
 
     public override void PlayerRender(Player player) {
-        int numVertices = 32;
-        float aimRangeInRads = MathF.PI / 180f * aimRange;
-        float fullRange = aimRangeInRads * 2;
-        float increment = fullRange / (numVertices - 1);
+        if (!attackHold) return;
 
-        float angleToOpponent = player.AngleToOpponent;
+        var indicatorStates = new SpriteStates() {
+            Origin = new Vector2f(0.5f, 0.5f),
+            Position = player.Position,
+            Scale = new Vector2f(1f, 1f) * 0.35f,
+            Color = new Color(255, 255, 255, 40),
+        };
 
-        if (attackHold) { // ~7 frames at 60fps
-            var vertexArray = new VertexArray(PrimitiveType.TriangleFan);
-            vertexArray.Append(new Vertex(player.Position, new Color(255, 255, 255, 50)));
-            for (int i = 0; i < numVertices; i++) {
-                vertexArray.Append(new Vertex(player.Position + new Vector2f(
-                    MathF.Cos(angleToOpponent + aimRangeInRads - increment * i) * 40f,
-                    MathF.Sin(angleToOpponent + aimRangeInRads - increment * i) * 40f
-                ), new Color(255, 255, 255, 10)));
-            }
-            Game.Window.Draw(vertexArray);
+        var shader = new TShader("aimIndicator");
+        shader.SetUniform("angle", player.AngleToOpponent);
+        shader.SetUniform("arc", TMathF.degToRad(aimRange));
 
-            var shape = new RectangleShape(new Vector2f(40f, 2f));
-            shape.Origin = new Vector2f(0f, 1f);
-            shape.Position = player.Position;
-            shape.Rotation = 180f / MathF.PI * (player.AngleToOpponent + aimOffset);
-            shape.FillColor = new Color(255, (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset)), (byte)MathF.Round(255f - 100f * Math.Abs(normalizedAimOffset)));
-            Game.Window.Draw(shape);
+        Game.DrawSprite("aimindicator", indicatorStates, shader, Layers.Player);
 
-            var circle = new CircleShape(sizeCharge);
-            circle.Origin = new Vector2f(1f, 1f) * circle.Radius;
-            circle.Position = player.Position;
-            circle.OutlineThickness = 1f;
-            circle.OutlineColor = new Color(255, 255, 255, 80);
-            circle.FillColor = Color.Transparent;
-            Game.Window.Draw(circle);
-        }
+        byte darkness = (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset));
+
+        var arrowStates = new SpriteStates() {
+            Origin = new Vector2f(10f, 10f),
+            OriginType = OriginType.Position,
+            Position = player.Position,
+            Rotation = TMathF.radToDeg(player.AngleToOpponent + aimOffset),
+            Scale = new Vector2f(1f, 1f) * 0.35f,
+            Color = new Color(255, darkness, darkness)
+        };
+
+        Game.DrawSprite("aimarrow", arrowStates, Layers.Player);
+
+        var circleStates = new CircleStates() {
+            Origin = new Vector2f(0.5f, 0.5f),
+            Radius = minRadius + (maxRadius - minRadius) * chargeTime,
+            Position = player.Position,
+            OutlineColor = new Color(255, 255, 255, 80),
+            FillColor = Color.Transparent
+        };
+
+        Game.DrawCircle(circleStates, Layers.Player);
+
+        // var circle = new CircleShape(minRadius + (maxRadius - minRadius) * chargeTime);
+        // circle.Origin = new Vector2f(1f, 1f) * circle.Radius;
+        // circle.Position = player.Position;
+        // circle.OutlineThickness = 1f;
+        // circle.OutlineColor = new Color(255, 255, 255, 80);
+        // circle.FillColor = Color.Transparent;
+        // Game.Draw(circle, 0);
     }
 }

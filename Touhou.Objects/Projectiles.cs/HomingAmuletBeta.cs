@@ -57,7 +57,7 @@ public class HomingAmuletBeta : ParametricProjectile {
         shape.Rotation = 180f / MathF.PI * SampleTangent(CurrentTime);
         shape.FillColor = Color;
         shape.Position = Position;
-        Game.Window.Draw(shape);
+        Game.Draw(shape, 0);
     }
 
 }

@@ -10,7 +10,7 @@ public abstract class Projectile : Entity, IReceivable {
     public static uint totalRemoteProjectiles = 0x80000000;
 
 
-
+    public bool IsPlayerOwned { get; init; } = true;
     public bool IsRemote { get; }
 
     public Time SpawnTime { get; }
@@ -25,6 +25,9 @@ public abstract class Projectile : Entity, IReceivable {
 
     public int GrazeAmount { get; set; }
 
+    protected Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
+    private Match match;
+
 
 
     public Projectile(bool isRemote, Time spawnTimeOffset = default(Time)) {
@@ -37,11 +40,11 @@ public abstract class Projectile : Entity, IReceivable {
 
 
     public override void Update() {
-        if (DestroyedOnScreenExit) {
+        if (DestroyedOnScreenExit && Game.Time >= SpawnTime + Time.InSeconds(1f)) {
             foreach (var hitbox in Hitboxes) {
                 var bounds = hitbox.GetBounds();
-                if (!(bounds.Left >= Game.Window.Size.X || bounds.Left + bounds.Width <= 0 ||
-                bounds.Top >= Game.Window.Size.Y || bounds.Top + bounds.Height <= 0)) {
+                if (!(bounds.Left >= Match.Bounds.X || bounds.Left + bounds.Width <= -Match.Bounds.X ||
+                      bounds.Top >= Match.Bounds.Y || bounds.Top + bounds.Height <= -Match.Bounds.Y)) {
                     return;
                 }
             }

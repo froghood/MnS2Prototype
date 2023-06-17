@@ -33,9 +33,11 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
 
     // power
-    public int Power { get => Math.Min(Timer.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
+    public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     private int powerGainedFromGrazing;
     private int powerSpent;
+
+    public float SmoothPower => smoothPower;
     private float smoothPower;
 
     // hearts
@@ -45,16 +47,11 @@ public abstract class Player : Entity, IControllable, IReceivable {
     private bool isDead;
     private Time deathTime;
 
-    public MatchTimer Timer {
-        get {
-            timer ??= Scene.GetFirstEntity<MatchTimer>();
-            return timer;
-        }
-    }
-    private MatchTimer timer;
+    public Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
+    private Match match;
 
 
-    private Dictionary<PlayerAction, Attack> attacks = new();
+    public Dictionary<PlayerAction, Attack> Attacks { get; } = new();
 
     private Shader cooldownShader;
 
@@ -62,13 +59,10 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
 
 
-    public Opponent Opponent {
-        get {
-            opponent ??= Scene.GetFirstEntity<Opponent>();
-            return opponent;
-        }
-    }
+    public Opponent Opponent => opponent is null ? opponent = Scene.GetFirstEntity<Opponent>() : opponent;
     private Opponent opponent;
+
+
     private bool hosting;
     private bool isDeathConfirmed;
     private Time deathConfirmationTime;
@@ -96,7 +90,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
         Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 0.5f, Hit));
         Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 50f, Graze));
 
-        cooldownShader = new Shader(null, null, "assets/Cooldown.frag");
+        cooldownShader = new Shader(null, null, "assets/shaders/cooldown.frag");
     }
 
     public virtual void Press(PlayerAction action) { }
@@ -116,14 +110,14 @@ public abstract class Player : Entity, IControllable, IReceivable {
             });
         }
 
-        if (!Timer.MatchStarted || isDead) return;
+        if (!Match.Started || isDead) return;
 
         UpdateKnockback();
         if (CanMove) UpdateMovement();
 
         Position = new Vector2f(
-            Math.Clamp(Position.X, 5f, Game.Window.Size.X - 5f),
-            Math.Clamp(Position.Y, 5f, Game.Window.Size.Y - 5f)
+            Math.Clamp(Position.X, -Match.Bounds.X, Match.Bounds.X),
+            Math.Clamp(Position.Y, -Match.Bounds.Y, Match.Bounds.Y)
         );
 
         var order = Game.Input.GetActionOrder();
@@ -133,7 +127,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
     private void InvokeAttackPresses(PlayerAction action) {
-        if (attacks.TryGetValue(action, out var attack)) {
+        if (Attacks.TryGetValue(action, out var attack)) {
 
             if (attack.Cooldown <= 0) attack.Cooldown = 0;
             else attack.Cooldown -= Game.Delta;
@@ -171,7 +165,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
     }
 
     private void InvokeAttackHolds(PlayerAction action) {
-        if (attacks.TryGetValue(action, out var attack)) {
+        if (Attacks.TryGetValue(action, out var attack)) {
             if (currentlyHeldAttacks.TryGetValue(attack, out var heldState)) {
 
 
@@ -222,81 +216,35 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public override void Render() {
 
         if (!isDead) {
-            var rect = new RectangleShape(new Vector2f(20f, 20f));
-            rect.Origin = rect.Size / 2f;
-            rect.Position = Position;
-            rect.FillColor = Color;
-            Game.Window.Draw(rect);
+            var states = new SpriteStates() {
+                Origin = new Vector2f(0.4f, 0.7f),
+                Position = Position,
+                Scale = new Vector2f(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.15f,
+                Color = Color
+            };
+
+            Game.DrawSprite("reimu", states, Layers.Player);
+
+            if (Focused) {
+                states = new SpriteStates() {
+                    Origin = new Vector2f(0.5f, 0.5f),
+                    Position = Position,
+                    Scale = new Vector2f(1f, 1f) * 0.15f,
+                };
+
+                var shader = new TShader("projectileColor");
+                shader.SetUniform("color", Color);
+
+                Game.DrawSprite("hitboxfocused", states, shader, Layers.Foreground1);
+            }
+
+
         }
 
-        // hearts (temp)
-
-        var text = new Text();
-        text.Font = Game.DefaultFont;
-        text.CharacterSize = 14;
-        text.Style = Text.Styles.Bold;
-        text.DisplayedString = $"Hearts: {HeartCount}";
-        text.Origin = new Vector2f(0f, text.GetLocalBounds().Height);
-        text.Position = new Vector2f(5f, Game.Window.Size.Y - 130f);
-        Game.Window.Draw(text);
-
-
-        RenderCooldowns();
-        RenderPower();
-
-        foreach (var attack in attacks.Values) {
+        foreach (var attack in Attacks.Values) {
             attack.PlayerRender(this);
         }
     }
-
-    private void RenderPower() {
-
-        var rect = new RectangleShape();
-        rect.Size = new Vector2f(
-            Power / 400f * 204f,
-            5
-        );
-        rect.Origin = new Vector2f(0f, rect.Size.Y);
-        rect.Position = new Vector2f(4f, Game.Window.Size.Y - 106f);
-        rect.FillColor = Color.White;
-
-        Game.Window.Draw(rect);
-
-
-        //smoothPower += MathF.Min(MathF.Abs(Power - smoothPower) * 0.99f, 50f * Game.Delta.AsSeconds()) * MathF.Sign(Power - smoothPower);
-
-        smoothPower += MathF.Min(MathF.Abs(Power - smoothPower), Game.Delta.AsSeconds() * 80f) * MathF.Sign(Power - smoothPower);
-
-
-        rect.Size = new Vector2f(
-            -(Power - smoothPower) / 400 * 204f,
-            5
-        );
-        rect.Position = new Vector2f(
-            4f + Power / 400f * 204f,
-            Game.Window.Size.Y - 106f
-        );
-        rect.FillColor = new Color(255, 200, 120);
-        Game.Window.Draw(rect);
-
-
-        var text = new Text();
-        text.Font = Game.DefaultFont;
-        text.CharacterSize = 14;
-        text.DisplayedString = Power.ToString();
-        text.Origin = new Vector2f(0f, text.GetLocalBounds().Height);
-        text.Position = new Vector2f(5f, Game.Window.Size.Y - 40f);
-
-        Game.Window.Draw(text);
-
-        text.DisplayedString = smoothPower.ToString();
-        text.Origin = new Vector2f(0f, text.GetLocalBounds().Height);
-        text.Position = new Vector2f(5f, Game.Window.Size.Y - 26f);
-
-        Game.Window.Draw(text);
-    }
-
-    public override void PostRender() { }
 
     public void Hit(Entity entity) {
         if (Game.Time - InvulnerabilityTime < InvulnerabilityDuration || isDead) return;
@@ -357,6 +305,9 @@ public abstract class Player : Entity, IControllable, IReceivable {
             Game.Sounds.Play("graze");
 
             projectile.Graze();
+
+            var packet = new Packet(PacketType.Grazed).In(projectile.GrazeAmount);
+            Game.Network.Send(packet);
         }
     }
 
@@ -376,7 +327,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public void ApplyCooldowns(Time duration, params PlayerAction[] actions) {
         foreach (var action in actions) {
-            if (attacks.TryGetValue(action, out var attack) && duration > attack.Cooldown) {
+            if (Attacks.TryGetValue(action, out var attack) && duration > attack.Cooldown) {
                 attack.CooldownDuration = duration;
                 attack.Cooldown = duration;
             }
@@ -386,71 +337,37 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public void DisableAttacks(params PlayerAction[] actions) {
         foreach (var action in actions) {
-            if (attacks.TryGetValue(action, out var attack)) attack.Disable();
+            if (Attacks.TryGetValue(action, out var attack)) attack.Disable();
         }
     }
 
     public void EnableAttacks(params PlayerAction[] actions) {
         foreach (var action in actions) {
-            if (attacks.TryGetValue(action, out var attack)) attack.Enable();
+            if (Attacks.TryGetValue(action, out var attack)) attack.Enable();
         }
     }
 
     public void SpendPower(int amount) {
-        var powerOverflow = Math.Max((Timer.TotalPowerGenerated + powerGainedFromGrazing - powerSpent) - 400, 0);
-        powerSpent += powerOverflow + amount;
+        var powerOverflow = Math.Max((Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent) - 400, 0);
+
+        int spent = powerOverflow + amount;
+        powerSpent += spent;
+
+        var packet = new Packet(PacketType.SpentPower).In(spent);
+        Game.Network.Send(packet);
     }
 
     private void ChangeVelocity(Vector2f newVelocity) {
         if (newVelocity == Velocity) return;
         Velocity = newVelocity;
-        var packet = new Packet(PacketType.VelocityChange);
-        packet.In((long)Game.Network.Time).In(Position).In(Velocity);
+        var packet = new Packet(PacketType.VelocityChanged);
+        packet.In((long)Game.Network.Time).In(Position).In(Velocity).In(Focused);
         Game.Network.Send(packet);
-    }
-
-    private void RenderCooldowns() {
-        var rect = new RectangleShape(new Vector2f(48f, 48f));
-
-        var text = new Text();
-        text.Font = Game.DefaultFont;
-        text.FillColor = Color.Black;
-        text.CharacterSize = 14;
-
-        int offset = 0;
-
-        foreach (var (name, attack) in attacks) {
-
-            text.DisplayedString = name.ToString();
-
-            rect.FillColor = Power < attack.Cost ? new Color(230, 180, 190) : Color.White;
-            rect.Position = new Vector2f(4f + offset * 52f, Game.Window.Size.Y - 54f);
-            rect.Size = new Vector2f(48f, 48f);
-            rect.Origin = new Vector2f(0f, rect.Size.Y);
-
-            //cooldownShader.SetUniform("texture", Shader.CurrentTexture);
-            cooldownShader.SetUniform("duration", attack.Cooldown.AsSeconds() / attack.CooldownDuration.AsSeconds());
-            cooldownShader.SetUniform("position", new Vector2f(rect.Position.X, Game.Window.Size.Y - rect.Position.Y));
-            cooldownShader.SetUniform("size", rect.Size);
-            Game.Window.Draw(rect, new RenderStates(cooldownShader));
-
-            text.Position = new Vector2f(4f + offset * 52f, Game.Window.Size.Y - 54f - rect.Size.Y);
-            Game.Window.Draw(text);
-
-            rect.FillColor = new Color(0, 0, 0, 80);
-            if (attack.Disabled) {
-                Game.Window.Draw(rect);
-            }
-
-            offset++;
-        }
     }
 
     public void Receive(Packet packet, IPEndPoint endPoint) {
         switch (packet.Type) {
-
             case PacketType.Death:
-
 
                 // received death before death confirmation: resolve tie
                 if (isDead) {
@@ -458,11 +375,6 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
                     // send confirmation if opponent died before we did
                     if (theirDeathTime < deathTime || (theirDeathTime == deathTime && hosting)) {
-
-
-
-
-
                         Game.Network.Send(new Packet(PacketType.DeathConfirmation));
 
                         // give us a point
@@ -470,7 +382,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
 
                 } else {
-                    ApplyInvulnerability(Time.InSeconds(9999f));
+                    ApplyInvulnerability(Time.InSeconds(999f));
 
                     Game.Network.Send(new Packet(PacketType.DeathConfirmation));
 
@@ -499,7 +411,6 @@ public abstract class Player : Entity, IControllable, IReceivable {
         }
     }
 
-    protected void AddAttack(PlayerAction action, Attack attack) {
-        attacks[action] = attack;
-    }
+    protected void AddAttack(PlayerAction action, Attack attack) => Attacks[action] = attack;
+
 }

@@ -24,7 +24,7 @@ public class ValueDisplay<T> : Entity {
     public override void Render() {
         text.Position = Position;
         text.DisplayedString = value.ToString();
-        Game.Window.Draw(text);
+        Game.Draw(text, 0);
     }
 
     public override void PostRender() { }
@@ -57,7 +57,7 @@ public class ValueDisplay<T> : Entity {
 //     public override void Render() {
 //         text.Position = Position;
 //         text.DisplayedString = $"{value}";
-//         Game.Window.Draw(text);
+//         Game.Draw(text, 0);
 //     }
 
 //     public override void PostRender() { }

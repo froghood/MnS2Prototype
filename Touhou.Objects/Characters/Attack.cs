@@ -18,7 +18,7 @@ public abstract class Attack {
     public abstract void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused);
     public abstract void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused);
 
-    public abstract void OpponentPress(Opponent opponent, Packet packet);
+    public abstract void OpponentReleased(Opponent opponent, Packet packet);
 
     public virtual void PlayerRender(Player player) { }
     public virtual void OpponentRender(Opponent opponent) { }

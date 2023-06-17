@@ -5,7 +5,6 @@ using Touhou.Objects;
 namespace Touhou.Objects {
     public class HitExplosion : Entity {
         private Color color;
-        private CircleShape circle;
         private float duration;
         private float radius;
         private byte transparency;
@@ -17,9 +16,6 @@ namespace Touhou.Objects {
             this.duration = duration;
             this.radius = radius;
             this.color = color;
-
-            circle = new CircleShape();
-            circle.Position = Position;
         }
 
         public override void Update() {
@@ -27,10 +23,16 @@ namespace Touhou.Objects {
         }
 
         public override void Render() {
-            circle.Radius = Easing.Out(lifeTime, 5f) * radius;
-            circle.FillColor = new Color(color.R, color.G, color.B, transparency);
-            circle.Origin = new Vector2f(1f, 1f) * circle.Radius;
-            Game.Window.Draw(circle);
+            var states = new CircleStates() {
+                Origin = new Vector2f(0.5f, 0.5f),
+                Position = Position,
+                Radius = Easing.Out(lifeTime, 5f) * radius,
+                FillColor = new Color(color.R, color.G, color.B, transparency),
+                OutlineColor = Color.Transparent,
+            };
+
+            Game.DrawCircle(states, 0);
+
         }
         public override void PostRender() {
             lifeTime = MathF.Min(lifeTime + Game.Delta.AsSeconds() / duration, 1f);

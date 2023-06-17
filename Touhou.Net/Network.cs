@@ -117,7 +117,15 @@ public class Network {
             lastReceivedTime = Game.Time;
 
             var theirEndPoint = new IPEndPoint(IPAddress.Any, 0);
-            var data = udpClient.Receive(ref theirEndPoint);
+            byte[] data;
+            try {
+                data = udpClient.Receive(ref theirEndPoint);
+            } catch (Exception e) {
+                System.Console.WriteLine(e);
+                Game.Scenes.Current?.OnDisconnect();
+                return;
+            }
+
 
             dataUsage = CalculateDataUsage(data.Length);
 

@@ -73,7 +73,7 @@ public class ClientSyncingScene : Scene {
     }
 
     private void RendererCallback() {
-        Game.Window.Draw(this.text);
+        Game.Draw(this.text, 0);
     }
 
     private void Request() {

@@ -75,7 +75,12 @@ public class YukariSpellA : Attack {
             }
             player.SpendPower(Cost);
 
-            var packet = new Packet(PacketType.SpellA).In(Game.Network.Time - cooldownOverflow + timeOffset).In(player.Position).In(angle);
+            var packet = new Packet(PacketType.AttackReleased)
+            .In(PlayerAction.SpellA)
+            .In(Game.Network.Time - cooldownOverflow + timeOffset)
+            .In(player.Position)
+            .In(angle);
+
             Game.Network.Send(packet);
 
             angleOffsetVelocity += angleOffsetAcceleration;
@@ -96,7 +101,7 @@ public class YukariSpellA : Attack {
 
 
 
-    public override void OpponentPress(Opponent opponent, Packet packet) {
+    public override void OpponentReleased(Opponent opponent, Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle);
         var delta = Game.Network.Time - theirTime;
 

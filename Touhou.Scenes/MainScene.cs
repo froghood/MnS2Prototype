@@ -28,7 +28,7 @@ public class MainScene : Scene {
             }
         }, (_) => { }));
 
-        AddEntity(new Renderer(() => Game.Window.Draw(text)));
+        AddEntity(new Renderer(() => Game.Draw(text, 0)));
 
     }
 }

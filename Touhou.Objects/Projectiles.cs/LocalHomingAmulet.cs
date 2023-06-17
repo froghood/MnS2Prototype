@@ -22,8 +22,7 @@ public class LocalHomingAmulet : Projectile {
     private float interpolationTime;
     private bool isHoming = true;
     private bool hasStartedMoving;
-    private readonly RectangleShape rect;
-    private readonly CircleShape circle;
+    private float rotation;
 
 
 
@@ -36,12 +35,7 @@ public class LocalHomingAmulet : Projectile {
 
         Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), hitboxRadius));
 
-
-        rect = new RectangleShape(new Vector2f(25f, 22f));
-        rect.Rotation = Game.Random.NextSingle() * 180f;
-        rect.Origin = rect.Size / 2f;
-
-        circle = new CircleShape();
+        rotation = Game.Random.NextSingle() * 360f;
     }
 
     public override void Update() {
@@ -140,10 +134,20 @@ public class LocalHomingAmulet : Projectile {
     }
 
     public override void Render() {
-        rect.FillColor = isHoming ? Color : new Color(0, 170, 200, 80);
-        rect.Position = Position + visualOffset * interpolationTime;
-        rect.Rotation += 360f * Game.Delta.AsSeconds() * 2f;
-        Game.Window.Draw(rect);
+
+        rotation += 360f * Game.Delta.AsSeconds() * 2f;
+
+        var states = new SpriteStates() {
+            Origin = new Vector2f(0.5f, 0.5f),
+            Position = Position + visualOffset * interpolationTime,
+            Rotation = rotation,
+            Scale = new Vector2f(1f, 1f) * 0.4f
+        };
+
+        var shader = new TShader("projectileColor");
+        shader.SetUniform("color", Color);
+
+        Game.DrawSprite("spinningamulet", states, shader, Layers.Projectiles1);
 
 
         // if (side == 0) return;
@@ -154,7 +158,7 @@ public class LocalHomingAmulet : Projectile {
         // circle.FillColor = Color.Transparent;
         // circle.OutlineColor = new Color(255, 255, 255, 30);
         // circle.OutlineThickness = 1f;
-        // Game.Window.Draw(circle);
+        // Game.Draw(circle, 0);
     }
 
     public override void PostRender() {

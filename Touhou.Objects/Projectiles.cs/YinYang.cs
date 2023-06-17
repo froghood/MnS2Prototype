@@ -40,27 +40,50 @@ public class YinYang : ParametricProjectile {
         circle.FillColor = Color;
         circle.Position = Position;
 
-        Game.Window.Draw(circle);
+        var state = new SpriteStates() {
+            Origin = new Vector2f(0.5f, 0.5f),
+            Position = Position,
+            Rotation = CurrentTime * Velocity / (MathF.Tau * radius) * -360f,
+            Scale = new Vector2f(0.25f, 0.25f) * radius / 60f
+        };
+
+        var shader = new TShader("projectileColor");
+        shader.SetUniform("color", Color);
+
+        Game.DrawSprite("yinyang", state, shader, Layers.BackgroundProjectiles1);
+
+        //Game.Draw(circle, 0);
     }
 
     public override void DebugRender() {
         foreach (CircleHitbox hitbox in Hitboxes) {
-            hitboxShape.Position = hitbox.Position;
-            hitboxShape.Radius = hitbox.Radius;
-            hitboxShape.Origin = new Vector2f(hitbox.Radius, hitbox.Radius);
-            Game.Window.Draw(hitboxShape);
 
-            var bounds = hitbox.GetBounds();
-            boundsShape.Position = new Vector2f(bounds.Left, bounds.Top);
-            boundsShape.Size = new Vector2f(bounds.Width, bounds.Height);
-            Game.Window.Draw(boundsShape);
+            var states = new CircleStates() {
+                Origin = new Vector2f(0.5f, 0.5f),
+                Position = hitbox.Position,
+                Radius = hitbox.Radius,
+                FillColor = Color.Transparent,
+                OutlineColor = Color.White,
+            };
+
+            Game.DrawCircle(states, Layers.UI2);
+
+            // hitboxShape.Position = hitbox.Position;
+            // hitboxShape.Radius = hitbox.Radius;
+            // hitboxShape.Origin = new Vector2f(hitbox.Radius, hitbox.Radius);
+            // Game.Draw(hitboxShape, 0);
+
+            // var bounds = hitbox.GetBounds();
+            // boundsShape.Position = new Vector2f(bounds.Left, bounds.Top);
+            // boundsShape.Size = new Vector2f(bounds.Width, bounds.Height);
+            // Game.Draw(boundsShape, 0);
 
 
         }
     }
 
-    protected override float FuncX(float time) {
-        float t = MathF.Max(time - 0.15f, 0f);
+    protected override float FuncX(float t) {
+        // float t = MathF.Max(time - 0.15f, 0f);
         return Velocity * t;
     }
 
@@ -69,14 +92,20 @@ public class YinYang : ParametricProjectile {
     }
 
     protected override Vector2f Adjust(float time, Vector2f position) {
+
+        position += Match.Bounds;
+
+        var matchBoundsX = Match.Bounds.X * 2f;
+        var matchBoundsY = Match.Bounds.Y * 2f;
+
         var screenOffset = new Vector2f(
-            MathF.Abs(MathF.Floor(position.X / Game.Window.Size.X)),
-            MathF.Abs(MathF.Floor(position.Y / Game.Window.Size.Y))
+            MathF.Abs(MathF.Floor(position.X / matchBoundsX)),
+            MathF.Abs(MathF.Floor(position.Y / matchBoundsY))
         );
 
         return new Vector2f(
-            screenOffset.X % 2 * Game.Window.Size.X + TMathF.Mod(position.X, Game.Window.Size.X) * MathF.Pow(-1, screenOffset.X),
-            screenOffset.Y % 2 * Game.Window.Size.Y + TMathF.Mod(position.Y, Game.Window.Size.Y) * MathF.Pow(-1, screenOffset.Y)
+            (screenOffset.X % 2 * matchBoundsX + TMathF.Mod(position.X, matchBoundsX) * MathF.Pow(-1, screenOffset.X)) - Match.Bounds.X,
+            (screenOffset.Y % 2 * matchBoundsY + TMathF.Mod(position.Y, matchBoundsY) * MathF.Pow(-1, screenOffset.Y)) - Match.Bounds.Y
         );
     }
 }

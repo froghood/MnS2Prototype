@@ -14,7 +14,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     public float Direction { get; private set; }
 
-    public float CurrentTime => realTime;
+    public float CurrentTime => lifeTime;
 
     public Time SpawnDelay { get; init; }
 
@@ -26,7 +26,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     private float preCos;
     private float preSin;
-    private float realTime;
+    private float lifeTime;
 
 
 
@@ -52,13 +52,16 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     public sealed override void Update() {
         PrevPosition = Position;
 
-        var lifeTime = MathF.Max((Game.Time - SpawnTime).AsSeconds() - SpawnDelay.AsSeconds(), 0f);
+        lifeTime = (Game.Time - SpawnTime).AsSeconds();
 
-        realTime = lifeTime + Easing.Out(Math.Clamp(lifeTime / 2f, 0f, 1f), 3f) * InterpolatedOffset;
+        float spawnTimeAdjustedTime = MathF.Max(lifeTime - SpawnDelay.AsSeconds(), 0f);
+
+
+        float funcTime = spawnTimeAdjustedTime + Easing.Out(Math.Clamp(spawnTimeAdjustedTime / 2f, 0f, 1f), 3f) * InterpolatedOffset;
 
         //var realTime = InterpolateOffset ? Time + EaseOutSine(Math.Clamp(Time / 2f, 0f, 1f)) * TimeOffset : Time + TimeOffset;
-        Position = Adjust(realTime, SamplePosition(realTime));
-        Tick(realTime);
+        Position = Adjust(funcTime, SamplePosition(funcTime));
+        Tick(funcTime);
 
         base.Update();
 
@@ -168,7 +171,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     //     public override void Render() {
     //         _shape.Position = Position;
     //         _shape.Rotation = 180f / MathF.PI * MathF.Atan2(Position.Y - PrevPosition.Y, Position.X - PrevPosition.X);
-    //         Game.Window.Draw(_shape);
+    //         Game.Draw(_shape, 0);
     //     }
     // }
 }

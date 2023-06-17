@@ -29,7 +29,7 @@ public class ConnectingScene : Scene {
             Game.Scenes.PushScene<ClientSyncingScene>();
         }));
 
-        AddEntity(new Renderer(() => Game.Window.Draw(text)));
+        AddEntity(new Renderer(() => Game.Draw(text, 0)));
 
         TryConnecting(endPoint);
 

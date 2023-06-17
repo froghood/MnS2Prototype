@@ -18,7 +18,7 @@ public class HostSyncingScene : Scene {
         Game.Network.Send(new Packet(PacketType.ConnectionResponse));
 
         AddEntity(new Receiver(ReceiveCallback));
-        AddEntity(new Renderer(() => Game.Window.Draw(this.text)));
+        AddEntity(new Renderer(() => Game.Draw(text, 0)));
     }
 
     private void ReceiveCallback(Packet packet, IPEndPoint endPoint) {

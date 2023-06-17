@@ -34,7 +34,7 @@ public class Graph : Entity {
         var bg = new RectangleShape(Size);
         bg.Position = Position;
         bg.FillColor = new Color(0, 0, 0, 80);
-        Game.Window.Draw(bg);
+        Game.Draw(bg, 0);
 
 
         float largestSample = 0f;

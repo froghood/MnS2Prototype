@@ -28,7 +28,7 @@ public class HostingScene : Scene {
         Game.Network.Host(this.port);
 
         AddEntity(new Receiver(ReceiverCallback));
-        AddEntity(new Renderer(() => Game.Window.Draw(text)));
+        AddEntity(new Renderer(() => Game.Draw(text, 0)));
     }
 
     private void ReceiverCallback(Packet packet, IPEndPoint endPoint) {

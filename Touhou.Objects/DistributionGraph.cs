@@ -48,7 +48,7 @@ public class DistributionGraph : Entity {
         rectangle.FillColor = new Color(0, 0, 0, 180);
         rectangle.OutlineThickness = 1f;
         rectangle.OutlineColor = new Color(255, 255, 255, 60);
-        Game.Window.Draw(rectangle);
+        Game.Draw(rectangle, 0);
 
 
 
@@ -63,17 +63,17 @@ public class DistributionGraph : Entity {
         text.DisplayedString = "0";
         text.Origin = new Vector2f(text.GetLocalBounds().Width / 2f, 0f);
         text.Position = Position + new Vector2f(Size.X / 2f, 0f);
-        Game.Window.Draw(text);
+        Game.Draw(text, 0);
 
         text.DisplayedString = $"{largestSample}";
         text.Origin = new Vector2f(text.GetLocalBounds().Width, 0f);
         text.Position = Position + new Vector2f(Size.X, 0f);
-        Game.Window.Draw(text);
+        Game.Draw(text, 0);
 
         text.DisplayedString = $"{-largestSample}";
         text.Origin = new Vector2f(0, 0f);
         text.Position = Position;
-        Game.Window.Draw(text);
+        Game.Draw(text, 0);
 
 
         // samples
@@ -89,7 +89,7 @@ public class DistributionGraph : Entity {
                     Y = Size.Y * 0.75f
                 };
 
-                Game.Window.Draw(rectangle);
+                Game.Draw(rectangle, 0);
             }
         }
 
@@ -99,14 +99,14 @@ public class DistributionGraph : Entity {
             X = Size.X / 2f + GetAverage(graphs.First().Value) / largestSample * Size.X / 2f,
             Y = Size.Y * 0.25f
         };
-        Game.Window.Draw(rectangle);
+        Game.Draw(rectangle, 0);
 
         rectangle.FillColor = new Color(255, 200, 0, 200);
         rectangle.Position = Position + new Vector2f() {
             X = Size.X / 2f + GetPrunedAverage(graphs.First().Value, 50) / largestSample * Size.X / 2f,
             Y = Size.Y * 0.25f
         };
-        Game.Window.Draw(rectangle);
+        Game.Draw(rectangle, 0);
 
 
 
@@ -119,7 +119,7 @@ public class DistributionGraph : Entity {
             Y = Size.Y - 4f
         };
 
-        Game.Window.Draw(rectangle);
+        Game.Draw(rectangle, 0);
 
         int markerCount = 1;
         while (markerCount < largestSample) {
@@ -128,14 +128,14 @@ public class DistributionGraph : Entity {
                 Y = Size.Y - 2f
             };
 
-            Game.Window.Draw(rectangle);
+            Game.Draw(rectangle, 0);
 
             rectangle.Position = Position + new Vector2f() {
                 X = Size.X / 2f + -markerCount / largestSample * Size.X / 2f,
                 Y = Size.Y - 2f
             };
 
-            Game.Window.Draw(rectangle);
+            Game.Draw(rectangle, 0);
 
             markerCount++;
         }
