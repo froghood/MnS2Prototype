@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D texture;
 
 uniform vec2 resolution;
@@ -13,9 +15,7 @@ float normalizeAngle(float a) {
 
 void main()
 {
-    vec2 uv = (vec2(gl_FragCoord.x, resolution.y - gl_FragCoord.y) - position.xy) / size.xy;
-
-    
+    vec2 uv = (vec2(gl_FragCoord.x, resolution.y - gl_FragCoord.y) - position.xy) / size.xy;    
 
     float uvAngle = atan(uv.y - 0.5, uv.x - 0.5);
     
@@ -26,4 +26,3 @@ void main()
 
     gl_FragColor = gl_Color * tColor;
 }
-

@@ -1,4 +1,6 @@
-﻿uniform sampler2D texture;
+#version 120
+
+uniform sampler2D texture;
 uniform vec4 color;
 
 void main()
@@ -11,7 +13,7 @@ void main()
     
     vec4 newColor = vec4(color.rgb, sourceColor.a * color.a);
     
-    newColor.rgb += (1f - color.rgb ) * desaturation;
+    newColor.rgb += (1. - color.rgb ) * desaturation;
     newColor.rgb *= darkness;
 
     // multiply it by the color

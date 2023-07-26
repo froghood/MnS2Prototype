@@ -80,6 +80,10 @@ internal static class Game {
 
 
         Window = new RenderWindow(new VideoMode(1280, 720), "mns2", Styles.Default, new ContextSettings(0, 0, 16));
+
+        System.Console.WriteLine(Window.Settings.MinorVersion);
+        System.Console.WriteLine(Window.Settings.MajorVersion);
+
         Camera = new Camera(new Vector2f(1600f, 900f));
 
         DefaultFont = new Font("assets/fonts/arial.ttf");

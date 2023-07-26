@@ -1,3 +1,5 @@
+#version 120
+
 uniform sampler2D texture;
 
 uniform vec2 resolution;
@@ -10,7 +12,7 @@ void main()
     
     vec2 pixel = (fragCoord.xy - position.xy) / size.xy;
 
-    vec4 color = vec4(pixel.xy, 0f, 1f);
+    vec4 color = vec4(pixel.xy, 0., 1.);
 
     gl_FragColor = gl_Color * color;
 }

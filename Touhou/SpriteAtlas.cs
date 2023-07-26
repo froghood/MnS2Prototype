@@ -2,6 +2,7 @@
 using SFML.System;
 using SFML.Graphics;
 using Newtonsoft.Json;
+using System.Text.Json.Nodes;
 
 namespace Touhou;
 
@@ -17,8 +18,9 @@ public class SpriteAtlas {
 
     public void Load(string sheetPath, string dataPath) {
         spriteSheet = new Texture(sheetPath);
-        var dataSource = File.ReadAllText(dataPath);
-        atlas = JsonConvert.DeserializeObject<Dictionary<string, IntRect>>(dataSource);
+        var json = File.ReadAllText(dataPath);
+        var sprites = JsonObject.Parse(json)["Sprites"];
+        atlas = JsonConvert.DeserializeObject<Dictionary<string, IntRect>>(sprites.ToJsonString());
     }
 
     public Sprite GetSprite(string name) {
