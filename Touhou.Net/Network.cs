@@ -2,8 +2,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
-using SFML.System;
-using SFML.Graphics;
 
 namespace Touhou.Net;
 

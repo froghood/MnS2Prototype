@@ -1,4 +1,3 @@
-// using SFML.System;
 // using Touhou.Net;
 
 // namespace Touhou.Scenes;
@@ -36,7 +35,7 @@
 
 //             if (theirIndex < _sendIndex) return;
 
-//             Console.ForegroundColor = ConsoleColor.Cyan;
+//             Console.ForegroundColor4 = ConsoleColor4.Cyan;
 //             System.Console.WriteLine($"Received Sync: {theirIndex}, {theirTime}, {theirDiff}");
 
 //             //_receiveIndex++;
@@ -45,7 +44,7 @@
 //             var diffDiff = theirDiff - (Game.Network.Time - theirTime);
 //             var offsetChange = (int)Math.Ceiling(diffDiff * 0.1f);
 //             Game.Network.Offset += offsetChange;
-//             Console.ForegroundColor = ConsoleColor.Red;
+//             Console.ForegroundColor4 = ConsoleColor4.Red;
 //             System.Console.WriteLine($"{diffDiff} | {offsetChange}");
 
 //             int ourTime = Game.Network.Time;
@@ -99,7 +98,7 @@
 
 //         if (!_hosting) index--;
 
-//         Console.ResetColor();
+//         Console.ResetColor4();
 //         System.Console.WriteLine($"Sending sync {index}");
 //         Game.Network.Send(PacketType.Sync,
 //             BitConverter.GetBytes(index).Concat(

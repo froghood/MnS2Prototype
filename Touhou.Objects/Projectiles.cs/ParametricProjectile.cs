@@ -1,6 +1,5 @@
 using System.Net;
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
 using Touhou.Net;
 using Touhou.Objects.Characters;
 
@@ -10,7 +9,7 @@ namespace Touhou.Objects.Projectiles;
 
 public abstract class ParametricProjectile : Projectile, IReceivable {
 
-    public Vector2f Origin { get; private set; }
+    public Vector2 Origin { get; private set; }
 
     public float Direction { get; private set; }
 
@@ -20,7 +19,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     public float InterpolatedOffset { get; init; }
 
-    public Vector2f PrevPosition { get; private set; }
+    public Vector2 PrevPosition { get; private set; }
 
 
 
@@ -30,7 +29,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
 
 
-    protected ParametricProjectile(Vector2f origin, float direction, bool isRemote, Time spawnTimeOffset = default(Time)) : base(isRemote, spawnTimeOffset) {
+    protected ParametricProjectile(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, Time spawnTimeOffset = default(Time)) : base(isPlayerOwned, isRemote, spawnTimeOffset) {
         Origin = origin;
         Direction = direction;
 
@@ -44,7 +43,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     protected abstract float FuncX(float t);
     protected abstract float FuncY(float t);
     protected virtual float FuncAngle(float t) => 0f;
-    protected virtual Vector2f Adjust(float t, Vector2f position) => position;
+    protected virtual Vector2 Adjust(float t, Vector2 position) => position;
     protected virtual void Tick(float t) { }
 
 
@@ -69,10 +68,10 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
 
 
-    protected Vector2f SamplePosition(float t) {
+    protected Vector2 SamplePosition(float t) {
         var x = FuncX(t);
         var y = FuncY(t);
-        return Origin + new Vector2f(preCos * x - preSin * y, preSin * x + preCos * y);
+        return Origin + new Vector2(preCos * x - preSin * y, preSin * x + preCos * y);
     }
 
     protected float SampleTangent(float t) => Direction + FuncAngle(t);
@@ -86,39 +85,39 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     //     protected float WrapTimeLimit { get; private init; }
 
-    //     private Vector2f _wrapLimitOffset;
+    //     private Vector2 _wrapLimitOffset;
 
-    //     protected WrappingProjectile(Vector2f startingPosition, float direction, float wrapTimeLimit = -1f) : base(startingPosition, direction) {
+    //     protected WrappingProjectile(Vector2 startingPosition, float direction, float wrapTimeLimit = -1f) : base(startingPosition, direction) {
     //         WrapTimeLimit = wrapTimeLimit;
     //     }
 
-    //     protected override Vector2f Adjust(float time, Vector2f position) {
+    //     protected override Vector2 Adjust(float time, Vector2 position) {
     //         if (WrapTimeLimit >= 0f && time >= WrapTimeLimit) {
     //             if (_wrapLimitOffset == null) {
     //                 var positionSample = SamplePosition(WrapTimeLimit);
-    //                 _wrapLimitOffset = new Vector2f(
+    //                 _wrapLimitOffset = new Vector2(
     //                     MathF.Floor(positionSample.X / Game.Window.Size.X),
     //                     MathF.Floor(positionSample.Y / Game.Window.Size.Y)
     //                 );
     //             }
-    //             return new Vector2f(
+    //             return new Vector2(
     //                 position.X - _wrapLimitOffset.X * Game.Window.Size.X,
     //                 position.Y - _wrapLimitOffset.Y * Game.Window.Size.Y
     //             );
     //         }
-    //         return new Vector2f(TMathF.Mod(position.X, Game.Window.Size.X), TMathF.Mod(position.Y, Game.Window.Size.Y));
+    //         return new Vector2(TMathF.Mod(position.X, Game.Window.Size.X), TMathF.Mod(position.Y, Game.Window.Size.Y));
     //     }
     // }
 
     // private abstract class BouncingProjectile : Projectile {
-    //     protected BouncingProjectile(Vector2f startingPosition, float direction) : base(startingPosition, direction) { }
-    //     protected override Vector2f Adjust(float time, Vector2f position) {
-    //         var screenOffset = new Vector2f(
+    //     protected BouncingProjectile(Vector2 startingPosition, float direction) : base(startingPosition, direction) { }
+    //     protected override Vector2 Adjust(float time, Vector2 position) {
+    //         var screenOffset = new Vector2(
     //             MathF.Abs(MathF.Floor(position.X / Game.Window.Size.X)),
     //             MathF.Abs(MathF.Floor(position.Y / Game.Window.Size.Y))
     //         );
 
-    //         return new Vector2f(
+    //         return new Vector2(
     //             screenOffset.X % 2 * Game.Window.Size.X + TMathF.Mod(position.X, Game.Window.Size.X) * MathF.Pow(-1, screenOffset.X),
     //             screenOffset.Y % 2 * Game.Window.Size.Y + TMathF.Mod(position.Y, Game.Window.Size.Y) * MathF.Pow(-1, screenOffset.Y)
     //         );
@@ -132,23 +131,23 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     //     private RectangleShape _shape;
     //     private float _a;
     //     private int _flipped;
-    //     private Color _color;
+    //     private Color4 _Color4;
     //     private float _s;
 
     //     //private float c = 4f / 3f * (MathF.Sqrt(2f) - 1f);
 
-    //     public Bullet(Vector2f startingPosition, float direction, float speed, int flipped, Color color) : base(startingPosition, direction, 2f) {
+    //     public Bullet(Vector2 startingPosition, float direction, float speed, int flipped, Color4 Color4) : base(startingPosition, direction, 2f) {
     //         _speed = speed;
 
-    //         _shape = new RectangleShape(new Vector2f(20f, 15f));
-    //         _shape.Origin = new Vector2f(_shape.Size.X / 2f, _shape.Size.Y / 2f);
-    //         _shape.FillColor = color;
+    //         _shape = new RectangleShape(new Vector2(20f, 15f));
+    //         _shape.Origin = new Vector2(_shape.Size.X / 2f, _shape.Size.Y / 2f);
+    //         _shape.FillColor4 = Color4;
 
     //         _a = MathF.Tau / 3f;
     //         _s = 1f;
 
     //         _flipped = flipped;
-    //         _color = color;
+    //         _Color4 = Color4;
     //     }
 
     //     protected override float FuncX(float t) {

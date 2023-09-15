@@ -1,5 +1,4 @@
 using System.Net;
-using SFML.Window;
 using Touhou.Net;
 using Touhou.Objects;
 
@@ -8,7 +7,38 @@ namespace Touhou.Scenes;
 public abstract class Scene {
 
     private List<Entity> entities = new();
+
     private CollisionGrid collisionGrid = new(16, 9);
+
+    private static readonly Dictionary<CollisionGroups, HashSet<CollisionGroups>> collisionGroupConfig = new() {
+        {CollisionGroups.Default,
+            Enum.GetValues<CollisionGroups>().ToHashSet() // all other collision groups
+        },
+
+        {CollisionGroups.Player, new() {
+            CollisionGroups.Default,
+            CollisionGroups.OpponentProjectile
+        }},
+
+        {CollisionGroups.PlayerProjectile, new() {
+            CollisionGroups.Default,
+        }},
+
+        {CollisionGroups.PlayerBomb, new() {
+            CollisionGroups.Default,
+            CollisionGroups.OpponentProjectile
+        }},
+
+        {CollisionGroups.Opponent, new() {
+            CollisionGroups.Default,
+        }},
+
+        {CollisionGroups.OpponentProjectile, new() {
+            CollisionGroups.Default,
+            CollisionGroups.Player,
+            CollisionGroups.PlayerBomb
+        }},
+    };
 
 
     public void AddEntity(Entity entity) {
@@ -55,6 +85,8 @@ public abstract class Scene {
     public void Update() {
         int numCollisions = 0;
 
+        collisionGrid.Clear();
+
         IterateEntites(entity => {
             entity.Update();
             CheckCollisions(entity, ref numCollisions);
@@ -74,10 +106,10 @@ public abstract class Scene {
             var checkedHitboxes = new HashSet<Hitbox>();
 
             var bounds = hitbox.GetBounds();
-            int regionX = (int)MathF.Floor(bounds.Left / collisionGrid.CellWidth);
-            int regionY = (int)MathF.Floor(bounds.Top / collisionGrid.CellHeight);
-            int regionWidth = (int)MathF.Ceiling((bounds.Left + bounds.Width) / collisionGrid.CellWidth);
-            int regionHeight = (int)MathF.Ceiling((bounds.Top + bounds.Height) / collisionGrid.CellHeight);
+            int regionX = (int)MathF.Floor(bounds.Min.X / collisionGrid.CellWidth);
+            int regionY = (int)MathF.Floor(bounds.Min.Y / collisionGrid.CellHeight);
+            int regionWidth = (int)MathF.Ceiling(bounds.Max.X / collisionGrid.CellWidth);
+            int regionHeight = (int)MathF.Ceiling(bounds.Max.Y / collisionGrid.CellHeight);
 
             for (int x = regionX; x < regionWidth; x++) {
                 for (int y = regionY; y < regionHeight; y++) {
@@ -97,8 +129,8 @@ public abstract class Scene {
                             // ignore collisions between entities own hitboxes
                             if (otherHitbox.Entity == entity) continue;
 
-                            // ignore collisions between entities that share collision groups
-                            if (SharesCollisionGroup(entity, otherHitbox.Entity)) continue;
+                            // ignore collisions between hitboxes with collision groups that dont collide with each other
+                            if (CheckCollisionGroups(hitbox, otherHitbox)) continue;
 
                             bool collided = ((Func<bool>)(otherHitbox switch {
                                 PointHitbox point => () => hitbox.Check(point),
@@ -120,11 +152,15 @@ public abstract class Scene {
         }
     }
 
-    private static bool SharesCollisionGroup(Entity entity, Entity other) {
-        foreach (int group in entity.CollisionGroups) {
-            if (other.CollisionGroups.Contains(group)) return true;
-        }
-        return false;
+    // private static bool CheckCollisionGroups(Entity entity, Entity other) {
+    //     foreach (int group in entity.CollisionGroups) {
+    //         if (other.CollisionGroups.Contains(group)) return true;
+    //     }
+    //     return false;
+    // }
+
+    private static bool CheckCollisionGroups(Hitbox hitbox, Hitbox other) {
+        return !collisionGroupConfig[hitbox.CollisionGroup].Contains(other.CollisionGroup);
     }
 
     public void Render() {
@@ -133,13 +169,13 @@ public abstract class Scene {
     }
 
     public void DebugRender() {
-        collisionGrid.Render();
+        //collisionGrid.Render();
         IterateEntites(e => e.DebugRender());
     }
 
     public void PostRender() {
         IterateEntites(e => e.PostRender());
-        collisionGrid.Clear();
+        //collisionGrid.Clear();
     }
 
     private void IterateEntites(Action<Entity> callback) {

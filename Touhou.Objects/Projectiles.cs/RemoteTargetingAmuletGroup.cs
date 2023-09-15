@@ -1,5 +1,4 @@
 using System.Net;
-using SFML.System;
 using Touhou.Net;
 using Touhou.Objects.Characters;
 
@@ -11,7 +10,7 @@ public class RemoteTargetingAmuletGroup : Projectile {
     private List<TargetingAmulet> targetingAmulets = new();
     private readonly Time targetTime;
 
-    public RemoteTargetingAmuletGroup(Time targetTime, Time spawnTimeOffset = default) : base(true, spawnTimeOffset) {
+    public RemoteTargetingAmuletGroup(Time targetTime, Time spawnTimeOffset = default(Time)) : base(false, true, spawnTimeOffset) {
         this.targetTime = targetTime;
     }
 

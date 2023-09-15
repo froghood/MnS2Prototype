@@ -1,6 +1,6 @@
 using System.Net;
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Net;
 
 using Touhou.Objects.Generics;
@@ -9,7 +9,7 @@ namespace Touhou.Scenes;
 public class ClientSyncingScene : Scene {
 
     private const int TOTAL_REQUESTS = 5;
-    private const int REQUEST_FREQUENCY = 500; // ms
+    private const double REQUEST_FREQUENCY = 500; // ms
 
     private List<(Time RoundTripTime, Time Offset)> timeResponses = new();
 
@@ -20,20 +20,27 @@ public class ClientSyncingScene : Scene {
     private readonly Text text;
 
     public ClientSyncingScene() {
-        text = new Text("Syncing...", Game.DefaultFont, 14);
+
+        text = new Text {
+            DisplayedText = "Syncing...",
+            CharacterSize = 40f,
+            Origin = Vector2.UnitY,
+            IsUI = true,
+            Alignment = new Vector2(-1f, 1f),
+        };
     }
 
     public override void OnInitialize() {
-        AddEntity(new Receiver(ReceiverCallback));
-        AddEntity(new Updater(UpdaterCallback));
-        AddEntity(new Renderer(RendererCallback));
+        AddEntity(new ReceiveCallback(ReceiveCallback));
+        AddEntity(new UpdateCallback(UpdateCallback));
+        AddEntity(new RenderCallback(RenderCallback));
 
         Request();
     }
 
 
 
-    private void ReceiverCallback(Packet packet, IPEndPoint endPoint) {
+    private void ReceiveCallback(Packet packet, IPEndPoint endPoint) {
         if (packet.Type == PacketType.TimeResponse && timeResponses.Count < TOTAL_REQUESTS) {
 
             packet.Out(out Time ourTime).Out(out Time theirTime);
@@ -66,14 +73,14 @@ public class ClientSyncingScene : Scene {
         }
     }
 
-    private void UpdaterCallback() {
-        if (requestCount < TOTAL_REQUESTS && requestTimer.ElapsedTime.AsMilliseconds() > REQUEST_FREQUENCY) {
+    private void UpdateCallback() {
+        if (requestCount < TOTAL_REQUESTS && requestTimer.Elapsed.AsMilliseconds() > REQUEST_FREQUENCY) {
             Request();
         }
     }
 
-    private void RendererCallback() {
-        Game.Draw(this.text, 0);
+    private void RenderCallback() {
+        Game.Draw(text, Layers.UI1);
     }
 
     private void Request() {

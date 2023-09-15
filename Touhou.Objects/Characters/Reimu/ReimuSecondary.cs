@@ -1,5 +1,5 @@
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Net;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
@@ -66,7 +66,7 @@ public class ReimuSecondary : Attack {
 
         foreach (var angle in angles) {
             var projectile = new LocalHomingAmulet(player.Position, player.AngleToOpponent + aimOffset + angle, 150f, 200f, 10f) {
-                Color = new Color(0, 255, 200, 80),
+                Color = new Color4(0, 1f, 0.8f, 0.3f),
                 CanCollide = false,
             };
 
@@ -83,10 +83,10 @@ public class ReimuSecondary : Attack {
 
 
 
-        player.ApplyCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
-        player.ApplyCooldowns(secondaryCooldown - cooldownOverflow, PlayerAction.Secondary);
-        player.ApplyCooldowns(spellACooldown - cooldownOverflow, PlayerAction.SpellA);
-        player.ApplyCooldowns(spellBCooldown - cooldownOverflow, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
+        player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerAction.Secondary);
+        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerAction.SpellA);
+        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerAction.SpellB);
 
         player.EnableAttacks(PlayerAction.Primary, PlayerAction.SpellA, PlayerAction.SpellB);
 
@@ -98,7 +98,7 @@ public class ReimuSecondary : Attack {
 
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
-        packet.Out(out Time theirTime).Out(out Vector2f theirPosition).Out(out float theirAngle);
+        packet.Out(out Time theirTime).Out(out Vector2 theirPosition).Out(out float theirAngle);
         var delta = Game.Network.Time - theirTime;
 
 
@@ -107,10 +107,9 @@ public class ReimuSecondary : Attack {
 
         foreach (var angle in angles) {
             var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, 150f, 200f, 10f, delta) {
-                Color = new Color(255, 0, 200),
+                Color = new Color4(1f, 0, 0.8f, 1f),
                 GrazeAmount = 3,
             };
-            projectile.CollisionGroups.Add(1);
 
             opponent.Scene.AddEntity(projectile);
         }
@@ -119,30 +118,40 @@ public class ReimuSecondary : Attack {
     public override void PlayerRender(Player player) {
         if (!attackHold) return;
 
-        var indicatorStates = new SpriteStates() {
-            Origin = new Vector2f(0.5f, 0.5f),
+        // var indicatorStates = new SpriteStates() {
+        //     Origin = new Vector2(0.5f, 0.5f),
+        //     Position = player.Position,
+        //     Scale = new Vector2(1f, 1f) * 0.35f,
+        //     Color4 = new Color4(255, 255, 255, 40),
+        // };
+
+        // var shader = new TShader("aimIndicator");
+        // shader.SetUniform("angle", player.AngleToOpponent);
+        // shader.SetUniform("arc", TMathF.degToRad(aimRange));
+
+        //Game.DrawSprite("aimindicator", indicatorStates, shader, Layers.Player);
+
+        float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
+
+        var aimArrowSprite = new Sprite("aimarrow") {
+            Origin = new Vector2(0.0625f, 0.5f),
             Position = player.Position,
-            Scale = new Vector2f(1f, 1f) * 0.35f,
-            Color = new Color(255, 255, 255, 40),
+            Rotation = player.AngleToOpponent + aimOffset,
+            Scale = Vector2.One * 0.35f,
+            Color = new Color4(1f, darkness, darkness, 1f),
         };
 
-        var shader = new TShader("aimIndicator");
-        shader.SetUniform("angle", player.AngleToOpponent);
-        shader.SetUniform("arc", TMathF.degToRad(aimRange));
+        Game.Draw(aimArrowSprite, Layers.Player);
 
-        Game.DrawSprite("aimindicator", indicatorStates, shader, Layers.Player);
+        // var arrowStates = new SpriteStates() {
+        //     Origin = new Vector2(10f, 10f),
+        //     OriginType = OriginType.Position,
+        //     Position = player.Position,
+        //     Rotation = TMathF.radToDeg(player.AngleToOpponent + aimOffset),
+        //     Scale = new Vector2(1f, 1f) * 0.35f,
+        //     Color4 = new Color4(255, darkness, darkness)
+        // };
 
-        byte darkness = (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset));
-
-        var arrowStates = new SpriteStates() {
-            Origin = new Vector2f(10f, 10f),
-            OriginType = OriginType.Position,
-            Position = player.Position,
-            Rotation = TMathF.radToDeg(player.AngleToOpponent + aimOffset),
-            Scale = new Vector2f(1f, 1f) * 0.35f,
-            Color = new Color(255, darkness, darkness)
-        };
-
-        Game.DrawSprite("aimarrow", arrowStates, Layers.Player);
+        //Game.DrawSprite("aimarrow", arrowStates, Layers.Player);
     }
 }

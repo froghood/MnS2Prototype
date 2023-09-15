@@ -1,5 +1,3 @@
-using SFML.Graphics;
-using SFML.System;
 using Touhou.Net;
 using Touhou.Objects;
 
@@ -13,7 +11,9 @@ public class PlayerReimu : Player {
 
         AddAttack(PlayerAction.Primary, new ReimuPrimary());
         AddAttack(PlayerAction.Secondary, new ReimuSecondary());
-        AddAttack(PlayerAction.SpellA, new ReimuSpellA());
+        AddAttack(PlayerAction.SpellA, new YukariSpellA());
         AddAttack(PlayerAction.SpellB, new ReimuSpellB());
+
+        AddBomb(PlayerAction.Bomb, new ReimuBomb());
     }
 }

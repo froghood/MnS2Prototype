@@ -1,5 +1,5 @@
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Net;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
@@ -74,37 +74,36 @@ public class ReimuPrimary : Attack {
 
         if (focused) {
             for (int index = 0; index < numShots; index++) {
-                var offset = new Vector2f(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
-                var projectile = new LinearAmulet(player.Position + offset, angle, false, cooldownOverflow) {
+                var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
+                var projectile = new Amulet(player.Position + offset, angle, true, false, cooldownOverflow) {
                     SpawnDelay = spawnDelay,
                     CanCollide = false,
-                    Color = new Color(0, 255, 0, 100),
+                    Color = new Color4(0f, 1f, 0f, 0.4f),
                     StartingVelocity = focusedVelocity * startingVelocityModifier,
                     GoalVelocity = focusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.CollisionGroups.Add(0);
                 player.Scene.AddEntity(projectile);
             }
         } else {
             for (int index = 0; index < numShots; index++) {
-                var projectile = new LinearAmulet(player.Position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), false, cooldownOverflow) {
+                var projectile = new Amulet(player.Position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), true, false, cooldownOverflow) {
                     SpawnDelay = spawnDelay,
                     CanCollide = false,
-                    Color = new Color(0, 255, 0, 100),
+                    Color = new Color4(0f, 1f, 0f, 1f),
                     StartingVelocity = unfocusedVelocity * startingVelocityModifier,
                     GoalVelocity = unfocusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.CollisionGroups.Add(0);
+                projectile.Color = new Color4(0f, 1f, 0f, 0.4f);
                 player.Scene.AddEntity(projectile);
             }
         }
 
-        player.ApplyCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
-        player.ApplyCooldowns(secondaryCooldown - cooldownOverflow, PlayerAction.Secondary);
-        player.ApplyCooldowns(spellACooldown - cooldownOverflow, PlayerAction.SpellA);
-        player.ApplyCooldowns(spellBCooldown - cooldownOverflow, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
+        player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerAction.Secondary);
+        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerAction.SpellA);
+        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerAction.SpellB);
 
         player.EnableAttacks(PlayerAction.Secondary, PlayerAction.SpellA, PlayerAction.SpellB);
 
@@ -124,69 +123,54 @@ public class ReimuPrimary : Attack {
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
 
-        packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle).Out(out bool focused);
+        packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle).Out(out bool focused);
         Time delta = Game.Network.Time - theirTime;
 
         if (focused) {
             for (int index = 0; index < numShots; index++) {
-                var offset = new Vector2f(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
-                var projectile = new LinearAmulet(position + offset, angle, true) {
+                var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
+                var projectile = new Amulet(position + offset, angle, false, true) {
                     SpawnDelay = spawnDelay,
                     InterpolatedOffset = delta.AsSeconds(),
-                    Color = new Color(255, 0, 0),
+                    Color = new Color4(1f, 0, 0, 1f),
                     GrazeAmount = grazeAmount,
                     StartingVelocity = focusedVelocity * startingVelocityModifier,
                     GoalVelocity = focusedVelocity,
-                    VelocityFalloff = velocityFalloff
+                    VelocityFalloff = velocityFalloff,
                 };
-                projectile.CollisionGroups.Add(1);
                 opponent.Scene.AddEntity(projectile);
             }
         } else {
             for (int index = 0; index < numShots; index++) {
-                var projectile = new LinearAmulet(position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), true) {
+                var projectile = new Amulet(position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), false, true) {
                     SpawnDelay = spawnDelay,
                     InterpolatedOffset = delta.AsSeconds(),
-                    Color = new Color(255, 0, 0),
+                    Color = new Color4(1f, 0, 0, 1f),
                     GrazeAmount = grazeAmount,
                     StartingVelocity = unfocusedVelocity * startingVelocityModifier,
                     GoalVelocity = unfocusedVelocity,
-                    VelocityFalloff = velocityFalloff
+                    VelocityFalloff = velocityFalloff,
                 };
-                projectile.CollisionGroups.Add(1);
                 opponent.Scene.AddEntity(projectile);
             }
         }
     }
 
     public override void PlayerRender(Player player) {
+
         if (!attackHold) return;
 
-        var indicatorStates = new SpriteStates() {
-            Origin = new Vector2f(0.5f, 0.5f),
+        float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
+
+        var aimArrowSprite = new Sprite("aimarrow") {
+            Origin = new Vector2(0.0625f, 0.5f),
             Position = player.Position,
-            Scale = new Vector2f(1f, 1f) * 0.35f,
-            Color = new Color(255, 255, 255, 40),
+            Rotation = player.AngleToOpponent + aimOffset,
+            Scale = new Vector2(0.5f, 0.25f),
+            Color = new Color4(1f, darkness, darkness, 1f),
         };
 
-        var shader = new TShader("aimIndicator");
-        shader.SetUniform("angle", player.AngleToOpponent);
-        shader.SetUniform("arc", TMathF.degToRad(aimRange));
-
-        Game.DrawSprite("aimindicator", indicatorStates, shader, Layers.Player);
-
-        byte darkness = (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset));
-
-        var arrowStates = new SpriteStates() {
-            Origin = new Vector2f(10f, 10f),
-            OriginType = OriginType.Position,
-            Position = player.Position,
-            Rotation = TMathF.radToDeg(player.AngleToOpponent + aimOffset),
-            Scale = new Vector2f(1f, 1f) * 0.35f,
-            Color = new Color(255, darkness, darkness)
-        };
-
-        Game.DrawSprite("aimarrow", arrowStates, Layers.Player);
+        Game.Draw(aimArrowSprite, Layers.Player);
     }
 
 

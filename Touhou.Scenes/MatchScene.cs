@@ -1,10 +1,11 @@
 
-using SFML.Graphics;
-using SFML.System;
 
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Objects;
 using Touhou.Objects.Characters;
 using Touhou.Objects.Generics;
+using Touhou.Objects.Projectiles;
 
 namespace Touhou.Scenes;
 
@@ -13,128 +14,149 @@ public class MatchScene : Scene {
     private readonly bool isHosting;
     private readonly Time startTime;
 
+    private readonly Graph updateTimeGraph;
+    private readonly Graph renderTimeGraph;
+
     private Action<Time> latencyGraphDelegate;
-    private DistributionGraph latencyGraph;
 
     public MatchScene(bool isHosting, Time startTime) {
 
         this.isHosting = isHosting;
         this.startTime = startTime;
 
-        latencyGraph = new DistributionGraph() { Size = new Vector2f(Game.Window.Size.X / 2f, 25) };
-        latencyGraph.Position = new Vector2f(Game.Window.Size.X / 4f, 0f);
-        latencyGraph.Add("latency", null, 100, Color.Green);
+        updateTimeGraph = new Graph(() => {
+            Game.Stats.TryGet("update", out var value);
+            return value;
+        }, 5000) {
+            Size = new Vector2(800f, 100f),
+            Origin = Vector2.UnitX * 0.5f,
+            Color = Color4.Green,
+            IsUI = true,
+            Alignment = new Vector2(0.42f, -1f),
+        };
 
-        latencyGraphDelegate = (latency) => latencyGraph.Sample("latency", (float)(latency / 1000d));
+        renderTimeGraph = new Graph(() => {
+            Game.Stats.TryGet("render", out var value);
+            return value;
+        }, 5000) {
+            Size = new Vector2(800f, 100f),
+            Origin = Vector2.UnitX * 0.5f,
+            Color = Color4.LightBlue,
+            IsUI = true,
+            Alignment = new Vector2(0.42f, -1f),
+        };
 
     }
 
     public override void OnInitialize() {
 
+        Projectile.totalLocalProjectiles = 0;
+        Projectile.totalRemoteProjectiles = 0x80000000;
+
         var match = new Match(startTime);
         AddEntity(match);
-        AddEntity(new Renderer(() => {
-            var states = new RectangeStates() {
-                Origin = new Vector2f(0.5f, 0.5f),
-                OriginType = OriginType.Percentage,
+        AddEntity(new RenderCallback(() => {
+
+            var matchBoundsRectangle = new Rectangle() {
+                Origin = new Vector2(0.5f, 0.5f),
                 Size = match.Bounds * 2f,
-                FillColor = Color.Transparent,
-                OutlineColor = new Color(255, 255, 255, 60)
+                FillColor = Color4.Transparent,
+                StrokeColor = new Color4(255, 255, 255, 60),
+                StrokeWidth = 1f,
             };
-            Game.DrawRectangle(states, 0);
+
+            Game.Draw(matchBoundsRectangle, Layers.Background2);
+
+
+
+
+            Game.Draw(updateTimeGraph, Layers.UI1);
+            Game.Draw(renderTimeGraph, Layers.UI1);
+
+            int actionNumber = 0;
+            foreach (var action in Game.Input.GetActionOrder()) {
+                if (Game.Input.IsActionPressBuffered(action, out var time, out _)) {
+                    var rect = new Rectangle() {
+                        Origin = new Vector2(1f, 1f),
+                        Size = new Vector2((300f - (float)(Game.Time - time).AsMilliseconds()) * 0.5f, 18f),
+                        FillColor = Color4.White,
+                        StrokeColor = Color4.Black,
+                        StrokeWidth = 1f,
+                        IsUI = true,
+                        Alignment = new Vector2(0.99f, 0.99f - 0.05f * actionNumber),
+                    };
+
+                    Game.Draw(rect, Layers.UI1);
+
+                    actionNumber++;
+                }
+            }
+
+
         }));
 
         Game.Network.ResetPing();
         if (isHosting) Game.Network.StartLatencyCorrection();
 
-        var opponent = new OpponentReimu(new Vector2f(!isHosting ? -200 : 200, 0f));
-        var player = new PlayerReimu(isHosting) { Position = new Vector2f(isHosting ? -200 : 200, 0f) };
-        //var player = new PlayerReimu() { Position = new Vector2f(80f, Game.Window.Size.Y / 2f) };
+        var opponent = new OpponentReimu(new Vector2(!isHosting ? -200 : 200, 0f));
+        var player = new PlayerReimu(isHosting) { Position = new Vector2(isHosting ? -200 : 200, 0f) };
+        //var player = new PlayerReimu() { Position = new Vector2(80f, Game.Window.Size.Y / 2f) };
 
         AddEntity(player);
         AddEntity(opponent);
 
         AddEntity(new MatchUI(isHosting));
 
-        AddEntity(new Renderer(() => {
-
-            // var state = new RectangeStates() {
-            //     Origin = new Vector2f(0.5f, 0.5f),
-            //     Size = new Vector2f(768f, 768f),
-            //     Position = new Vector2f(0.5f, 0.5f),
-            //     Scale = new Vector2f(1f, 1f) * 0.25f,
-            //     Rotation = Game.Time.AsSeconds() * 180f,
-            //     IsUI = true,
-            // };
-
-            // var shader = new TShader("template");
-
-            // Game.DrawRectangle(state, shader, Layers.UI2);
-
-
-
-
-
-        }));
-
-        // var graph = new Graph() { Size = new Vector2f(Game.Window.Size.X, 25) };
-        // graph.Position = new Vector2f(0f, Game.Window.Size.Y - graph.Size.Y);
-        // graph.Add("update", () => {
-        //     Game.Debug.Fields.TryGet("update", out var value);
-        //     return value;
-        // }, 10000, Color.Yellow);
-        // graph.Add("render", () => {
-        //     Game.Debug.Fields.TryGet("render", out var value);
-        //     return value;
-        // }, 10000, Color.Blue);
-        // graph.Add("step", () => {
-        //     Game.Debug.Fields.TryGet("step", out var value);
-        //     return value;
-        // }, 10000, Color.Green);
-        // AddEntity(graph);
 
         Game.Network.DataReceived += latencyGraphDelegate;
 
         //AddEntity(latencyGraph);
 
-        AddEntity(new ValueDisplay<string>(() => $"FPS: {Game.FPS}") { Color = Color.White, CharacterSize = 14 });
-        //AddEntity(new ValueDisplay<string>(() => $"Network Time: {Game.Network.Time.AsMilliseconds()}") { Position = new Vector2f(0f, 20f), Color = Color.White, CharacterSize = 14 });
+        AddEntity(new ValueDisplay<string>(() => $"FPS: {Game.FPS}") {
+            Origin = Vector2.UnitY,
+            Color = Color4.White,
+            CharacterSize = 40f,
+            IsUI = true,
+            UIAlignment = new Vector2(-1f, 1f),
+        });
 
-        // AddEntity(new ValueDisplay<string>(() => $"Lat: {Game.Network.PerceivedLatency.AsMilliseconds()}") { Position = new Vector2f(0f, 50f), Color = Color.White, CharacterSize = 14 });
-        //AddEntity(new ValueDisplay<string>(() => $"Their Lat: {Game.Network.TheirPerceivedLatency.AsMilliseconds()}") { Position = new Vector2f(0f, 70f), Color = Color.White, CharacterSize = 14 });
+        AddEntity(new ValueDisplay<string>(() => $"Network Time: {Game.Network.Time.AsMilliseconds()}") {
+            Origin = Vector2.UnitY,
+            Position = new Vector2(0f, -70f),
+            CharacterSize = 40f,
+            Color = Color4.White,
+            IsUI = true,
+            UIAlignment = new Vector2(-1f, 1f),
+        });
 
-        //AddEntity(new ValueDisplay<string>(() => $"Pos: {player.Position.X}, {player.Position.Y}") { Position = new Vector2f(0f, 100f), Color = Color.White, CharacterSize = 14 });
+        AddEntity(new ValueDisplay<string>(() => $"Lat: {Game.Network.PerceivedLatency.AsMilliseconds()}") {
+            Origin = Vector2.UnitY,
+            Position = new Vector2(0f, -140f),
+            CharacterSize = 40f,
+            Color = Color4.White,
+            IsUI = true,
+            UIAlignment = new Vector2(-1f, 1f),
+        });
 
+        AddEntity(new ValueDisplay<string>(() => $"Their Lat: {Game.Network.TheirPerceivedLatency.AsMilliseconds()}") {
+            Origin = Vector2.UnitY,
+            Position = new Vector2(0f, -190f),
+            CharacterSize = 40f,
+            Color = Color4.White,
+            IsUI = true,
+            UIAlignment = new Vector2(-1f, 1f),
+        });
 
+        AddEntity(new ValueDisplay<string>(() => $"Pos: {player.Position.X}, {player.Position.Y}") {
+            Origin = Vector2.UnitY,
+            Position = new Vector2(0f, -260f),
+            CharacterSize = 40f,
+            Color = Color4.White,
+            IsUI = true,
+            UIAlignment = new Vector2(-1f, 1f),
+        });
     }
 
-    // public override void OnRender() {
-
-
-    //     if (_gameManager.StartTime - Game.Network.Time > 0 && _gameManager.StartTime - Game.Network.Time <= 3000) {
-    //         var text = new Text($"{(_gameManager.StartTime - Game.Network.Time) / 1000f}", _font, 14);
-    //         text.Position = new Vector2f(0, 60f);
-    //         Game.Draw(text, 0);
-    //     }
-
-    //     _gameManager.OnRender();
-
-    //     _fpsSamples.Enqueue(delta);
-
-    //     while (_fpsSamples.Count > 1000) _fpsSamples.Dequeue();
-    //     var fpsText = new Text($"FPS {MathF.Floor(1 / (_fpsSamples.Sum() / _fpsSamples.Count))}", _font, 14);
-    //     Game.Draw(fpsText, 0);
-
-    //     // var pingText = new Text($"Ping: [{Game.Network.Ping}]", _font, 14);
-    //     // pingText.Position += new Vector2f(0, 20f);
-    //     // Game.Draw(pingText, 0);
-
-    //     // var frameTimesText = new Text($"Frames: [{Game.FrameTimes}]", _font, 14);
-
-    //     // frameTimesText.Position += new Vector2f(0, 80f);
-    //     // Game.Draw(frameTimesText, 0);
-
-    // }
 
     public override void OnDisconnect() {
         Game.Network.Disconnect();

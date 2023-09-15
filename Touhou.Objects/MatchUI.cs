@@ -1,5 +1,5 @@
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Objects.Characters;
 
 namespace Touhou.Objects;
@@ -43,21 +43,22 @@ public class MatchUI : Entity {
     private void RenderCooldowns(bool isP1, bool isPlayer) {
 
         int i = isP1 ? 0 : 3;
+
         foreach (var (name, attack) in isPlayer ? Player.Attacks : Opponent.Attacks) {
-            var states = new RectangeStates() {
-                Origin = new Vector2f((isP1 ? -0.15f - 1.15f * i : 1.15f + 1.15f * i), 1.15f),
-                Position = new Vector2f(isP1 ? 0f : 1f, 1f),
-                Size = new Vector2f(120f, 120f),
-                OutlineColor = Color.Transparent,
-                FillColor = (isPlayer ? Player.Power : Opponent.Power) < attack.Cost ? new Color(230, 180, 190) : Color.White,
+
+
+            var rectangle = new Rectangle {
+                Origin = new Vector2((isP1 ? -0.15f - 1.15f * i : 1.15f + 1.15f * i), 1.15f),
+                Position = new Vector2(isP1 ? 0f : 1f, 1f),
+                Size = new Vector2(120f, 120f),
+                StrokeColor = Color4.Black,
+                StrokeWidth = 1f,
+                FillColor = (isPlayer ? Player.Power : Opponent.Power) < attack.Cost ? new Color4(230, 180, 190, 255) : Color4.White,
                 IsUI = true,
             };
 
-            var shader = new TShader("cooldown");
-            shader.SetUniform("duration", attack.Cooldown.AsSeconds() / attack.CooldownDuration.AsSeconds());
-            shader.SetUniform("disabled", attack.Disabled);
+            Game.Draw(rectangle, Layers.UI1);
 
-            Game.DrawRectangle(states, shader, 0);
             i += isP1 ? 1 : -1;
         }
     }
@@ -66,20 +67,21 @@ public class MatchUI : Entity {
 
         int i = 0;
         foreach (var (name, attack) in Player.Attacks) {
-            var states = new RectangeStates() {
-                Origin = new Vector2f((0.5f - 1.15f * i) + 1.15f * (Player.Attacks.Count - 1) / 2f, 1.30f),
-                Position = new Vector2f(0.5f, 1f),
-                Size = new Vector2f(120f, 120f),
-                OutlineColor = Color.Transparent,
-                FillColor = Player.Power < attack.Cost ? new Color(230, 180, 190) : Color.White,
+
+            var fillColor = Player.Power < attack.Cost ? new Color4(230, 180, 190, 255) : (attack.Disabled | attack.Cooldown.AsSeconds() > 0f ? Color4.Gray : Color4.White);
+
+            var rectangle = new Rectangle {
+                Origin = new Vector2((0.5f - 1.15f * i) + 1.15f * (Player.Attacks.Count - 1) / 2f, -0.30f),
+                Size = new Vector2(120f, 120f),
+                StrokeColor = Color4.Black,
+                StrokeWidth = 1f,
+                FillColor = fillColor,
                 IsUI = true,
+                Alignment = new Vector2(0f, attack.Disabled | attack.Cooldown.AsSeconds() > 0f ? -1.01f : -1f),
             };
 
-            var shader = new TShader("cooldown");
-            shader.SetUniform("duration", attack.Cooldown.AsSeconds() / attack.CooldownDuration.AsSeconds());
-            shader.SetUniform("disabled", attack.Disabled);
+            Game.Draw(rectangle, Layers.UI1);
 
-            Game.DrawRectangle(states, shader, 0);
             i++;
         }
     }
@@ -91,47 +93,48 @@ public class MatchUI : Entity {
         float maxWidth = 534f;
         float height = 18f;
 
-        var bgStates = new RectangeStates() {
-            Origin = new Vector2f((isP1 ? -18f : maxWidth + 18f) / maxWidth, 174f / height),
-            Position = new Vector2f(isP1 ? 0f : 1f, 1f),
-            Size = new Vector2f(maxWidth, height),
-            FillColor = new Color(255, 255, 255, 80),
-            OutlineColor = Color.Transparent,
-            IsUI = true
+        var bgRect = new Rectangle() {
+            Origin = new Vector2((isP1 ? -18f : maxWidth + 18f) / maxWidth, -1f),
+            Size = new Vector2(maxWidth, height),
+            FillColor = new Color4(255, 255, 255, 80),
+            StrokeColor = Color4.Transparent,
+            IsUI = true,
+            Alignment = new Vector2(isP1 ? -1 : 1, -1),
+
         };
 
-        Game.DrawRectangle(bgStates, 0);
+
 
         var width = (isPlayer ? Player.Power : Opponent.Power) / 400f * maxWidth;
 
-        var states = new RectangeStates() {
-            Origin = new Vector2f((isP1 ? -18f : maxWidth + 18f) / width, 174f / height),
-            Position = new Vector2f(isP1 ? 0f : 1f, 1f),
-            Size = new Vector2f(width, height),
-            OutlineColor = Color.Transparent,
-            IsUI = true
+        var rect = new Rectangle() {
+            Origin = new Vector2((isP1 ? -18f : maxWidth + 18f) / width, -1f),
+            Size = new Vector2(width, height),
+            FillColor = Color4.White,
+            StrokeColor = Color4.Transparent,
+            IsUI = true,
+            Alignment = new Vector2(isP1 ? -1 : 1, -1),
         };
 
-        Game.DrawRectangle(states, 0);
+
 
         if (isPlayer) playerSmoothPower += MathF.Min(MathF.Abs(Player.Power - playerSmoothPower), Game.Delta.AsSeconds() * 80f) * MathF.Sign(Player.Power - playerSmoothPower);
         else opponentSmoothPower += MathF.Min(MathF.Abs(Opponent.Power - opponentSmoothPower), Game.Delta.AsSeconds() * 80f) * MathF.Sign(Opponent.Power - opponentSmoothPower);
 
         float smoothWidth = -((isPlayer ? Player.Power : Opponent.Power) - (isPlayer ? playerSmoothPower : opponentSmoothPower)) / 400f * maxWidth;
 
-        var sStates = new RectangeStates() {
-            Origin = new Vector2f(((isP1 ? -18f : maxWidth + 18f) - width) / smoothWidth, 174f / height),
-            Position = new Vector2f(isP1 ? 0f : 1f, 1f),
-            Size = new Vector2f(smoothWidth, height),
-            FillColor = new Color(255, 200, 120),
-            OutlineColor = Color.Transparent,
-            IsUI = true
+        var sRect = new Rectangle() {
+            Origin = new Vector2(((isP1 ? -18f : maxWidth + 18f) - width) / smoothWidth, -1f),
+            Size = new Vector2(smoothWidth, height),
+            FillColor = new Color4(255, 200, 120, 255),
+            StrokeColor = Color4.Transparent,
+            IsUI = true,
+            Alignment = new Vector2(isP1 ? -1 : 1, -1),
         };
 
-        Game.DrawRectangle(sStates, 0);
-
-
-
+        Game.Draw(bgRect, Layers.UI1);
+        Game.Draw(rect, Layers.UI1);
+        Game.Draw(sRect, Layers.UI1);
 
     }
 
@@ -140,39 +143,47 @@ public class MatchUI : Entity {
     private void RenderHearts(bool isP1, bool isPlayer) {
 
         for (int i = 0; i < (isPlayer ? Player.HeartCount : Opponent.HeartCount); i++) {
-            var state = new SpriteStates() {
-                Origin = new Vector2f(isP1 ? -0.8f - 1.15f * i : 1.8f + 1.15f * i, -0.8f),
-                Position = new Vector2f(isP1 ? 0f : 1f, 0f),
+
+            var sprite = new Sprite("heart") {
+                Origin = new Vector2(isP1 ? -0.8f - 1.15f * i : 1.8f + 1.15f * i, -0.8f),
+                Alignment = new Vector2(isP1 ? -1f : 1f, -1f),
                 IsUI = true,
             };
 
-            Game.DrawSprite("heart", state, Layers.UI1);
+            Game.Draw(sprite, Layers.UI1);
         }
-
 
     }
 
     private void RenderTimer() {
         float displayTime = MathF.Max(MathF.Ceiling((Match.EndTime - Match.StartTime - Match.CurrentTime).AsSeconds()), 0f);
 
-        var timerStates = new TextStates() {
-            CharacterSize = 100f,
-            Style = Text.Styles.Bold,
-            Origin = new Vector2f(0.5f, -0.08f),
-            Position = new Vector2f(0.5f, 0f),
+        var timerText = new Text() {
+            Origin = new Vector2(0.5f, 1f),
+            IsUI = true,
+            Alignment = new Vector2(0f, 1.02f),
+            DisplayedText = displayTime.ToString(),
+            Font = "consolas",
+            CharacterSize = 120f,
+            Boldness = 0.25f,
         };
 
-        Game.DrawText(displayTime.ToString(), Game.DefaultFont, timerStates, Layers.UI1);
+        Game.Draw(timerText, Layers.UI1);
 
-        var ppsStates = new TextStates() {
-            CharacterSize = 50f,
-            Style = Text.Styles.Bold,
-            Origin = new Vector2f(0.5f, -3f),
-            Position = new Vector2f(0.5f, 0f)
+        var ppsText = new Text() {
+            Origin = new Vector2(0.5f, 1f),
+            //Position = new Vector2(0f, -116f),
+            IsUI = true,
+            Alignment = new Vector2(0f, 0.9f),
+            DisplayedText = $"{Match.GetPowerPerSecond()}/s",
+            Font = "consolas",
+            CharacterSize = 60f,
+            Boldness = 0.25f,
+
+
         };
 
-        Game.DrawText($"{Match.GetPowerPerSecond()}/s", Game.DefaultFont, ppsStates, Layers.UI1);
-
+        Game.Draw(ppsText, Layers.UI1);
     }
 
 }

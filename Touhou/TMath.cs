@@ -1,4 +1,5 @@
-using SFML.System;
+
+using OpenTK.Mathematics;
 
 namespace Touhou;
 public static class TMathF {
@@ -20,7 +21,7 @@ public static class TMathF {
         return Mod(a, MathF.Tau);
     }
 
-    public static float Dot(Vector2f a, Vector2f b) {
+    public static float Dot(Vector2 a, Vector2 b) {
         return a.X * b.X + a.Y + b.Y;
     }
 

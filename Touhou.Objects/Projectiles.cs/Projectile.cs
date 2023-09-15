@@ -1,5 +1,6 @@
 using System.Net;
-using SFML.Graphics;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Net;
 
 namespace Touhou.Objects.Projectiles;
@@ -10,7 +11,7 @@ public abstract class Projectile : Entity, IReceivable {
     public static uint totalRemoteProjectiles = 0x80000000;
 
 
-    public bool IsPlayerOwned { get; init; } = true;
+    public bool IsPlayerOwned { get; }
     public bool IsRemote { get; }
 
     public Time SpawnTime { get; }
@@ -19,7 +20,7 @@ public abstract class Projectile : Entity, IReceivable {
 
     public bool DestroyedOnScreenExit { get; set; } = true;
 
-    public Color Color { get; set; } = Color.White;
+    public Color4 Color { get; set; } = Color4.White;
 
     public bool Grazed { get; private set; }
 
@@ -30,7 +31,8 @@ public abstract class Projectile : Entity, IReceivable {
 
 
 
-    public Projectile(bool isRemote, Time spawnTimeOffset = default(Time)) {
+    public Projectile(bool isPlayerOwned, bool isRemote, Time spawnTimeOffset = default(Time)) {
+        IsPlayerOwned = isPlayerOwned;
         IsRemote = isRemote;
         SpawnTime = Game.Time - spawnTimeOffset;
 
@@ -43,8 +45,8 @@ public abstract class Projectile : Entity, IReceivable {
         if (DestroyedOnScreenExit && Game.Time >= SpawnTime + Time.InSeconds(1f)) {
             foreach (var hitbox in Hitboxes) {
                 var bounds = hitbox.GetBounds();
-                if (!(bounds.Left >= Match.Bounds.X || bounds.Left + bounds.Width <= -Match.Bounds.X ||
-                      bounds.Top >= Match.Bounds.Y || bounds.Top + bounds.Height <= -Match.Bounds.Y)) {
+                if (!(bounds.Min.X >= Match.Bounds.X || bounds.Max.X <= -Match.Bounds.X ||
+                      bounds.Min.Y >= Match.Bounds.Y || bounds.Max.Y <= -Match.Bounds.Y)) {
                     return;
                 }
             }
@@ -60,6 +62,18 @@ public abstract class Projectile : Entity, IReceivable {
         packet.Out(out uint id, true);
 
         if (id == Id) Destroy();
+    }
+
+    public override void Render() {
+        // var idText = new Text() {
+        //     DisplayedText = Id.ToString(),
+        //     CharacterSize = 12f,
+        //     Font = "consolas",
+        //     Color = Color4.White,
+        //     Position = Position,
+        // };
+
+        // Game.Draw(idText);
     }
 
 

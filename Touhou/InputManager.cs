@@ -2,17 +2,16 @@
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Touhou;
 public class InputManager {
 
 
-    public Dictionary<PlayerAction, Keyboard.Key> KeyboardConfig { get; private set; }
+    public Dictionary<PlayerAction, Keys> KeyboardConfig { get; private set; }
 
-    public Dictionary<Keyboard.Key, PlayerAction> ActionsByKey { get; private set; } = new();
+    public Dictionary<Keys, PlayerAction> ActionsByKey { get; private set; } = new();
     //public Dictionary<PlayerAction, uint> GamepadConfig { get; private set; }
 
     public event Action<PlayerAction> ActionPressed;
@@ -46,7 +45,7 @@ public class InputManager {
         var jsonText = File.ReadAllText("./KeyConfig.json");
         var json = JObject.Parse(jsonText);
 
-        KeyboardConfig = json["Keyboard"].ToObject<Dictionary<PlayerAction, Keyboard.Key>>();
+        KeyboardConfig = json["Keyboard"].ToObject<Dictionary<PlayerAction, Keys>>();
         foreach (var entry in KeyboardConfig) {
             ActionsByKey.Add(entry.Value, entry.Key);
         }
@@ -55,25 +54,31 @@ public class InputManager {
         actionPressOrder = new List<PlayerAction>(playerActions);
     }
 
-    public void AttachEvents(RenderWindow window) {
-        // window.KeyPressed += KeyPressed;
-        // window.KeyReleased += KeyReleased;
-        // window.LostFocus += LostFocus;
-    }
+    // public void AttachEvents(RenderWindow window) {
+    //     // window.KeyPressed += KeyPressed;
+    //     // window.KeyReleased += KeyReleased;
+    //     // window.LostFocus += LostFocus;
+    // }
 
     public bool GetActionState(PlayerAction action) {
         return actionState.TryGetValue(action, out bool state) && state;
     }
 
-    public bool IsActionPressBuffered(PlayerAction action) {
-        return IsActionPressBuffered(action, out _);
+    public bool NewGetActionState(NativeWindow window, PlayerAction action) {
+        return window.IsFocused && window.IsKeyDown(KeyboardConfig[action]);
     }
 
-    public bool IsActionPressBuffered(PlayerAction action, out ReadOnlyDictionary<PlayerAction, bool> state) {
+    public bool IsActionPressBuffered(PlayerAction action) {
+        return IsActionPressBuffered(action, out _, out _);
+    }
+
+    public bool IsActionPressBuffered(PlayerAction action, out Time time, out ReadOnlyDictionary<PlayerAction, bool> state) {
         if (actionPressBuffer.TryGetValue(action, out var data)) {
+            time = data.Time;
             state = new ReadOnlyDictionary<PlayerAction, bool>(data.StateSnapshot);
             return true;
         }
+        time = Time.InSeconds(0f);
         state = null;
         return false;
     }
@@ -81,25 +86,24 @@ public class InputManager {
     public bool IsActionReleaseBuffered(PlayerAction action) => actionReleaseBuffer.ContainsKey(action);
     public List<PlayerAction> GetActionOrder() => actionPressOrder;
 
-    public void Update(RenderWindow window) {
+    public void Update(NativeWindow window) {
 
-        window.DispatchEvents();
+        window.ProcessEvents(5);
 
-        bool windowFocused = window.HasFocus();
         foreach (var action in playerActions) {
 
             // keeping track of action state each frame to determine if a press or release happened on this frame
             previousActionState[action] = actionState[action];
-            actionState[action] = Keyboard.IsKeyPressed(KeyboardConfig[action]) && windowFocused;
+            actionState[action] = window.IsKeyPressed(KeyboardConfig[action]) && window.IsFocused;
         }
 
         foreach (var action in playerActions) {
 
             // previously not pressed but now is
-            if (!previousActionState[action] && actionState[action]) BufferPressAction(action);
+            if (!previousActionState[action] && actionState[action]) BufferActionPress(action);
 
             // previously pressed but now isn't
-            if (previousActionState[action] && !actionState[action]) BufferReleaseAction(action);
+            if (previousActionState[action] && !actionState[action]) BufferActionRelease(action);
         }
 
         // remove old buffers
@@ -112,27 +116,50 @@ public class InputManager {
         }
     }
 
-    public void Render() {
-        var text = new Text();
-        text.Font = Game.DefaultFont;
-        text.CharacterSize = 14;
+    public void NewUpdate(NativeWindow window) {
 
-        float offset = 0f;
-        foreach (var action in actionPressOrder) {
-            bool pressed = actionState[action];
-            text.DisplayedString = action.ToString();
-            text.FillColor = new Color(255, 255, 255, 80);
-            if (pressed) text.FillColor = Color.White;
-            if (IsActionReleaseBuffered(action)) text.FillColor = new Color(0, 200, 255);
-            if (IsActionPressBuffered(action)) text.FillColor = new Color(255, 0, 100);
-            text.Origin = new Vector2f(text.GetLocalBounds().Width, 0f);
-            text.Position = new Vector2f(Game.Window.Size.X - 2f, offset);
+        window.ProcessEvents(0);
 
-            Game.Draw(text, 0);
+        foreach (var action in playerActions) {
 
-            offset += 20f;
+            if (window.IsKeyPressed(KeyboardConfig[action])) BufferActionPress(action);
+
+            if (window.IsKeyReleased(KeyboardConfig[action])) BufferActionRelease(action);
+
         }
+
+        // remove old buffers
+        foreach (var (action, press) in actionPressBuffer) {
+            if (Game.Time - press.Time >= bufferTime) actionPressBuffer.Remove(action);
+        }
+
+        foreach (var (action, time) in actionReleaseBuffer) {
+            if (Game.Time - time >= bufferTime) actionReleaseBuffer.Remove(action);
+        }
+
     }
+
+    // public void Render() {
+    //     var text = new Text();
+    //     text.Font = Game.DefaultFont;
+    //     text.CharacterSize = 14;
+
+    //     float offset = 0f;
+    //     foreach (var action in actionPressOrder) {
+    //         bool pressed = actionState[action];
+    //         text.DisplayedString = action.ToString();
+    //         text.FillColor4 = new Color4(255, 255, 255, 80);
+    //         if (pressed) text.FillColor4 = Color4.White;
+    //         if (IsActionReleaseBuffered(action)) text.FillColor4 = new Color4(0, 200, 255);
+    //         if (IsActionPressBuffered(action)) text.FillColor4 = new Color4(255, 0, 100);
+    //         text.Origin = new Vector2(text.GetLocalBounds().Width, 0f);
+    //         text.Position = new Vector2(Game.WindowSize.X - 2f, offset);
+
+    //         //Game.Draw(text, 0);
+
+    //         offset += 20f;
+    //     }
+    // }
 
 
 
@@ -148,7 +175,10 @@ public class InputManager {
     //     }
     // }
 
-    private void BufferPressAction(PlayerAction action) {
+    private void BufferActionPress(PlayerAction action) {
+
+        actionState[action] = true;
+
         actionPressBuffer[action] = (Game.Time, new Dictionary<PlayerAction, bool>(actionState));
         actionReleaseBuffer.Remove(action);
 
@@ -161,7 +191,10 @@ public class InputManager {
 
     }
 
-    private void BufferReleaseAction(PlayerAction action) {
+    private void BufferActionRelease(PlayerAction action) {
+
+        actionState[action] = false;
+
         actionReleaseBuffer[action] = Game.Time;
 
         ActionReleased.Invoke(action);

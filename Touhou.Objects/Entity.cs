@@ -1,4 +1,4 @@
-using SFML.System;
+using OpenTK.Mathematics;
 using Touhou.Scenes;
 
 namespace Touhou.Objects;
@@ -6,14 +6,14 @@ public abstract class Entity {
 
     public Scene Scene { get; set; }
 
-    public Vector2f Position { get; set; }
+    public Vector2 Position { get; set; }
 
     public event Action Destroyed;
     public bool IsDestroyed { get; private set; }
 
     public bool CanCollide { get; set; } = true;
-    public CollisionType CollisionType { get; protected set; }
-    public List<int> CollisionGroups { get; private set; } = new();
+    //public CollisionType CollisionType { get; protected set; }
+    //public List<CollisionGroups> CollisionGroups { get; private set; } = new();
     public List<Hitbox> Hitboxes { get; private set; } = new();
 
     public virtual void Update() { }

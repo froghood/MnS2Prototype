@@ -1,6 +1,7 @@
 
 using System.Net;
-using SFML.Graphics;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Net;
 using Touhou.Objects.Generics;
 using Touhou.Scenes;
@@ -11,14 +12,22 @@ public class HostSyncingScene : Scene {
     private readonly Text text;
 
     public HostSyncingScene() {
-        text = new Text("Syncing...", Game.DefaultFont, 14);
+
+        text = new Text {
+            DisplayedText = "Syncing...",
+            CharacterSize = 40f,
+            Origin = Vector2.UnitY,
+            IsUI = true,
+            Alignment = new Vector2(-1f, 1f),
+        };
     }
 
     public override void OnInitialize() {
         Game.Network.Send(new Packet(PacketType.ConnectionResponse));
 
-        AddEntity(new Receiver(ReceiveCallback));
-        AddEntity(new Renderer(() => Game.Draw(text, 0)));
+        AddEntity(new ReceiveCallback(ReceiveCallback));
+
+        AddEntity(new RenderCallback(() => Game.Draw(text, Layers.UI1)));
     }
 
     private void ReceiveCallback(Packet packet, IPEndPoint endPoint) {

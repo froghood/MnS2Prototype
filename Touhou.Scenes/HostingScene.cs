@@ -1,10 +1,9 @@
 using System.Net;
-using SFML.System;
-using SFML.Graphics;
-using SFML.Window;
 using Touhou.Net;
 using Touhou.Scenes;
 using Touhou.Objects.Generics;
+using Touhou.Graphics;
+using OpenTK.Mathematics;
 
 namespace Touhou.Scenes;
 
@@ -17,18 +16,26 @@ public class HostingScene : Scene {
     public HostingScene(int port) {
         this.port = port;
 
-        text = new Text("Waiting for connection...", Game.DefaultFont, 14);
+        text = new Text {
+            DisplayedText = "Waiting for connection...",
+            CharacterSize = 40f,
+            Origin = Vector2.UnitY,
+            IsUI = true,
+            Alignment = new Vector2(-1f, 1f),
+        };
     }
 
     public override void OnInitialize() {
 
         Game.Network.TimeOffset -= Game.Time;
 
-        Game.Window.SetTitle("MnS2 | Host");
         Game.Network.Host(this.port);
 
-        AddEntity(new Receiver(ReceiverCallback));
-        AddEntity(new Renderer(() => Game.Draw(text, 0)));
+        AddEntity(new ReceiveCallback(ReceiverCallback));
+
+        AddEntity(new RenderCallback(() => {
+            Game.Draw(text, Layers.UI1);
+        }));
     }
 
     private void ReceiverCallback(Packet packet, IPEndPoint endPoint) {

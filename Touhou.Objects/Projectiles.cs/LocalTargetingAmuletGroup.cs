@@ -1,5 +1,5 @@
 using System.Net;
-using SFML.System;
+using OpenTK.Mathematics;
 using Touhou.Net;
 using Touhou.Objects.Characters;
 
@@ -10,7 +10,7 @@ public class LocalTargetingAmuletGroup : Projectile {
 
     private List<TargetingAmulet> targetingAmulets = new();
 
-    public LocalTargetingAmuletGroup() : base(false) {
+    public LocalTargetingAmuletGroup() : base(true, false) {
         DestroyedOnScreenExit = false;
     }
 
@@ -29,7 +29,7 @@ public class LocalTargetingAmuletGroup : Projectile {
 
         Destroy();
 
-        packet.Out(out Time theirTime).Out(out Vector2f theirPosition);
+        packet.Out(out Time theirTime).Out(out Vector2 theirPosition);
 
         foreach (var targetingAmulet in targetingAmulets) {
             targetingAmulet.RemoteTarget(theirTime, theirPosition);

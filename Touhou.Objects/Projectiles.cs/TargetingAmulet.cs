@@ -1,6 +1,6 @@
 using System.Net;
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Net;
 using Touhou.Objects.Characters;
 
@@ -12,19 +12,21 @@ public class TargetingAmulet : ParametricProjectile {
     private readonly float deceleration;
 
 
-    private readonly RectangleShape shape;
 
-    public TargetingAmulet(Vector2f origin, float direction, bool isRemote, float velocity, float deceleration, Time spawnTimeOffset = default) : base(origin, direction, isRemote, spawnTimeOffset) {
+    private Sprite sprite;
+
+
+    public TargetingAmulet(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float velocity, float deceleration, Time spawnTimeOffset = default) : base(origin, direction, isPlayerOwned, isRemote, spawnTimeOffset) {
         this.velocity = velocity;
         this.deceleration = deceleration;
 
-        shape = new RectangleShape(new Vector2f(20f, 15f));
-        shape.Origin = shape.Size / 2f;
-        shape.Rotation = 180f / MathF.PI * Direction;
-        shape.FillColor = Color;
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectile));
 
-        CollisionType = CollisionType.Projectile;
-        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 7.5f));
+        sprite = new Sprite("amulet") {
+            Origin = new Vector2(0.5f, 0.5f),
+            Rotation = Direction,
+            UseColorSwapping = true,
+        };
 
     }
 
@@ -39,45 +41,53 @@ public class TargetingAmulet : ParametricProjectile {
     public override void Render() {
         float spawnTime = MathF.Min(CurrentTime / SpawnDelay.AsSeconds(), 1f);
 
-        var spriteStates = new SpriteStates() {
-            Position = Position,
-            Rotation = TMathF.radToDeg(Direction),
-            Origin = new Vector2f(0.5f, 0.5f),
-            Scale = new Vector2f(0.35f, 0.35f) * (1f + 3f * (1f - spawnTime)),
-        };
+        sprite.Position = Position;
+        sprite.Scale = new Vector2(0.4f, 0.4f) * (1f + 3f * (1f - spawnTime));
+        sprite.Color = Color;
 
-        var color = new Color(Color.R, Color.G, Color.B, (byte)MathF.Round(Color.A * spawnTime));
+        Game.Draw(sprite, IsPlayerOwned ? Layers.PlayerProjectiles1 : Layers.OpponentProjectiles1);
 
-        var shader = new TShader("projectileColor");
-        shader.SetUniform("color", color);
+        base.Render();
 
-        Game.DrawSprite("amulet", spriteStates, shader, 0);
+        // var spriteStates = new SpriteStates() {
+        //     Position = Position,
+        //     Rotation = TMathF.radToDeg(Direction),
+        //     Origin = new Vector2(0.5f, 0.5f),
+        //     Scale = new Vector2(0.35f, 0.35f) * (1f + 3f * (1f - spawnTime)),
+        // };
+
+        //var Color4 = new Color4(Color4.R, Color4.G, Color4.B, (byte)MathF.Round(Color4.A * spawnTime));
+
+        //var shader = new TShader("projectileColor4");
+        //shader.SetUniform("Color4", Color4);
+
+        //Game.DrawSprite("amulet", spriteStates, shader, 0);
     }
 
-    public void LocalTarget(Vector2f targetPosition, Time timeOverflow) {
+    public void LocalTarget(Vector2 targetPosition, Time timeOverflow) {
         Destroy();
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
-        var projectile = new LinearAmulet(Position, angle, false, timeOverflow) {
+        var projectile = new Amulet(Position, angle, false, false, timeOverflow) {
             GrazeAmount = 1,
             Color = Color,
             StartingVelocity = 500f,
             GoalVelocity = 500f,
         };
-        projectile.CollisionGroups.Add(1);
+
         if (Grazed) projectile.Graze();
 
         Scene.AddEntity(projectile);
     }
 
-    public void RemoteTarget(Time theirTime, Vector2f targetPosition) {
+    public void RemoteTarget(Time theirTime, Vector2 targetPosition) {
         Destroy();
 
 
         var delta = Game.Network.Time - theirTime;
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
-        var projectile = new LinearAmulet(Position, angle, true) {
+        var projectile = new Amulet(Position, angle, true, true) {
             InterpolatedOffset = delta.AsSeconds(),
             CanCollide = false,
             Color = Color,

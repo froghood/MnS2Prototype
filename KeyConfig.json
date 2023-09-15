@@ -4,7 +4,7 @@
         "Left": "Left",
         "Down": "Down",
         "Up": "Up",
-        "Focus": "LShift",
+        "Focus": "LeftShift",
         "Primary": "Z",
         "Secondary": "X",
         "SpellA": "C",

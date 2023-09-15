@@ -1,9 +1,9 @@
-using SFML.Graphics;
-using SFML.System;
+
+using OpenTK.Mathematics;
 
 namespace Touhou.Objects {
     public class PointHitbox : Hitbox {
-        public PointHitbox(Entity entity, Vector2f offset, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionCallback) { }
+        public PointHitbox(Entity entity, Vector2 offset, CollisionGroups collisionGroup, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionGroup, collisionCallback) { }
 
 
 
@@ -21,8 +21,8 @@ namespace Touhou.Objects {
             throw new NotImplementedException();
         }
 
-        public override FloatRect GetBounds() {
-            return new FloatRect(Position.X, Position.Y, 0f, 0f);
+        public override Box2 GetBounds() {
+            return new Box2(Position, Position);
         }
     }
 }

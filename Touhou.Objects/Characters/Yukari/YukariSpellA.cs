@@ -1,5 +1,4 @@
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
 using Touhou.Net;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
@@ -62,14 +61,13 @@ public class YukariSpellA : Attack {
             float angle = startingAngle + angleOffset / 360f * MathF.Tau + MathF.PI;
 
             for (int i = 0; i < numShots; i++) {
-                var projectile = new LinearAmulet(player.Position, angle + MathF.Tau / numShots * i, false, cooldownOverflow + timeOffset) {
+                var projectile = new Amulet(player.Position, angle + MathF.Tau / numShots * i, true, false, cooldownOverflow + timeOffset) {
                     CanCollide = false,
-                    Color = new Color(0, 255, 0, 100),
+                    Color = new Color4(0, 1f, 0, 0.4f),
                     StartingVelocity = velocity * startingVelocityModifier,
                     GoalVelocity = velocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.CollisionGroups.Add(0);
                 player.Scene.AddEntity(projectile);
 
             }
@@ -93,8 +91,8 @@ public class YukariSpellA : Attack {
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
         player.MovespeedModifier = 1f;
 
-        player.ApplyCooldowns(spellCooldown, PlayerAction.SpellA);
-        player.ApplyCooldowns(globalCooldown, PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(spellCooldown, PlayerAction.SpellA);
+        player.ApplyAttackCooldowns(globalCooldown, PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
 
         player.EnableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
     }
@@ -102,20 +100,19 @@ public class YukariSpellA : Attack {
 
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
-        packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle);
+        packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle);
         var delta = Game.Network.Time - theirTime;
 
         for (int i = 0; i < numShots; i++) {
-            var projectile = new LinearAmulet(position, angle + MathF.Tau / numShots * i, true) {
+            var projectile = new Amulet(position, angle + MathF.Tau / numShots * i, false, true) {
                 InterpolatedOffset = delta.AsSeconds(),
 
-                Color = new Color(255, 0, 0),
+                Color = new Color4(1f, 0f, 0f, 1f),
                 GrazeAmount = grazeAmount,
                 StartingVelocity = velocity * startingVelocityModifier,
                 GoalVelocity = velocity,
                 VelocityFalloff = velocityFalloff,
             };
-            projectile.CollisionGroups.Add(1);
             opponent.Scene.AddEntity(projectile);
         }
     }

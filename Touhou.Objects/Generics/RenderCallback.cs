@@ -1,13 +1,13 @@
 namespace Touhou.Objects.Generics;
 
-public class Updater : Entity {
+public class RenderCallback : Entity {
     private Action callback;
 
-    public Updater(Action callback) {
+    public RenderCallback(Action callback) {
         this.callback = callback;
     }
 
-    public override void Update() {
+    public override void Render() {
         callback.Invoke();
     }
 }

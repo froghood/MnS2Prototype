@@ -1,9 +1,9 @@
 using System.Net;
-using SFML.Graphics;
-using SFML.System;
 using Touhou.Net;
 using Touhou.Scenes;
 using Touhou.Objects.Generics;
+using Touhou.Graphics;
+using OpenTK.Mathematics;
 
 namespace Touhou.Scenes;
 
@@ -16,20 +16,26 @@ public class ConnectingScene : Scene {
     public ConnectingScene(IPEndPoint endPoint) {
         this.endPoint = endPoint;
 
-        text = new Text("Connecting...", Game.DefaultFont, 14);
+        text = new Text {
+            DisplayedText = "Connecting...",
+            CharacterSize = 40f,
+            Origin = Vector2.UnitY,
+            IsUI = true,
+            Alignment = new Vector2(-1f, 1f),
+        };
     }
 
     public override void OnInitialize() {
         Game.Network.TimeOffset -= Game.Time;
 
-        Game.Window.SetTitle("MnS2 | Client");
-
-        AddEntity(new Receiver((packet, endPoint) => {
+        AddEntity(new ReceiveCallback((packet, endPoint) => {
             if (packet.Type != PacketType.ConnectionResponse) return;
             Game.Scenes.PushScene<ClientSyncingScene>();
         }));
 
-        AddEntity(new Renderer(() => Game.Draw(text, 0)));
+        AddEntity(new RenderCallback(() => {
+            Game.Draw(text, Layers.UI1);
+        }));
 
         TryConnecting(endPoint);
 
