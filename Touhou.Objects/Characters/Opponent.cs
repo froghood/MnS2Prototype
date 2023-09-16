@@ -10,6 +10,17 @@ namespace Touhou.Objects.Characters;
 public abstract class Opponent : Entity, IReceivable {
 
 
+
+    public int HeartCount { get; private set; } = 5;
+    public float BombCount { get; private set; } = 3;
+    public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
+    public IEnumerable<KeyValuePair<PlayerAction, Attack>> Attacks { get => attacks.AsEnumerable(); }
+    public Color4 Color { get; set; } = new Color4(1f, 0f, 0.4f, 1f);
+    private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
+    private Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
+
+
+
     private Vector2 basePosition;
     private Vector2 predictedOffset;
     private Vector2 interpolatedPosition;
@@ -28,36 +39,27 @@ public abstract class Opponent : Entity, IReceivable {
     private bool isDead;
 
 
+
     private Dictionary<PacketType, Action<Packet>> packetDelegates;
 
 
 
-    public Dictionary<PlayerAction, Attack> Attacks { get; } = new();
-
-    private Bomb bomb;
+    private Dictionary<PlayerAction, Attack> attacks = new();
     private Dictionary<Attack, (Time Time, bool Focused)> currentlyHeldAttacks = new();
-
-
-    private bool matchStarted;
-
-    public Color4 Color { get; set; } = new Color4(1f, 0f, 0.4f, 1f);
-
-    private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
-    private Player player;
-
-    private Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
-    private Match match;
-
+    private Bomb bomb;
 
 
     // power
-    public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     private int powerGainedFromGrazing;
     private int powerSpent;
 
 
 
-    public int HeartCount { get; private set; } = 5;
+    private bool matchStarted;
+
+
+    private Player player;
+    private Match match;
 
 
 
@@ -174,7 +176,7 @@ public abstract class Opponent : Entity, IReceivable {
 
     }
 
-    protected void AddAttack(PlayerAction action, Attack attack) => Attacks[action] = attack;
+    protected void AddAttack(PlayerAction action, Attack attack) => attacks[action] = attack;
 
     protected void AddBomb(Bomb bomb) => this.bomb = bomb;
 
@@ -217,7 +219,7 @@ public abstract class Opponent : Entity, IReceivable {
 
     private void AttackReleased(Packet packet) {
         packet.Out(out PlayerAction action, true);
-        if (Attacks.TryGetValue(action, out var attack)) {
+        if (attacks.TryGetValue(action, out var attack)) {
             attack.OpponentReleased(this, packet);
         }
     }
@@ -226,6 +228,7 @@ public abstract class Opponent : Entity, IReceivable {
 
     private void BombPressed(Packet packet) {
         bomb.OpponentPress(this, packet);
+        BombCount--;
     }
 
 

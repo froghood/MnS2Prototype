@@ -18,9 +18,9 @@ public class Match : Entity {
     //private Text text = new();
 
     public List<(Time Time, int Increase)> powerGenerationIncreaseBreakpoints = new() {
-        (Time.InSeconds(0f), 50),
-        (Time.InSeconds(49f), 50),
-        (Time.InSeconds(99f), 50)
+        (Time.InSeconds(0f), 8),
+        (Time.InSeconds(49f), 8),
+        (Time.InSeconds(99f), 16)
     };
 
     public int TotalPowerGenerated {

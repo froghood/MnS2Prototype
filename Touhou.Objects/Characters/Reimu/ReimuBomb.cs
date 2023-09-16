@@ -14,10 +14,16 @@ public class ReimuBomb : Bomb {
 
         for (int i = 0; i < numShots; i++) {
 
-            var projectile = new ReimuBombWave(player.Position, MathF.PI / 2f * i, true, false, cooldownOverflow) {
+            float direction = MathF.PI / 2f * i;
+            float x = MathF.Abs(MathF.Cos(direction));
+            float y = MathF.Abs(MathF.Sin(direction));
+
+            System.Console.WriteLine($"{x}, {y}");
+
+            var projectile = new ReimuBombWave(player.Position * new Vector2(x, y), direction, true, false, cooldownOverflow) {
                 Velocity = 750f,
                 SpawnDelay = Time.InSeconds(0.5f),
-                DestroyedOnScreenExit = false,
+                DestroyedOnScreenExit = true,
                 Color = (i % 2 == 0) ? new Color4(0.5f, 1f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
 
@@ -51,7 +57,7 @@ public class ReimuBomb : Bomb {
                 Velocity = 750f,
                 SpawnDelay = Time.InSeconds(0.5f),
                 InterpolatedOffset = delta.AsSeconds(),
-                DestroyedOnScreenExit = false,
+                DestroyedOnScreenExit = true,
                 Color = (i % 2 == 0) ? new Color4(1f, 0.5f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
 

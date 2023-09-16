@@ -11,7 +11,7 @@ namespace Touhou.Objects {
         public Matrix2 RotationMatrix { get; }
 
         public RectangleHitbox(Entity entity, Vector2 offset, Vector2 size, float rotation, CollisionGroups collisionGroup, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionGroup, collisionCallback) {
-            Size = Size;
+            Size = size;
             Rotation = rotation;
 
             Cos = MathF.Cos(rotation);
@@ -39,7 +39,10 @@ namespace Touhou.Objects {
 
         public override Box2 GetBounds() {
             var boundsSize = new Vector2(Size.X * Cos + Size.Y * Sin, Size.X * Sin + Size.Y * Cos);
-            return new Box2(Offset - boundsSize / 2f, boundsSize);
+
+            //System.Console.WriteLine(boundsSize);
+
+            return new Box2(Position - boundsSize / 2f, Position + boundsSize / 2f);
         }
     }
 }

@@ -8,5 +8,6 @@ public enum CollisionGroups {
     Opponent,
     OpponentProjectileMinor,
     OpponentProjectileMajor,
+    OpponentBomb,
 
 }

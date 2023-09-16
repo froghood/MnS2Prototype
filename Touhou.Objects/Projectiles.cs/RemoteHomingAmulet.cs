@@ -184,7 +184,7 @@ public class RemoteHomingAmulet : Projectile {
         sprite.Rotation = rotation;
         sprite.Color = isHoming ? Color : new Color4(170, 0, 200, 255);
 
-        Game.Draw(sprite, Layers.PlayerProjectiles1);
+        Game.Draw(sprite, Layers.OpponentProjectiles1);
 
         base.Render();
 

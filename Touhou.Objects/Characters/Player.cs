@@ -31,6 +31,9 @@ public abstract class Player : Entity, IReceivable {
 
 
 
+    public IEnumerable<KeyValuePair<PlayerAction, Attack>> Attacks { get => attacks.AsEnumerable(); }
+
+
     // power
     public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     private int powerGainedFromGrazing;
@@ -39,7 +42,7 @@ public abstract class Player : Entity, IReceivable {
     public float SmoothPower => smoothPower;
     private float smoothPower;
 
-    // hearts
+    // heartss
 
     public int HeartCount { get; private set; } = 5;
 
@@ -52,7 +55,7 @@ public abstract class Player : Entity, IReceivable {
     private Match match;
 
 
-    public Dictionary<PlayerAction, Attack> Attacks { get; } = new();
+    private Dictionary<PlayerAction, Attack> attacks = new();
     public (PlayerAction Action, Bomb Bomb) Bomb { get; private set; }
 
     //private Shader cooldownShader;
@@ -148,7 +151,7 @@ public abstract class Player : Entity, IReceivable {
     private void InvokeActionPresses(PlayerAction action) {
 
         // attacks
-        if (Attacks.TryGetValue(action, out var attack)) {
+        if (attacks.TryGetValue(action, out var attack)) {
 
             if (attack.Cooldown <= 0) attack.Cooldown = 0;
             else attack.Cooldown -= Game.Delta;
@@ -212,7 +215,7 @@ public abstract class Player : Entity, IReceivable {
     }
 
     private void InvokeActionHolds(PlayerAction action) {
-        if (Attacks.TryGetValue(action, out var attack)) {
+        if (attacks.TryGetValue(action, out var attack)) {
             if (currentlyHeldAttacks.TryGetValue(attack, out var heldState)) {
 
 
@@ -300,7 +303,7 @@ public abstract class Player : Entity, IReceivable {
 
         }
 
-        foreach (var attack in Attacks.Values) {
+        foreach (var attack in attacks.Values) {
             attack.PlayerRender(this);
         }
     }
@@ -319,7 +322,7 @@ public abstract class Player : Entity, IReceivable {
 
             Game.Network.Send(destroyProjectilePacket);
 
-            //HeartCount--;
+            HeartCount--;
             if (HeartCount <= 0) {
                 Die();
                 return;
@@ -388,7 +391,7 @@ public abstract class Player : Entity, IReceivable {
 
     public void ApplyAttackCooldowns(Time duration, params PlayerAction[] actions) {
         foreach (var action in actions) {
-            if (Attacks.TryGetValue(action, out var attack) && duration > attack.Cooldown) {
+            if (attacks.TryGetValue(action, out var attack) && duration > attack.Cooldown) {
                 attack.CooldownDuration = duration;
                 attack.Cooldown = duration;
             }
@@ -398,13 +401,13 @@ public abstract class Player : Entity, IReceivable {
 
     public void DisableAttacks(params PlayerAction[] actions) {
         foreach (var action in actions) {
-            if (Attacks.TryGetValue(action, out var attack)) attack.Disable();
+            if (attacks.TryGetValue(action, out var attack)) attack.Disable();
         }
     }
 
     public void EnableAttacks(params PlayerAction[] actions) {
         foreach (var action in actions) {
-            if (Attacks.TryGetValue(action, out var attack)) attack.Enable();
+            if (attacks.TryGetValue(action, out var attack)) attack.Enable();
         }
     }
 
@@ -475,7 +478,7 @@ public abstract class Player : Entity, IReceivable {
         }
     }
 
-    protected void AddAttack(PlayerAction action, Attack attack) => Attacks[action] = attack;
+    protected void AddAttack(PlayerAction action, Attack attack) => attacks[action] = attack;
     protected void AddBomb(PlayerAction action, Bomb bomb) => Bomb = (action, bomb);
 
 }

@@ -26,6 +26,9 @@ public class RemoteTargetingAmuletGroup : Projectile {
             var timeOverflow = lifeTime - targetTime;
 
             foreach (var targetingAmulet in targetingAmulets) {
+
+                if (targetingAmulet.IsDestroyed) return;
+
                 targetingAmulet.LocalTarget(player.Position, timeOverflow);
             }
 

@@ -71,7 +71,7 @@ public class MatchUI : Entity {
             var fillColor = Player.Power < attack.Cost ? new Color4(230, 180, 190, 255) : (attack.Disabled | attack.Cooldown.AsSeconds() > 0f ? Color4.Gray : Color4.White);
 
             var rectangle = new Rectangle {
-                Origin = new Vector2((0.5f - 1.15f * i) + 1.15f * (Player.Attacks.Count - 1) / 2f, -0.30f),
+                Origin = new Vector2((0.5f - 1.15f * i) + 1.15f * (Player.Attacks.Count() - 1) / 2f, -0.30f),
                 Size = new Vector2(120f, 120f),
                 StrokeColor = Color4.Black,
                 StrokeWidth = 1f,

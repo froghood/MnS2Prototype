@@ -152,7 +152,7 @@ public class LocalHomingAmulet : Projectile {
         sprite.Rotation = rotation;
         sprite.Color = Color;
 
-        Game.Draw(sprite, Layers.OpponentProjectiles1);
+        Game.Draw(sprite, Layers.PlayerProjectiles1);
 
         base.Render();
 

@@ -7,8 +7,8 @@ public class Rectangle : Renderable {
 
     public Vector2 Size { get; set; }
 
-    public Color4 FillColor { get; set; }
-    public Color4 StrokeColor { get; set; }
+    public Color4 FillColor { get; set; } = Color4.White;
+    public Color4 StrokeColor { get; set; } = Color4.Black;
     public float StrokeWidth { get; set; }
 
     private static VertexArray vertexArray;

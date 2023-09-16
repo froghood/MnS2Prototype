@@ -44,6 +44,10 @@ public abstract class Scene {
             CollisionGroups.Default,
             CollisionGroups.Player,
         }},
+
+        {CollisionGroups.OpponentBomb, new() {
+            CollisionGroups.Default,
+        }},
     };
 
 
@@ -53,6 +57,7 @@ public abstract class Scene {
 
         };
         entities.Add(entity);
+        entity.Init();
 
     }
 

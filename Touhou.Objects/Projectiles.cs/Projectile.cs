@@ -45,8 +45,8 @@ public abstract class Projectile : Entity, IReceivable {
         if (DestroyedOnScreenExit && Game.Time >= SpawnTime + Time.InSeconds(1f)) {
             foreach (var hitbox in Hitboxes) {
                 var bounds = hitbox.GetBounds();
-                if (!(bounds.Min.X >= Match.Bounds.X || bounds.Max.X <= -Match.Bounds.X ||
-                      bounds.Min.Y >= Match.Bounds.Y || bounds.Max.Y <= -Match.Bounds.Y)) {
+                if ((bounds.Min.X < Match.Bounds.X && bounds.Max.X > -Match.Bounds.X) &&
+                    (bounds.Min.Y < Match.Bounds.Y && bounds.Max.Y > -Match.Bounds.Y)) {
                     return;
                 }
             }
