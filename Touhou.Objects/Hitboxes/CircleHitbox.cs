@@ -27,9 +27,9 @@ namespace Touhou.Objects {
             var circleOffset = Position - other.Position;
             circleOffset *= Matrix2.Invert(other.RotationMatrix);
             var edge = other.Size / 2f;
-            var distX = MathF.Max(0f, circleOffset.X - edge.X) + MathF.Min(0f, circleOffset.X + edge.X);
-            var distY = MathF.Max(0f, circleOffset.Y - edge.Y) + MathF.Min(0f, circleOffset.Y + edge.Y);
-            var dist = distX * distX + distY * distY;
+            var xDist = MathF.Max(0f, circleOffset.X - edge.X) + MathF.Min(0f, circleOffset.X + edge.X);
+            var yDist = MathF.Max(0f, circleOffset.Y - edge.Y) + MathF.Min(0f, circleOffset.Y + edge.Y);
+            var dist = xDist * xDist + yDist * yDist;
             return dist < Radius * Radius;
         }
 

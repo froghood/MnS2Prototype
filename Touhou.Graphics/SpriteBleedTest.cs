@@ -21,9 +21,9 @@ public class SpriteBleedTest : Renderable {
     public override void Render() {
 
         var textureSize = new Vector2(400f, 400f);
-        var textureUV = new Box2(new Vector2(100f, 200f) / textureSize, new Vector2(200f, 300f) / textureSize);
+        var textureUV = new Box2(new Vector2(0f, 0f) / textureSize, new Vector2(400f, 400f) / textureSize);
 
-        var spriteSize = new Vector2(100f, 100f);
+        var spriteSize = new Vector2(400f, 400f);
 
         var origin = spriteSize * Origin;
         var rotationMatrix = Matrix2.CreateRotation(Rotation);
@@ -33,9 +33,14 @@ public class SpriteBleedTest : Renderable {
         var t = Game.Time.AsSeconds() / 10f;
 
         var modelMatrix = Matrix4.Identity;
-        modelMatrix *= Matrix4.CreateScale(Scale.X + MathF.Sin(t) * 2.5f, Scale.Y + MathF.Cos(t) * 2.5f, 0f);
-        modelMatrix *= Matrix4.CreateRotationZ(-t);
-        modelMatrix *= Matrix4.CreateTranslation(MathF.Cos(t) * 300f, MathF.Sin(t) * 300f, 0f);
+
+        modelMatrix *= Matrix4.CreateScale(Scale.X, Scale.Y, 0f);
+        modelMatrix *= Matrix4.CreateRotationZ(Rotation);
+        modelMatrix *= Matrix4.CreateTranslation(Position.X, Position.Y, 0f);
+
+        // modelMatrix *= Matrix4.CreateScale(Scale.X + MathF.Sin(t) * 2.5f, Scale.Y + MathF.Cos(t) * 2.5f, 0f);
+        // modelMatrix *= Matrix4.CreateRotationZ(-t);
+        // modelMatrix *= Matrix4.CreateTranslation(MathF.Cos(t) * 300f, MathF.Sin(t) * 300f, 0f);
 
         var projectionMatrix = Matrix4.CreateOrthographicOffCenter(
             Game.WindowSize.X * -cameraScale / 2f,
@@ -90,7 +95,7 @@ public class SpriteBleedTest : Renderable {
         Game.Renderer.ShaderLibrary.Uniform("inColor", Color4.White);
         Game.Renderer.ShaderLibrary.Uniform("useColorSwapping", false);
 
-        Game.Renderer.TextureLibrary.UseTexture("spritebleedtest", TextureUnit.Texture0);
+        Game.Renderer.TextureLibrary.UseTexture("blendtest", TextureUnit.Texture0);
 
         GL.DrawElements(PrimitiveType.Triangles, vertexArray.IndexCount, DrawElementsType.UnsignedInt, 0);
 

@@ -62,11 +62,20 @@ public class OpenGLTestScene : Scene {
     public override void OnInitialize() {
         AddEntity(new Touhou.Objects.Generics.RenderCallback(() => {
 
-            var sprite = new SpriteBleedTest() {
+            var bg = new Sprite("starrynight") {
                 Origin = new Vector2(0.5f),
-                Position = new Vector2(100f * Game.Time.AsSeconds()),
-                Scale = new Vector2(3f),
+                Scale = new Vector2(6f),
                 IsUI = true,
+            };
+
+            Game.Draw(bg, Layers.Background1);
+
+            var sprite = new Sprite("blendtest") {
+                Origin = new Vector2(0.5f),
+                //Position = new Vector2(100f * Game.Time.AsSeconds()),
+                Scale = new Vector2(6f),
+                IsUI = true,
+                BlendMode = BlendMode.Additive,
             };
 
             Game.Draw(sprite, Layers.Background1);

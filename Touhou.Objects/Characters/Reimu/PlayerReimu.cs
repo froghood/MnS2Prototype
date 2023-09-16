@@ -11,7 +11,7 @@ public class PlayerReimu : Player {
 
         AddAttack(PlayerAction.Primary, new ReimuPrimary());
         AddAttack(PlayerAction.Secondary, new ReimuSecondary());
-        AddAttack(PlayerAction.SpellA, new YukariSpellA());
+        AddAttack(PlayerAction.SpellA, new ReimuSpellA());
         AddAttack(PlayerAction.SpellB, new ReimuSpellB());
 
         AddBomb(PlayerAction.Bomb, new ReimuBomb());

@@ -18,21 +18,45 @@ public class ReimuBomb : Bomb {
                 Velocity = 750f,
                 SpawnDelay = Time.InSeconds(0.5f),
                 DestroyedOnScreenExit = false,
-                Color = (i % 2 == 0) ? new Color4(0.5f, 0.5f, 1f, 1f) : new Color4(1f, 0.5f, 0.5f, 1f),
+                Color = (i % 2 == 0) ? new Color4(0.5f, 1f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
 
             player.Scene.AddEntity(projectile);
 
-            Cooldown = Time.InSeconds(1f) - cooldownOverflow;
-            player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerAction.Primary);
-            player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerAction.Secondary);
-            player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerAction.SpellA);
-            player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerAction.SpellB);
         }
+
+        Cooldown = Time.InSeconds(1f) - cooldownOverflow;
+        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerAction.Primary);
+        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerAction.Secondary);
+        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerAction.SpellA);
+        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerAction.SpellB);
+
+        var packet = new Packet(PacketType.BombPressed)
+        .In(Game.Network.Time - cooldownOverflow)
+        .In(player.Position);
+
+        Game.Network.Send(packet);
 
     }
     public override void OpponentPress(Opponent opponent, Packet packet) {
-        throw new NotImplementedException();
+
+        packet.Out(out Time theirTime).Out(out Vector2 position);
+        Time delta = Game.Network.Time - theirTime;
+
+        System.Console.WriteLine(delta.AsSeconds());
+
+        for (int i = 0; i < numShots; i++) {
+
+            var projectile = new ReimuBombWave(opponent.Position, MathF.PI / 2f * i, false, true) {
+                Velocity = 750f,
+                SpawnDelay = Time.InSeconds(0.5f),
+                InterpolatedOffset = delta.AsSeconds(),
+                DestroyedOnScreenExit = false,
+                Color = (i % 2 == 0) ? new Color4(1f, 0.5f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
+            };
+
+            opponent.Scene.AddEntity(projectile);
+        }
     }
 
 

@@ -48,7 +48,7 @@ public class RemoteHomingAmulet : Projectile {
 
         // circle = new CircleShape();
 
-        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), hitboxRadius, CollisionGroups.OpponentProjectile));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), hitboxRadius, CollisionGroups.OpponentProjectileMinor));
 
         sprite = new Sprite("spinningamulet") {
             Origin = new Vector2(0.5f, 0.5f),

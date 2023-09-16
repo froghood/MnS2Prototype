@@ -33,6 +33,8 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     public Dictionary<PlayerAction, Attack> Attacks { get; } = new();
+
+    private Bomb bomb;
     private Dictionary<Attack, (Time Time, bool Focused)> currentlyHeldAttacks = new();
 
 
@@ -71,6 +73,7 @@ public abstract class Opponent : Entity, IReceivable {
             {PacketType.VelocityChanged, VelocityChanged},
             {PacketType.AttackPressed, AttackPressed},
             {PacketType.AttackReleased, AttackReleased},
+            {PacketType.BombPressed, BombPressed},
             {PacketType.SpentPower, SpentPower},
             {PacketType.Grazed, Grazed},
             {PacketType.Hit, Hit},
@@ -173,6 +176,8 @@ public abstract class Opponent : Entity, IReceivable {
 
     protected void AddAttack(PlayerAction action, Attack attack) => Attacks[action] = attack;
 
+    protected void AddBomb(Bomb bomb) => this.bomb = bomb;
+
     protected void SpendPower(int amount) => powerSpent += amount;
 
 
@@ -215,6 +220,12 @@ public abstract class Opponent : Entity, IReceivable {
         if (Attacks.TryGetValue(action, out var attack)) {
             attack.OpponentReleased(this, packet);
         }
+    }
+
+
+
+    private void BombPressed(Packet packet) {
+        bomb.OpponentPress(this, packet);
     }
 
 

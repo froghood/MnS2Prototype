@@ -17,7 +17,7 @@ public class Texture {
         using (var stream = File.OpenRead(imagePath)) {
             var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 
-            // pre-multiply
+            //pre-multiply
             if (preMultiply) {
                 for (int i = 0; i < image.Data.Length; i += 4) {
 
@@ -32,7 +32,7 @@ public class Texture {
             }
 
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            //GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);

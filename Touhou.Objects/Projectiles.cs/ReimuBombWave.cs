@@ -20,12 +20,16 @@ public class ReimuBombWave : ParametricProjectile {
 
     public override void Render() {
 
+        var alpha = MathF.Min(SpawnDelay.AsSeconds(), CurrentTime) / SpawnDelay.AsSeconds() * Color.A;
+        //System.Console.WriteLine(alpha);
+
+
         var sprite = new Sprite("reimubombwave") {
             Origin = new Vector2(0f, 0.5f),
             Position = Position,
             Rotation = Direction,
-            Scale = new Vector2(1f, 100f) * 0.30f,
-            Color = new Color4(Color.R, Color.G, Color.B, MathF.Min(SpawnDelay.AsSeconds(), CurrentTime) / SpawnDelay.AsSeconds() * Color.A),
+            Scale = new Vector2(1f, 20f) * 0.7f,
+            Color = new Color4(Color.R, Color.G, Color.B, alpha),
             UseColorSwapping = false,
             BlendMode = BlendMode.Additive,
         };
