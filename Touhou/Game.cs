@@ -50,6 +50,8 @@ internal static class Game {
     public static Time Time { get; private set; }
     public static Time Delta { get; private set; }
 
+    public static int FrameCount { get; private set; } = 0;
+
     public static string FrameTimes { get => string.Join(", ", frameTimes); }
     public static float FPS { get => 1 / (frameTimes.Sum() / frameTimes.Count); }
 
@@ -172,6 +174,8 @@ internal static class Game {
             previousTime = Time;
 
             while (commandBuffer.Count > 0) commandBuffer.Dequeue().Invoke();
+
+            FrameCount++;
         }
     }
 
@@ -184,6 +188,8 @@ internal static class Game {
 
         network.Update();
         sceneManager.Current.Update();
+
+        network.Flush();
     }
 
     private static void Render() {
@@ -210,5 +216,9 @@ internal static class Game {
 
     public static void Command(Action action) {
         commandBuffer.Enqueue(action);
+    }
+
+    public static void Log(string name, string message) {
+        File.AppendAllLines($"./log-{name}.txt", new[] { message });
     }
 }

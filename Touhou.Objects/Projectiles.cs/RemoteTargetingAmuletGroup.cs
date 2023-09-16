@@ -27,7 +27,7 @@ public class RemoteTargetingAmuletGroup : Projectile {
 
             foreach (var targetingAmulet in targetingAmulets) {
 
-                if (targetingAmulet.IsDestroyed) return;
+                if (targetingAmulet.IsDestroyed) continue;
 
                 targetingAmulet.LocalTarget(player.Position, timeOverflow);
             }

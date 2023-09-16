@@ -29,7 +29,8 @@ public abstract class Projectile : Entity, IReceivable {
     protected Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
     private Match match;
 
-
+    private static int lastLocalFrame = 0;
+    private static int lastRemoteFrame = 0;
 
     public Projectile(bool isPlayerOwned, bool isRemote, Time spawnTimeOffset = default(Time)) {
         IsPlayerOwned = isPlayerOwned;
@@ -37,6 +38,17 @@ public abstract class Projectile : Entity, IReceivable {
         SpawnTime = Game.Time - spawnTimeOffset;
 
         Id = IsRemote ? totalRemoteProjectiles++ : totalLocalProjectiles++;
+
+        // if (isRemote) {
+        //     if (lastRemoteFrame != Game.FrameCount) Game.Log("remoteprojectiles", "");
+        //     Game.Log("remoteprojectiles", $"{Id ^ 0x80000000}: {this.GetType().Name}");
+        //     lastRemoteFrame = Game.FrameCount;
+        // } else {
+        //     if (lastLocalFrame != Game.FrameCount) Game.Log("localprojectiles", "");
+        //     Game.Log("localprojectiles", $"{Id}: {this.GetType().Name}");
+        //     lastLocalFrame = Game.FrameCount;
+        // }
+
     }
 
 

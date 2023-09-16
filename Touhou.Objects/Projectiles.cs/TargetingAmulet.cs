@@ -68,7 +68,7 @@ public class TargetingAmulet : ParametricProjectile {
         Destroy();
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
-        var projectile = new Amulet(Position, angle, false, false, timeOverflow) {
+        var projectile = new SpellAmulet(Position, angle, false, false, timeOverflow) {
             GrazeAmount = 1,
             Color = Color,
             StartingVelocity = 500f,
@@ -87,7 +87,7 @@ public class TargetingAmulet : ParametricProjectile {
         var delta = Game.Network.Time - theirTime;
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
-        var projectile = new Amulet(Position, angle, true, true) {
+        var projectile = new SpellAmulet(Position, angle, true, true) {
             InterpolatedOffset = delta.AsSeconds(),
             CanCollide = false,
             Color = Color,

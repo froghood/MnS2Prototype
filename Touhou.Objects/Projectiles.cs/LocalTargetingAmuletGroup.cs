@@ -32,6 +32,9 @@ public class LocalTargetingAmuletGroup : Projectile {
         packet.Out(out Time theirTime).Out(out Vector2 theirPosition);
 
         foreach (var targetingAmulet in targetingAmulets) {
+
+            if (targetingAmulet.IsDestroyed) continue;
+
             targetingAmulet.RemoteTarget(theirTime, theirPosition);
         }
     }

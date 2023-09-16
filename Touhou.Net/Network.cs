@@ -58,6 +58,10 @@ public class Network {
     private FixedQueue<Time> latencySamples = new(1000);
 
 
+
+    private bool forceFlush;
+
+
     public void Host(int port) {
         if (udpClient.Client.IsBound) return;
         udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
@@ -101,7 +105,8 @@ public class Network {
         if (!Connected) return;
         packetOutgoingQueue.Enqueue(packet);
         totalPacketsSent++;
-        SendInternal();
+        forceFlush = true;
+        //SendInternal();
     }
 
     public void Update() {
@@ -111,6 +116,8 @@ public class Network {
         }
 
         while (udpClient.Available > 0) {
+
+
 
             lastReceivedTime = Game.Time;
 
@@ -126,6 +133,7 @@ public class Network {
 
 
             dataUsage = CalculateDataUsage(data.Length);
+            System.Console.WriteLine($"data received: {data.Length} byte(s)");
 
             // _______[ data format ]_______
             // their time              [offset: 0,  size: 8]
@@ -209,7 +217,7 @@ public class Network {
 
         }
 
-        if (Connected && Game.Time - lastSentTime >= sendRetryInterval) SendInternal();
+        //if (Connected && Game.Time - lastSentTime >= sendRetryInterval) SendInternal();
     }
 
     private void SampleLatency(Time theirTime, Time theirPerceivedLatency) {
@@ -345,5 +353,17 @@ public class Network {
 
     public void ResetPing() {
         correctionSamples.Clear();
+    }
+
+    public void Flush() {
+
+        if (forceFlush) {
+            SendInternal();
+            forceFlush = false;
+        } else {
+            if (Connected && Game.Time - lastSentTime >= sendRetryInterval) SendInternal();
+        }
+
+
     }
 }

@@ -56,7 +56,7 @@ public class ReimuBomb : Bomb {
             var projectile = new ReimuBombWave(opponent.Position, MathF.PI / 2f * i, false, true) {
                 Velocity = 750f,
                 SpawnDelay = Time.InSeconds(0.5f),
-                InterpolatedOffset = delta.AsSeconds(),
+                //InterpolatedOffset = delta.AsSeconds(),
                 DestroyedOnScreenExit = true,
                 Color = (i % 2 == 0) ? new Color4(1f, 0.5f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };

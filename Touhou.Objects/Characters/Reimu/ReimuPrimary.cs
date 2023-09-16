@@ -72,6 +72,8 @@ public class ReimuPrimary : Attack {
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
         float angle = player.AngleToOpponent + aimOffset;
 
+        //Game.Log("localprojectiles", $"@{(Game.Network.Time - cooldownOverflow).AsSeconds()}: {this.GetType().Name}");
+
         if (focused) {
             for (int index = 0; index < numShots; index++) {
                 var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
@@ -125,6 +127,8 @@ public class ReimuPrimary : Attack {
 
         packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle).Out(out bool focused);
         Time delta = Game.Network.Time - theirTime;
+
+        //Game.Log("localprojectiles", $"@{(theirTime).AsSeconds()}: {this.GetType().Name}");
 
         if (focused) {
             for (int index = 0; index < numShots; index++) {
