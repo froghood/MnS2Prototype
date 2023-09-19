@@ -40,11 +40,11 @@ public class ReimuSpellA : Attack {
             player.Scene.AddEntity(projectile);
         }
 
-        player.ApplyAttackCooldowns(Time.InSeconds(1f), PlayerAction.SpellA);
-        player.ApplyAttackCooldowns(Time.InSeconds(0.25f), PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(Time.InSeconds(1f), PlayerActions.SpellA);
+        player.ApplyAttackCooldowns(Time.InSeconds(0.25f), PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
 
         var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerAction.SpellA)
+        .In(PlayerActions.SpellA)
         .In(Game.Network.Time - cooldownOverflow)
         .In(player.Position)
         .In(angle);

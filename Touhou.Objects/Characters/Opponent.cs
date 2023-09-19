@@ -14,7 +14,7 @@ public abstract class Opponent : Entity, IReceivable {
     public int HeartCount { get; private set; } = 5;
     public float BombCount { get; private set; } = 3;
     public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
-    public IEnumerable<KeyValuePair<PlayerAction, Attack>> Attacks { get => attacks.AsEnumerable(); }
+    public IEnumerable<KeyValuePair<PlayerActions, Attack>> Attacks { get => attacks.AsEnumerable(); }
     public Color4 Color { get; set; } = new Color4(1f, 0f, 0.4f, 1f);
     private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
     private Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
@@ -44,7 +44,7 @@ public abstract class Opponent : Entity, IReceivable {
 
 
 
-    private Dictionary<PlayerAction, Attack> attacks = new();
+    private Dictionary<PlayerActions, Attack> attacks = new();
     private Dictionary<Attack, (Time Time, bool Focused)> currentlyHeldAttacks = new();
     private Bomb bomb;
 
@@ -85,7 +85,7 @@ public abstract class Opponent : Entity, IReceivable {
         characterSprite = new Sprite("reimu") {
             Origin = new Vector2(0.4f, 0.3f),
             Color = Color,
-            UseColorSwapping = true,
+            UseColorSwapping = false,
 
         };
     }
@@ -176,7 +176,7 @@ public abstract class Opponent : Entity, IReceivable {
 
     }
 
-    protected void AddAttack(PlayerAction action, Attack attack) => attacks[action] = attack;
+    protected void AddAttack(PlayerActions action, Attack attack) => attacks[action] = attack;
 
     protected void AddBomb(Bomb bomb) => this.bomb = bomb;
 
@@ -218,7 +218,7 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     private void AttackReleased(Packet packet) {
-        packet.Out(out PlayerAction action, true);
+        packet.Out(out PlayerActions action, true);
         if (attacks.TryGetValue(action, out var attack)) {
             attack.OpponentReleased(this, packet);
         }

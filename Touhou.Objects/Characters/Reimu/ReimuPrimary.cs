@@ -43,7 +43,7 @@ public class ReimuPrimary : Attack {
     }
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks(PlayerAction.Secondary, PlayerAction.SpellA, PlayerAction.SpellB);
+        player.DisableAttacks(PlayerActions.Secondary, PlayerActions.SpellA, PlayerActions.SpellB);
     }
 
     public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
@@ -102,19 +102,19 @@ public class ReimuPrimary : Attack {
             }
         }
 
-        player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
-        player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerAction.Secondary);
-        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerAction.SpellA);
-        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
+        player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerActions.Secondary);
+        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerActions.SpellA);
+        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerActions.SpellB);
 
-        player.EnableAttacks(PlayerAction.Secondary, PlayerAction.SpellA, PlayerAction.SpellB);
+        player.EnableAttacks(PlayerActions.Secondary, PlayerActions.SpellA, PlayerActions.SpellB);
 
         attackHold = false;
         aimOffset = 0f;
         normalizedAimOffset = 0f;
 
         var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerAction.Primary)
+        .In(PlayerActions.Primary)
         .In(Game.Network.Time - cooldownOverflow)
         .In(player.Position)
         .In(angle)
@@ -166,12 +166,12 @@ public class ReimuPrimary : Attack {
 
         float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
 
-        var aimArrowSprite = new Sprite("aimarrow") {
+        var aimArrowSprite = new Sprite("aimarrow2") {
             Origin = new Vector2(0.0625f, 0.5f),
             Position = player.Position,
             Rotation = player.AngleToOpponent + aimOffset,
-            Scale = new Vector2(0.5f, 0.25f),
-            Color = new Color4(1f, darkness, darkness, 1f),
+            Scale = new Vector2(0.3f),
+            Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
         Game.Draw(aimArrowSprite, Layers.Player);

@@ -131,8 +131,8 @@ internal static class Game {
         network.PacketReceived += (packet, endPoint) => sceneManager.Current.Receive(packet, endPoint);
 
         // renderer.ClearColor = new Color4(0.1f, 0.1f, 0.16f, 1f);
-        //renderer.ClearColor = new Color4(.1f, .1f, .16f, 1f);
-        renderer.ClearColor = new Color4(0f, 0f, 0f, 1f);
+        renderer.ClearColor = new Color4(.1f, .1f, .16f, 1f);
+        //renderer.ClearColor = new Color4(0f, 0f, 0f, 1f);
         //renderer.ClearColor = new Color4(1f, 1f, 1f, 1f);
 
         //Debug.Fields.Add("step");
@@ -184,7 +184,7 @@ internal static class Game {
     private static void Update() {
         //NativeWindow.ProcessWindowEvents(false);
 
-        inputManager.NewUpdate(window);
+        inputManager.Process(window);
 
         network.Update();
         sceneManager.Current.Update();
@@ -206,8 +206,8 @@ internal static class Game {
         sceneManager.Current.PostRender();
     }
 
-    public static bool IsActionPressed(PlayerAction action) {
-        return inputManager.NewGetActionState(window, action);
+    public static bool IsActionPressed(PlayerActions action) {
+        return inputManager.IsActionPressed(window, action);
     }
 
 

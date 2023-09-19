@@ -15,7 +15,7 @@ public class MainScene : Scene {
         //text = new Text($"Press {PlayerAction.Primary} to host, {PlayerAction.Secondary} to connect", Game.DefaultFont, 14);
 
         text = new Text {
-            DisplayedText = $"Press {PlayerAction.Primary} to host, {PlayerAction.Secondary} to connect",
+            DisplayedText = $"Press {PlayerActions.Primary} to host, {PlayerActions.Secondary} to connect",
             Font = "consolas",
             CharacterSize = 40f,
             Origin = Vector2.UnitY * 1f,
@@ -31,11 +31,11 @@ public class MainScene : Scene {
         //Game.Renderer.ClearColor4 = new Color44(1f, 1f, 1f, 1f);
 
         AddEntity(new Controller((action) => {
-            if (action == PlayerAction.Primary) {
+            if (action == PlayerActions.Primary) {
                 Game.Scenes.PushScene<HostingScene>(Game.Settings.Port);
             }
 
-            if (action == PlayerAction.Secondary) {
+            if (action == PlayerActions.Secondary) {
                 Game.Scenes.PushScene<ConnectingScene>(new IPEndPoint(IPAddress.Parse(Game.Settings.Address), Game.Settings.Port));
             }
         }, (_) => { }));

@@ -18,7 +18,7 @@ public abstract class Player : Entity, IReceivable {
     public Vector2 Velocity { get; private set; }
 
 
-    public bool Focused { get => Game.IsActionPressed(PlayerAction.Focus); }
+    public bool Focused { get => Game.IsActionPressed(PlayerActions.Focus); }
 
     public bool CanMove { get; private set; } = true;
 
@@ -31,7 +31,7 @@ public abstract class Player : Entity, IReceivable {
 
 
 
-    public IEnumerable<KeyValuePair<PlayerAction, Attack>> Attacks { get => attacks.AsEnumerable(); }
+    public IEnumerable<KeyValuePair<PlayerActions, Attack>> Attacks { get => attacks.AsEnumerable(); }
 
 
     // power
@@ -55,8 +55,8 @@ public abstract class Player : Entity, IReceivable {
     private Match match;
 
 
-    private Dictionary<PlayerAction, Attack> attacks = new();
-    public (PlayerAction Action, Bomb Bomb) Bomb { get; private set; }
+    private Dictionary<PlayerActions, Attack> attacks = new();
+    public (PlayerActions Action, Bomb Bomb) Bomb { get; private set; }
 
     //private Shader cooldownShader;
 
@@ -105,7 +105,7 @@ public abstract class Player : Entity, IReceivable {
         characterSprite = new Sprite("reimu") {
             Origin = new Vector2(0.4f, 0.3f),
             Color = Color,
-            UseColorSwapping = true,
+            UseColorSwapping = false,
 
         };
 
@@ -148,7 +148,7 @@ public abstract class Player : Entity, IReceivable {
         foreach (var action in order) InvokeActionHolds(action);
     }
 
-    private void InvokeActionPresses(PlayerAction action) {
+    private void InvokeActionPresses(PlayerActions action) {
 
         // attacks
         if (attacks.TryGetValue(action, out var attack)) {
@@ -164,7 +164,7 @@ public abstract class Player : Entity, IReceivable {
             if (Game.Input.IsActionPressBuffered(action, out _, out var state)) {
                 Game.Input.ConsumePressBuffer(action);
 
-                bool focused = state[PlayerAction.Focus];
+                bool focused = state.HasFlag(PlayerActions.Focus);
                 System.Console.WriteLine(focused);
 
                 attack.PlayerPress(this, cooldownOverflow, focused);
@@ -177,7 +177,7 @@ public abstract class Player : Entity, IReceivable {
 
             // when attack is held but not necessarily buffered
             else if (attack.Holdable && Game.IsActionPressed(action) && !currentlyHeldAttacks.ContainsKey(attack)) {
-                bool focused = Game.IsActionPressed(PlayerAction.Focus);
+                bool focused = Game.IsActionPressed(PlayerActions.Focus);
 
                 attack.PlayerPress(this, cooldownOverflow, focused);
                 currentlyHeldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
@@ -205,7 +205,7 @@ public abstract class Player : Entity, IReceivable {
                 Game.Input.ConsumePressBuffer(action);
 
                 Time cooldownOverflow = Math.Abs(bomb.Cooldown);
-                bool focused = state[PlayerAction.Focus];
+                bool focused = state.HasFlag(PlayerActions.Focus);
 
                 bomb.PlayerPress(this, cooldownOverflow, focused);
 
@@ -214,7 +214,7 @@ public abstract class Player : Entity, IReceivable {
         }
     }
 
-    private void InvokeActionHolds(PlayerAction action) {
+    private void InvokeActionHolds(PlayerActions action) {
         if (attacks.TryGetValue(action, out var attack)) {
             if (currentlyHeldAttacks.TryGetValue(attack, out var heldState)) {
 
@@ -235,8 +235,8 @@ public abstract class Player : Entity, IReceivable {
 
     private void UpdateMovement() {
         var movementVector = new Vector2(
-            (Game.IsActionPressed(PlayerAction.Right) ? 1f : 0f) - (Game.IsActionPressed(PlayerAction.Left) ? 1f : 0f),
-            (Game.IsActionPressed(PlayerAction.Up) ? 1f : 0f) - (Game.IsActionPressed(PlayerAction.Down) ? 1f : 0f)
+            (Game.IsActionPressed(PlayerActions.Right) ? 1f : 0f) - (Game.IsActionPressed(PlayerActions.Left) ? 1f : 0f),
+            (Game.IsActionPressed(PlayerActions.Up) ? 1f : 0f) - (Game.IsActionPressed(PlayerActions.Down) ? 1f : 0f)
         );
 
         float movementAngle = MathF.Atan2(movementVector.Y, movementVector.X);
@@ -389,7 +389,7 @@ public abstract class Player : Entity, IReceivable {
         InvulnerabilityDuration = duration;
     }
 
-    public void ApplyAttackCooldowns(Time duration, params PlayerAction[] actions) {
+    public void ApplyAttackCooldowns(Time duration, params PlayerActions[] actions) {
         foreach (var action in actions) {
             if (attacks.TryGetValue(action, out var attack) && duration > attack.Cooldown) {
                 attack.CooldownDuration = duration;
@@ -399,13 +399,13 @@ public abstract class Player : Entity, IReceivable {
 
     }
 
-    public void DisableAttacks(params PlayerAction[] actions) {
+    public void DisableAttacks(params PlayerActions[] actions) {
         foreach (var action in actions) {
             if (attacks.TryGetValue(action, out var attack)) attack.Disable();
         }
     }
 
-    public void EnableAttacks(params PlayerAction[] actions) {
+    public void EnableAttacks(params PlayerActions[] actions) {
         foreach (var action in actions) {
             if (attacks.TryGetValue(action, out var attack)) attack.Enable();
         }
@@ -478,7 +478,7 @@ public abstract class Player : Entity, IReceivable {
         }
     }
 
-    protected void AddAttack(PlayerAction action, Attack attack) => attacks[action] = attack;
-    protected void AddBomb(PlayerAction action, Bomb bomb) => Bomb = (action, bomb);
+    protected void AddAttack(PlayerActions action, Attack attack) => attacks[action] = attack;
+    protected void AddBomb(PlayerActions action, Bomb bomb) => Bomb = (action, bomb);
 
 }

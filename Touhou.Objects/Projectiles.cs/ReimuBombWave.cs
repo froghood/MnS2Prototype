@@ -15,6 +15,7 @@ public class ReimuBombWave : ParametricProjectile {
 
         Hitboxes.Add(new RectangleHitbox(this, Vector2.Zero, new Vector2(250f, width), Direction, IsPlayerOwned ? CollisionGroups.PlayerBomb : CollisionGroups.OpponentBomb, Hit));
 
+        base.Init();
     }
 
     protected override float FuncX(float t) {

@@ -10,18 +10,20 @@ public class YinYang : ParametricProjectile {
     public float Velocity { get; init; }
 
     private float radius;
+    private float visualRadius;
 
     private readonly Sprite sprite;
 
     public YinYang(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float radius, Time spawnTimeOffset = default(Time)) : base(origin, direction, isPlayerOwned, isRemote, spawnTimeOffset) {
 
         this.radius = radius;
+        this.visualRadius = radius + 8f;
 
         Hitboxes.Add(new CircleHitbox(this, -new Vector2(0f, 0f), this.radius, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMajor));
 
         sprite = new Sprite("yinyang") {
             Origin = new Vector2(0.5f),
-            Scale = new Vector2(0.25f, 0.25f) * radius / 60f,
+            Scale = Vector2.One * visualRadius / 250f,
             UseColorSwapping = true,
         };
     }
@@ -29,30 +31,20 @@ public class YinYang : ParametricProjectile {
     public override void Render() {
 
         sprite.Position = Position;
-        sprite.Rotation = CurrentTime * Velocity / radius;
-        sprite.Scale = new Vector2(0.25f, 0.25f) * radius / 60f;
+        sprite.Rotation = Velocity * CurrentTime / visualRadius;
         sprite.Color = Color;
 
         Game.Draw(sprite, IsPlayerOwned ? Layers.PlayerProjectiles1 : Layers.OpponentProjectiles1);
 
-        // circle.Radius = radius + 5f;
-        // circle.Origin = new Vector2(circle.Radius, circle.Radius);
-        // circle.FillColor4 = Color;
-        // circle.Position = Position;
-
-        // var state = new SpriteStates() {
-        //     Origin = new Vector2(0.5f, 0.5f),
+        // Game.Draw(new Circle {
+        //     Origin = new Vector2(0.5f),
         //     Position = Position,
-        //     Rotation = CurrentTime * Velocity / (MathF.Tau * radius) * -360f,
-        //     Scale = new Vector2(0.25f, 0.25f) * radius / 60f
-        // };
+        //     Radius = radius,
+        //     StrokeWidth = 1f,
+        //     StrokeColor = new Color4(0f, 0f, 1f, 1f),
+        //     FillColor = Color4.Transparent,
 
-        // var shader = new TShader("projectileColor4");
-        // shader.SetUniform("Color4", Color);
-
-        //Game.DrawSprite("yinyang", state, shader, Layers.BackgroundProjectiles1);
-
-        //Game.Draw(circle, 0);
+        // }, Layers.Foreground2);
     }
 
     public override void DebugRender() {
@@ -93,19 +85,20 @@ public class YinYang : ParametricProjectile {
 
     protected override Vector2 Adjust(float time, Vector2 position) {
 
-        position += Match.Bounds;
+        var adjustedMatchBounds = Match.Bounds; // - new Vector2(radius, radius);
 
-        var matchBoundsX = Match.Bounds.X * 2f;
-        var matchBoundsY = Match.Bounds.Y * 2f;
+        position += adjustedMatchBounds;
+
+        var matchBounds = adjustedMatchBounds * 2f;
 
         var screenOffset = new Vector2(
-            MathF.Abs(MathF.Floor(position.X / matchBoundsX)),
-            MathF.Abs(MathF.Floor(position.Y / matchBoundsY))
+            MathF.Abs(MathF.Floor(position.X / matchBounds.X)),
+            MathF.Abs(MathF.Floor(position.Y / matchBounds.Y))
         );
 
         return new Vector2(
-            (screenOffset.X % 2 * matchBoundsX + TMathF.Mod(position.X, matchBoundsX) * MathF.Pow(-1, screenOffset.X)) - Match.Bounds.X,
-            (screenOffset.Y % 2 * matchBoundsY + TMathF.Mod(position.Y, matchBoundsY) * MathF.Pow(-1, screenOffset.Y)) - Match.Bounds.Y
+            (screenOffset.X % 2 * matchBounds.X + TMathF.Mod(position.X, matchBounds.X) * MathF.Pow(-1, screenOffset.X)) - adjustedMatchBounds.X,
+            (screenOffset.Y % 2 * matchBounds.Y + TMathF.Mod(position.Y, matchBounds.Y) * MathF.Pow(-1, screenOffset.Y)) - adjustedMatchBounds.Y
         );
     }
 }

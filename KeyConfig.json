@@ -11,5 +11,16 @@
         "SpellB": "V",
         "Bomb": "Space"
     },
-    "Gamepad": {}
+    "Gamepad": {
+        "Right": "DPadRight",
+        "Left": "DPadLeft",
+        "Down": "DPadDown",
+        "Up": "DPadUp",
+        "Focus": "LeftShoulder",
+        "Primary": "X",
+        "Secondary": "A",
+        "SpellA": "B",
+        "SpellB": "RightShoulder",
+        "Bomb": "Y"
+    }
 }

@@ -75,13 +75,13 @@ public abstract class Scene {
         return null;
     }
 
-    public void Press(PlayerAction action) {
+    public void Press(PlayerActions action) {
         IterateEntites(e => {
             if (e is IControllable c) c.Press(action);
         });
     }
 
-    public void Release(PlayerAction action) {
+    public void Release(PlayerActions action) {
         IterateEntites(e => {
             if (e is IControllable c) c.Release(action);
         });

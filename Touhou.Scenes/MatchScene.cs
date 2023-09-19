@@ -50,8 +50,8 @@ public class MatchScene : Scene {
 
     public override void OnInitialize() {
 
-        Projectile.totalLocalProjectiles = 0;
-        Projectile.totalRemoteProjectiles = 0x80000000;
+        Projectile.TotalLocalProjectiles = 0;
+        Projectile.TotalRemoteProjectiles = 0x80000000;
 
         var match = new Match(startTime);
         AddEntity(match);
@@ -92,6 +92,28 @@ public class MatchScene : Scene {
                 }
             }
 
+            var localProjectileHistroyDisplay = new ProjectileHistoryDisplay("local", Projectile.LocalProjectileHistory) {
+                Origin = new Vector2(0f, 1f),
+                Size = new Vector2(2600f, 80f),
+                FillColor = new Color4(0f, 0f, 0f, 0.5f),
+                StrokeColor = Color4.White,
+                StrokeWidth = 1f,
+                IsUI = true,
+                Alignment = new Vector2(-0.9f, 0.99f),
+            };
+            Game.Draw(localProjectileHistroyDisplay, Layers.UI1);
+
+            var remoteProjectileHistroyDisplay = new ProjectileHistoryDisplay("remote", Projectile.RemoteProjectileHistory) {
+                Origin = new Vector2(0f, 1f),
+                Size = new Vector2(2600f, 80f),
+                FillColor = new Color4(0f, 0f, 0f, 0.5f),
+                StrokeColor = Color4.White,
+                StrokeWidth = 1f,
+                IsUI = true,
+                Alignment = new Vector2(-0.9f, 0.905f),
+            };
+            Game.Draw(remoteProjectileHistroyDisplay, Layers.UI1);
+
 
         }));
 
@@ -117,44 +139,44 @@ public class MatchScene : Scene {
             Color = Color4.White,
             CharacterSize = 40f,
             IsUI = true,
-            UIAlignment = new Vector2(-1f, 1f),
+            UIAlignment = new Vector2(0.75f, 1f),
         });
 
-        AddEntity(new ValueDisplay<string>(() => $"Network Time: {Game.Network.Time.AsMilliseconds()}") {
-            Origin = Vector2.UnitY,
-            Position = new Vector2(0f, -70f),
-            CharacterSize = 40f,
-            Color = Color4.White,
-            IsUI = true,
-            UIAlignment = new Vector2(-1f, 1f),
-        });
+        // AddEntity(new ValueDisplay<string>(() => $"Network Time: {Game.Network.Time.AsMilliseconds()}") {
+        //     Origin = Vector2.UnitY,
+        //     Position = new Vector2(0f, -70f),
+        //     CharacterSize = 40f,
+        //     Color = Color4.White,
+        //     IsUI = true,
+        //     UIAlignment = new Vector2(-1f, 1f),
+        // });
 
-        AddEntity(new ValueDisplay<string>(() => $"Lat: {Game.Network.PerceivedLatency.AsMilliseconds()}") {
-            Origin = Vector2.UnitY,
-            Position = new Vector2(0f, -140f),
-            CharacterSize = 40f,
-            Color = Color4.White,
-            IsUI = true,
-            UIAlignment = new Vector2(-1f, 1f),
-        });
+        // AddEntity(new ValueDisplay<string>(() => $"Lat: {Game.Network.PerceivedLatency.AsMilliseconds()}") {
+        //     Origin = Vector2.UnitY,
+        //     Position = new Vector2(0f, -140f),
+        //     CharacterSize = 40f,
+        //     Color = Color4.White,
+        //     IsUI = true,
+        //     UIAlignment = new Vector2(-1f, 1f),
+        // });
 
-        AddEntity(new ValueDisplay<string>(() => $"Their Lat: {Game.Network.TheirPerceivedLatency.AsMilliseconds()}") {
-            Origin = Vector2.UnitY,
-            Position = new Vector2(0f, -190f),
-            CharacterSize = 40f,
-            Color = Color4.White,
-            IsUI = true,
-            UIAlignment = new Vector2(-1f, 1f),
-        });
+        // AddEntity(new ValueDisplay<string>(() => $"Their Lat: {Game.Network.TheirPerceivedLatency.AsMilliseconds()}") {
+        //     Origin = Vector2.UnitY,
+        //     Position = new Vector2(0f, -190f),
+        //     CharacterSize = 40f,
+        //     Color = Color4.White,
+        //     IsUI = true,
+        //     UIAlignment = new Vector2(-1f, 1f),
+        // });
 
-        AddEntity(new ValueDisplay<string>(() => $"Pos: {player.Position.X}, {player.Position.Y}") {
-            Origin = Vector2.UnitY,
-            Position = new Vector2(0f, -260f),
-            CharacterSize = 40f,
-            Color = Color4.White,
-            IsUI = true,
-            UIAlignment = new Vector2(-1f, 1f),
-        });
+        // AddEntity(new ValueDisplay<string>(() => $"Pos: {player.Position.X}, {player.Position.Y}") {
+        //     Origin = Vector2.UnitY,
+        //     Position = new Vector2(0f, -260f),
+        //     CharacterSize = 40f,
+        //     Color = Color4.White,
+        //     IsUI = true,
+        //     UIAlignment = new Vector2(-1f, 1f),
+        // });
     }
 
 

@@ -46,7 +46,7 @@ public class YukariSpellA : Attack {
 
         player.MovespeedModifier = 0.2f;
 
-        player.DisableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+        player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
     }
 
 
@@ -74,7 +74,7 @@ public class YukariSpellA : Attack {
             player.SpendPower(Cost);
 
             var packet = new Packet(PacketType.AttackReleased)
-            .In(PlayerAction.SpellA)
+            .In(PlayerActions.SpellA)
             .In(Game.Network.Time - cooldownOverflow + timeOffset)
             .In(player.Position)
             .In(angle);
@@ -91,10 +91,10 @@ public class YukariSpellA : Attack {
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
         player.MovespeedModifier = 1f;
 
-        player.ApplyAttackCooldowns(spellCooldown, PlayerAction.SpellA);
-        player.ApplyAttackCooldowns(globalCooldown, PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(spellCooldown, PlayerActions.SpellA);
+        player.ApplyAttackCooldowns(globalCooldown, PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
 
-        player.EnableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+        player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
     }
 
 

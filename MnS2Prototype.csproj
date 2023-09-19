@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="newtonsoft.json" Version="13.0.3" />
     <PackageReference Include="OpenTK" Version="4.8.0" />
+    <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
     <PackageReference Include="StbImageSharp" Version="2.27.13" />
   </ItemGroup>
 

@@ -22,7 +22,7 @@ public class ReimuSpellB : Attack {
     private readonly Time maxChargeTime = Time.InSeconds(2f);
 
     private readonly float minRadius = 30f;
-    private readonly float maxRadius = 60f;
+    private readonly float maxRadius = 72f;
     private readonly float minVelocity = 120f;
     private readonly float maxVelocity = 60f;
 
@@ -46,7 +46,7 @@ public class ReimuSpellB : Attack {
 
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
+        player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellA);
 
         player.MovespeedModifier = 0.1f;
 
@@ -106,17 +106,17 @@ public class ReimuSpellB : Attack {
 
         player.SpendPower(Cost);
 
-        player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
-        player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerAction.Secondary);
-        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerAction.SpellA);
-        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
+        player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerActions.Secondary);
+        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerActions.SpellA);
+        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerActions.SpellB);
 
-        player.EnableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
+        player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellA);
 
         player.MovespeedModifier = 1f;
 
         var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerAction.SpellB)
+        .In(PlayerActions.SpellB)
         .In(Game.Network.Time - cooldownOverflow)
         .In(player.Position)
         .In(angle)
@@ -165,12 +165,12 @@ public class ReimuSpellB : Attack {
 
         float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
 
-        var aimArrowSprite = new Sprite("aimarrow") {
+        var aimArrowSprite = new Sprite("aimarrow2") {
             Origin = new Vector2(0.0625f, 0.5f),
             Position = player.Position,
             Rotation = player.AngleToOpponent + aimOffset,
-            Scale = Vector2.One * 0.35f,
-            Color = new Color4(1f, darkness, darkness, 1f),
+            Scale = Vector2.One * 0.3f,
+            Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
         Game.Draw(aimArrowSprite, Layers.Player);

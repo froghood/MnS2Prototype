@@ -39,8 +39,8 @@ public class Network {
     private Time lastReceivedTime;
     private Time sendRetryInterval = Time.InMilliseconds(100);
 
-    private int totalPacketsSent = 0;
-    private int totalPacketsReceived = 0;
+    private int totalUniquePacketsSent = 0;
+    private int totalUniquePacketsReceived = 0;
 
     private Queue<float> pingSamples = new();
 
@@ -92,8 +92,8 @@ public class Network {
         //disconnectionTimer.Reset();
 
         packetOutgoingQueue.Clear();
-        totalPacketsSent = 0;
-        totalPacketsReceived = 0;
+        totalUniquePacketsSent = 0;
+        totalUniquePacketsReceived = 0;
 
         pingSamples.Clear();
 
@@ -104,7 +104,7 @@ public class Network {
     public void Send(Packet packet) {
         if (!Connected) return;
         packetOutgoingQueue.Enqueue(packet);
-        totalPacketsSent++;
+        totalUniquePacketsSent++;
         forceFlush = true;
         //SendInternal();
     }
@@ -176,7 +176,7 @@ public class Network {
                 individualPacketSizes[i] = BitConverter.ToInt32(data, packetMetaBlockOffset + 8 * i + 4);
             }
 
-            int numToRead = totalTheySent - totalPacketsReceived;
+            int numToRead = totalTheySent - totalUniquePacketsReceived;
 
 
             for (int i = numPackets - numToRead; i < numPackets; i++) {
@@ -191,7 +191,7 @@ public class Network {
 
                 packet.In(data, offset, size);
 
-                totalPacketsReceived++;
+                totalUniquePacketsReceived++;
 
                 if (packetType == PacketType.LatencyCorrection) {
                     packet.Out(out Time theirLatency);
@@ -264,7 +264,7 @@ public class Network {
     }
 
     private void DequeueOutgoingPackets(int totalTheyReceived) {
-        int numToDequeue = packetOutgoingQueue.Count - (totalPacketsSent - totalTheyReceived);
+        int numToDequeue = packetOutgoingQueue.Count - (totalUniquePacketsSent - totalTheyReceived);
         for (int i = 0; i < numToDequeue; i++) packetOutgoingQueue.Dequeue();
     }
 
@@ -273,8 +273,8 @@ public class Network {
         var data = new byte[0]
         .Concat(BitConverter.GetBytes(Time))
         .Concat(BitConverter.GetBytes(PerceivedLatency))
-        .Concat(BitConverter.GetBytes(totalPacketsSent))
-        .Concat(BitConverter.GetBytes(totalPacketsReceived))
+        .Concat(BitConverter.GetBytes(totalUniquePacketsSent))
+        .Concat(BitConverter.GetBytes(totalUniquePacketsReceived))
         .Concat(BitConverter.GetBytes(packetOutgoingQueue.Count));
 
         // append packet meta
