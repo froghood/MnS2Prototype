@@ -3,11 +3,11 @@ using Touhou.Net;
 
 namespace Touhou.Objects.Generics;
 
-public class Receiver : Entity, IReceivable {
+public class ReceiveCallback : Entity, IReceivable {
 
     private Action<Packet, IPEndPoint> callback;
 
-    public Receiver(Action<Packet, IPEndPoint> callback) {
+    public ReceiveCallback(Action<Packet, IPEndPoint> callback) {
         this.callback = callback;
     }
 

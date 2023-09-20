@@ -9,7 +9,7 @@ public enum PacketType : byte {
     VelocityChanged,
     AttackPressed,
     AttackReleased,
-    Bomb,
+    BombPressed,
     SpentPower,
     Grazed,
     Hit,

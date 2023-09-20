@@ -1,16 +1,18 @@
 using System.Runtime.InteropServices;
 
 namespace Touhou;
-public enum PlayerAction : int {
+
+[Flags]
+public enum PlayerActions : int {
     None = 0,
-    Right,
-    Left,
-    Down,
-    Up,
-    Focus,
-    Primary,
-    Secondary,
-    SpellA,
-    SpellB,
-    Bomb
+    Right = 1,
+    Left = 2,
+    Down = 4,
+    Up = 8,
+    Focus = 16,
+    Primary = 32,
+    Secondary = 64,
+    SpellA = 128,
+    SpellB = 256,
+    Bomb = 512
 }

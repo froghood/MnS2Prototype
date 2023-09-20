@@ -1,4 +1,3 @@
-using SFML.System;
 
 namespace Touhou;
 public struct Time {
@@ -21,7 +20,6 @@ public struct Time {
 
     public static implicit operator long(Time duration) => duration.microseconds;
     public static implicit operator Time(long amount) => new Time(amount);
-    public static implicit operator Time(SFML.System.Time time) => new Time(time.AsMicroseconds());
 
     public override string ToString() => microseconds.ToString();
 

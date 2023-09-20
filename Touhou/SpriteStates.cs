@@ -1,25 +1,23 @@
-using SFML.Graphics;
-using SFML.System;
 
-namespace Touhou;
+// namespace Touhou;
 
-public readonly struct SpriteStates {
+// public readonly struct SpriteStates {
 
-    public Vector2f Origin { get; init; }
-    public OriginType OriginType { get; init; }
-    public Vector2f Position { get; init; }
-    public float Rotation { get; init; }
-    public Vector2f Scale { get; init; }
-    public Color Color { get; init; }
-    public bool IsUI { get; init; }
+//     public Vector2 Origin { get; init; }
+//     public OriginType OriginType { get; init; }
+//     public Vector2 Position { get; init; }
+//     public float Rotation { get; init; }
+//     public Vector2 Scale { get; init; }
+//     public Color4 Color4 { get; init; }
+//     public bool IsUI { get; init; }
 
-    public SpriteStates() {
-        Origin = default(Vector2f);
-        OriginType = OriginType.Percentage;
-        Position = default(Vector2f);
-        Rotation = 0f;
-        Scale = new Vector2f(1f, 1f);
-        Color = Color.White;
-        IsUI = false;
-    }
-}
+//     public SpriteStates() {
+//         Origin = default(Vector2);
+//         OriginType = OriginType.Percentage;
+//         Position = default(Vector2);
+//         Rotation = 0f;
+//         Scale = new Vector2(1f, 1f);
+//         Color4 = Color4.White;
+//         IsUI = false;
+//     }
+// }

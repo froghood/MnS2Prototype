@@ -1,6 +1,5 @@
 using System.Net;
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
 using Touhou.Net;
 using Touhou.Objects;
 
@@ -8,11 +7,13 @@ namespace Touhou.Objects.Characters;
 
 public class OpponentReimu : Opponent {
 
-    public OpponentReimu(Vector2f startingPosition) : base(startingPosition) {
+    public OpponentReimu(Vector2 startingPosition) : base(startingPosition) {
 
-        AddAttack(PlayerAction.Primary, new ReimuPrimary());
-        AddAttack(PlayerAction.Secondary, new ReimuSecondary());
-        AddAttack(PlayerAction.SpellA, new ReimuSpellA());
-        AddAttack(PlayerAction.SpellB, new ReimuSpellB());
+        AddAttack(PlayerActions.Primary, new ReimuPrimary());
+        AddAttack(PlayerActions.Secondary, new ReimuSecondary());
+        AddAttack(PlayerActions.SpellA, new ReimuSpellA());
+        AddAttack(PlayerActions.SpellB, new ReimuSpellB());
+
+        AddBomb(new ReimuBomb());
     }
 }

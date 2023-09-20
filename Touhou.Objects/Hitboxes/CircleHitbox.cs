@@ -1,12 +1,12 @@
-using SFML.Graphics;
-using SFML.System;
+
+using OpenTK.Mathematics;
 
 namespace Touhou.Objects {
     public class CircleHitbox : Hitbox {
 
         public float Radius { get; private set; }
 
-        public CircleHitbox(Entity entity, Vector2f offset, float radius, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionCallback) {
+        public CircleHitbox(Entity entity, Vector2 offset, float radius, CollisionGroups collisionGroup, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionGroup, collisionCallback) {
             Radius = radius;
         }
 
@@ -24,11 +24,18 @@ namespace Touhou.Objects {
         }
 
         public override bool Check(RectangleHitbox other) {
-            throw new NotImplementedException();
+            var circleOffset = Position - other.Position;
+            circleOffset *= Matrix2.Invert(other.RotationMatrix);
+            var edge = other.Size / 2f;
+            var xDist = MathF.Max(0f, circleOffset.X - edge.X) + MathF.Min(0f, circleOffset.X + edge.X);
+            var yDist = MathF.Max(0f, circleOffset.Y - edge.Y) + MathF.Min(0f, circleOffset.Y + edge.Y);
+            var dist = xDist * xDist + yDist * yDist;
+            return dist < Radius * Radius;
         }
 
-        public override FloatRect GetBounds() {
-            return new FloatRect(Position.X - Radius, Position.Y - Radius, Radius * 2f, Radius * 2f);
+        public override Box2 GetBounds() {
+            var halfSize = Vector2.One * Radius;
+            return new Box2(Position - halfSize, Position + halfSize);
         }
     }
 }

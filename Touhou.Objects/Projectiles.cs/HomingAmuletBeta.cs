@@ -1,5 +1,4 @@
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
 using Touhou.Objects.Characters;
 
 namespace Touhou.Objects.Projectiles;
@@ -7,22 +6,22 @@ namespace Touhou.Objects.Projectiles;
 public class HomingAmuletBeta : ParametricProjectile {
     private float velocity;
     private float radius;
-    private RectangleShape shape;
+    //private RectangleShape shape;
 
     private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
     private Player player;
     private int prevSide;
 
-    public HomingAmuletBeta(Vector2f origin, float direction, bool isRemote, float velocity, float radius, Time spawnTimeOffset = default) : base(origin, direction, isRemote, spawnTimeOffset) {
+    public HomingAmuletBeta(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float velocity, float radius, Time spawnTimeOffset = default) : base(origin, direction, isPlayerOwned, isRemote, spawnTimeOffset) {
         this.velocity = velocity;
         this.radius = radius;
 
-        shape = new RectangleShape(new Vector2f(20f, 15f));
-        shape.Origin = shape.Size / 2f;
+        // shape = new RectangleShape(new Vector2(20f, 15f));
+        // shape.Origin = shape.Size / 2f;
 
-        shape.FillColor = Color;
+        // shape.FillColor4 = Color;
 
-        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 7.5f));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMinor));
     }
 
 
@@ -42,7 +41,7 @@ public class HomingAmuletBeta : ParametricProjectile {
         if (!IsRemote) return;
 
         // var normal = SampleNormal(t);
-        // var side = MathF.Sign(TMathF.Dot(Player.Position - Position, new Vector2f(MathF.Cos(normal), MathF.Sin(normal))));
+        // var side = MathF.Sign(TMathF.Dot(Player.Position - Position, new Vector2(MathF.Cos(normal), MathF.Sin(normal))));
 
         // if (prevSide != side) {
         //     Reset(Position, SampleTangent(t));
@@ -54,10 +53,10 @@ public class HomingAmuletBeta : ParametricProjectile {
 
 
     public override void Render() {
-        shape.Rotation = 180f / MathF.PI * SampleTangent(CurrentTime);
-        shape.FillColor = Color;
-        shape.Position = Position;
-        Game.Draw(shape, 0);
+        // shape.Rotation = 180f / MathF.PI * SampleTangent(CurrentTime);
+        // shape.FillColor4 = Color;
+        // shape.Position = Position;
+        //Game.Draw(shape, 0);
     }
 
 }

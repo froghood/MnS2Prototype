@@ -1,5 +1,3 @@
-using SFML.Graphics;
-using SFML.System;
 
 namespace Touhou.Debugging;
 
@@ -28,18 +26,18 @@ public class Fields {
 
 // public class Stats : Drawable {
 
-//     public Color BackgroundColor { get => _background.FillColor; set => _background.FillColor = value; }
-//     public Vector2f Size { get => _background.Size; set => _background.Size = value; }
-//     public Vector2f Position { get => _background.Position; set => _background.Position = value; }
+//     public Color4 BackgroundColor4 { get => _background.FillColor4; set => _background.FillColor4 = value; }
+//     public Vector2 Size { get => _background.Size; set => _background.Size = value; }
+//     public Vector2 Position { get => _background.Position; set => _background.Position = value; }
 //     public float TextSpacing { get; set; }
 
-//     private Dictionary<string, (uint MaxSampleCount, float MaxSampleValue, Color Color, bool DisplayAverage, Queue<float> Samples)> _graphs = new();
+//     private Dictionary<string, (uint MaxSampleCount, float MaxSampleValue, Color4 Color4, bool DisplayAverage, Queue<float> Samples)> _graphs = new();
 //     private RectangleShape _background = new();
 //     private Text _text = new();
 
 
-//     public void AddGraph(string name, uint maxSampleCount, float maxValue, Color color, bool displayAverage) {
-//         _graphs.Add(name, (maxSampleCount, maxValue, color, displayAverage, new Queue<float>()));
+//     public void AddGraph(string name, uint maxSampleCount, float maxValue, Color4 Color4, bool displayAverage) {
+//         _graphs.Add(name, (maxSampleCount, maxValue, Color4, displayAverage, new Queue<float>()));
 //     }
 
 //     public void AddSample(string name, float value) {
@@ -58,10 +56,10 @@ public class Fields {
 //             int index = 0;
 //             foreach (float sample in graph.Samples) {
 //                 vertexArray.Append(new Vertex(
-//                     Position + new Vector2f(
+//                     Position + new Vector2(
 //                         Size.X / (graph.MaxSampleCount - 1) * index,
 //                         Size.Y - sample / graph.MaxSampleValue * Size.Y),
-//                     graph.Color
+//                     graph.Color4
 //                 ));
 //                 index++;
 //             }
@@ -73,12 +71,12 @@ public class Fields {
 //         foreach (var (name, graph) in _graphs) {
 //             _text.Font = Game.DefaultFont;
 //             _text.CharacterSize = 14;
-//             _text.FillColor = graph.Color;
-//             _text.OutlineColor = Color.Black;
+//             _text.FillColor4 = graph.Color4;
+//             _text.OutlineColor4 = Color4.Black;
 //             _text.OutlineThickness = 1f;
 //             _text.DisplayedString = name;
-//             _text.Position = Position + new Vector2f(0f, offset);
-//             _text.Origin = new Vector2f(0f, 0f);
+//             _text.Position = Position + new Vector2(0f, offset);
+//             _text.Origin = new Vector2(0f, 0f);
 
 //             _text.Draw(target, states);
 //             offset += TextSpacing;
@@ -87,11 +85,11 @@ public class Fields {
 //             float average = MathF.Round(graph.Samples.Sum() / graph.Samples.Count, 2);
 //             _text.DisplayedString = $" {average}";
 //             _text.CharacterSize = 12;
-//             _text.Position = Position + new Vector2f(
+//             _text.Position = Position + new Vector2(
 //                 Size.X,
 //                 Size.Y - average / graph.MaxSampleValue * Size.Y
 //             );
-//             _text.Origin = new Vector2f(0f, _text.GetLocalBounds().Height / 2f);
+//             _text.Origin = new Vector2(0f, _text.GetLocalBounds().Height / 2f);
 //             _text.Draw(target, states);
 //         }
 //     }

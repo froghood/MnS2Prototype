@@ -1,6 +1,6 @@
 using Touhou;
 
 public interface IControllable {
-    void Press(PlayerAction action);
-    void Release(PlayerAction action);
+    void Press(PlayerActions action);
+    void Release(PlayerActions action);
 }

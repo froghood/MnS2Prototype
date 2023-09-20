@@ -1,5 +1,3 @@
-// using SFML.Graphics;
-// using SFML.System;
 // using Touhou.Net;
 // using Touhou.Objects;
 // using Touhou.Objects.Projectiles;
@@ -34,10 +32,10 @@
 //         float angle = player.AngleToOpponent;
 
 //         for (int index = 0; index < numShots; index++) {
-//             var offset = new Vector2f(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (spacing * index - spacing / 2f * (numShots - 1));
+//             var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (spacing * index - spacing / 2f * (numShots - 1));
 //             var projectile = new LinearAmulet(player.Position + offset, angle, false, cooldownOverflow) {
 //                 CanCollide = false,
-//                 Color = new Color(0, 255, 0, 100),
+//                 Color4 = new Color4(0, 255, 0, 100),
 //                 StartingVelocity = velocity * startingVelocityModifier,
 //                 GoalVelocity = velocity,
 //                 VelocityFalloff = velocityFalloff,
@@ -62,15 +60,15 @@
 
 //     public override void OpponentPress(Opponent opponent, Packet packet) {
 
-//         packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle);
+//         packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle);
 //         var delta = Game.Network.Time - theirTime;
 
 //         for (int index = 0; index < numShots; index++) {
-//             var offset = new Vector2f(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (spacing * index - spacing / 2f * (numShots - 1));
+//             var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (spacing * index - spacing / 2f * (numShots - 1));
 //             var projectile = new LinearAmulet(position + offset, angle, true) {
 //                 InterpolatedOffset = delta.AsSeconds(),
 
-//                 Color = new Color(255, 0, 0),
+//                 Color4 = new Color4(255, 0, 0),
 
 //                 GrazeAmount = grazeAmount,
 

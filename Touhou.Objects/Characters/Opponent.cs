@@ -1,66 +1,73 @@
 using System.Net;
-using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
 using Touhou.Net;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
 using Touhou.Objects.Characters;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 
 namespace Touhou.Objects.Characters;
 public abstract class Opponent : Entity, IReceivable {
 
 
-    private Vector2f basePosition;
-    private Vector2f predictedOffset;
-    private Vector2f interpolatedPosition;
+
+    public int HeartCount { get; private set; } = 5;
+    public float BombCount { get; private set; } = 3;
+    public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
+    public IEnumerable<KeyValuePair<PlayerActions, Attack>> Attacks { get => attacks.AsEnumerable(); }
+    public Color4 Color { get; set; } = new Color4(1f, 0f, 0.4f, 1f);
+    private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
+    private Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
+
+
+
+    private Vector2 basePosition;
+    private Vector2 predictedOffset;
+    private Vector2 interpolatedPosition;
     private float predictedOffsetInterpolationTime;
-    private Vector2f velocity;
-    private Vector2f smoothingOffset;
+    private Vector2 velocity;
+    private Vector2 smoothingOffset;
     private float smoothingOffsetInterpolationTime;
 
 
 
     private bool isHit;
     private Time knockbackTime;
-    private Vector2f knockbackStartPosition;
-    private Vector2f knockbackEndPosition;
+    private Vector2 knockbackStartPosition;
+    private Vector2 knockbackEndPosition;
     private Time knockbackDuration;
     private bool isDead;
+
 
 
     private Dictionary<PacketType, Action<Packet>> packetDelegates;
 
 
 
-    public Dictionary<PlayerAction, Attack> Attacks { get; } = new();
+    private Dictionary<PlayerActions, Attack> attacks = new();
     private Dictionary<Attack, (Time Time, bool Focused)> currentlyHeldAttacks = new();
-
-
-    private bool matchStarted;
-
-    public Color Color { get; set; } = new Color(255, 0, 100);
-
-    private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
-    private Player player;
-
-    private Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
-    private Match match;
-
+    private Bomb bomb;
 
 
     // power
-    public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     private int powerGainedFromGrazing;
     private int powerSpent;
 
 
 
-    public int HeartCount { get; private set; } = 5;
+    private bool matchStarted;
+
+
+    private Player player;
+    private Match match;
 
 
 
-    public Opponent(Vector2f startingPosition) {
+    private Sprite characterSprite;
+
+
+
+    public Opponent(Vector2 startingPosition) {
         basePosition = startingPosition;
 
         packetDelegates = new Dictionary<PacketType, Action<Packet>>() {
@@ -68,10 +75,18 @@ public abstract class Opponent : Entity, IReceivable {
             {PacketType.VelocityChanged, VelocityChanged},
             {PacketType.AttackPressed, AttackPressed},
             {PacketType.AttackReleased, AttackReleased},
+            {PacketType.BombPressed, BombPressed},
             {PacketType.SpentPower, SpentPower},
             {PacketType.Grazed, Grazed},
             {PacketType.Hit, Hit},
             {PacketType.Death, Death},
+        };
+
+        characterSprite = new Sprite("reimu") {
+            Origin = new Vector2(0.4f, 0.3f),
+            Color = Color,
+            UseColorSwapping = false,
+
         };
     }
 
@@ -99,7 +114,7 @@ public abstract class Opponent : Entity, IReceivable {
                 smoothingOffset * Easing.In(smoothingOffsetInterpolationTime, 12f);
         }
 
-        Position = new Vector2f(
+        Position = new Vector2(
             Math.Clamp(Position.X, -Match.Bounds.X, Match.Bounds.X),
             Math.Clamp(Position.Y, -Match.Bounds.Y, Match.Bounds.Y)
         );
@@ -115,37 +130,42 @@ public abstract class Opponent : Entity, IReceivable {
     public override void Render() {
         if (isDead) return;
 
-        var states = new SpriteStates() {
-            Origin = new Vector2f(0.4f, 0.7f),
-            Position = Position,
-            Scale = new Vector2f(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.15f,
-            Color = Color
-        };
+        characterSprite.Position = Position;
+        characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.2f;
 
-        Game.DrawSprite("reimu", states, Layers.Opponent);
+        Game.Draw(characterSprite, Layers.Opponent);
 
-        // var rect = new RectangleShape(new Vector2f(20f, 20f));
+        // var states = new SpriteStates() {
+        //     Origin = new Vector2(0.4f, 0.7f),
+        //     Position = Position,
+        //     Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.15f,
+        //     Color4 = Color
+        // };
+
+        //Game.DrawSprite("reimu", states, Layers.Opponent);
+
+        // var rect = new RectangleShape(new Vector2(20f, 20f));
         // rect.Origin = rect.Size / 2f;
         // rect.Position = Position;
-        // rect.FillColor = Color;
+        // rect.FillColor4 = Color4;
         // Game.Draw(rect, 0);
     }
 
     public override void DebugRender() {
-        var circle = new CircleShape(5);
-        circle.Origin = new Vector2f(circle.Radius, circle.Radius);
+        // var circle = new CircleShape(5);
+        // circle.Origin = new Vector2(circle.Radius, circle.Radius);
 
-        circle.FillColor = new Color(0, 200, 255);
-        circle.Position = basePosition;
-        Game.Draw(circle, 0);
+        // circle.FillColor4 = new Color4(0, 200, 255);
+        // circle.Position = basePosition;
+        //Game.Draw(circle, 0);
 
-        circle.FillColor = new Color(255, 100, 0);
-        circle.Position = predictedOffset;
-        Game.Draw(circle, 0);
+        // circle.FillColor4 = new Color4(255, 100, 0);
+        // circle.Position = predictedOffset;
+        //Game.Draw(circle, 0);
 
-        circle.FillColor = new Color(0, 255, 0);
-        circle.Position = interpolatedPosition;
-        Game.Draw(circle, 0);
+        // circle.FillColor4 = new Color4(0, 255, 0);
+        // circle.Position = interpolatedPosition;
+        //Game.Draw(circle, 0);
 
 
     }
@@ -156,7 +176,9 @@ public abstract class Opponent : Entity, IReceivable {
 
     }
 
-    protected void AddAttack(PlayerAction action, Attack attack) => Attacks[action] = attack;
+    protected void AddAttack(PlayerActions action, Attack attack) => attacks[action] = attack;
+
+    protected void AddBomb(Bomb bomb) => this.bomb = bomb;
 
     protected void SpendPower(int amount) => powerSpent += amount;
 
@@ -164,7 +186,7 @@ public abstract class Opponent : Entity, IReceivable {
 
     // packets
     private void VelocityChanged(Packet packet) {
-        packet.Out(out Time theirTime, true).Out(out Vector2f theirPosition).Out(out Vector2f theirVelocity);
+        packet.Out(out Time theirTime, true).Out(out Vector2 theirPosition).Out(out Vector2 theirVelocity);
 
         var latency = Game.Network.Time - theirTime;
 
@@ -196,10 +218,17 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     private void AttackReleased(Packet packet) {
-        packet.Out(out PlayerAction action, true);
-        if (Attacks.TryGetValue(action, out var attack)) {
+        packet.Out(out PlayerActions action, true);
+        if (attacks.TryGetValue(action, out var attack)) {
             attack.OpponentReleased(this, packet);
         }
+    }
+
+
+
+    private void BombPressed(Packet packet) {
+        bomb.OpponentPress(this, packet);
+        BombCount--;
     }
 
 
@@ -219,7 +248,7 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     private void Hit(Packet packet) {
-        packet.Out(out Time theirTime, true).Out(out Vector2f theirPosition).Out(out float angle);
+        packet.Out(out Time theirTime, true).Out(out Vector2 theirPosition).Out(out float angle);
 
         Scene.AddEntity(new HitExplosion(theirPosition, 0.5f, 100f, Color));
 
@@ -228,25 +257,25 @@ public abstract class Opponent : Entity, IReceivable {
         isHit = true;
         knockbackTime = Game.Time;
         knockbackStartPosition = theirPosition;
-        knockbackEndPosition = theirPosition + new Vector2f(MathF.Cos(angle), MathF.Sin(angle)) * 100f;
+        knockbackEndPosition = theirPosition + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * 100f;
         knockbackDuration = Time.InSeconds(1);
 
         HeartCount--;
 
-        Game.Sounds.Play("hit");
+        //Game.Sounds.Play("hit");
     }
 
 
 
     private void Death(Packet packet) {
         isDead = true;
-        packet.Out(out Time _, true).Out(out Vector2f theirPosition);
+        packet.Out(out Time _, true).Out(out Vector2 theirPosition);
 
         Scene.AddEntity(new HitExplosion(theirPosition, 1f, 500f, Color));
 
         HeartCount--;
 
-        Game.Sounds.Play("death");
+        //Game.Sounds.Play("death");
     }
 
 

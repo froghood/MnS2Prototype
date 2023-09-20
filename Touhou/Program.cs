@@ -1,4 +1,7 @@
-﻿using Touhou;
+﻿
+
+global using Touhou;
+global using OpenTK.Graphics.OpenGL4;
 
 public class Program {
     private static void Main(string[] args) {

@@ -1,5 +1,5 @@
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Net;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
@@ -21,8 +21,8 @@ public class ReimuSpellB : Attack {
     private readonly int grazeAmount = 20;
     private readonly Time maxChargeTime = Time.InSeconds(2f);
 
-    private readonly float minRadius = 20f;
-    private readonly float maxRadius = 60f;
+    private readonly float minRadius = 30f;
+    private readonly float maxRadius = 72f;
     private readonly float minVelocity = 120f;
     private readonly float maxVelocity = 60f;
 
@@ -46,7 +46,7 @@ public class ReimuSpellB : Attack {
 
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
+        player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellA);
 
         player.MovespeedModifier = 0.1f;
 
@@ -89,35 +89,34 @@ public class ReimuSpellB : Attack {
 
         // var projectile = new YinYang(player.Position, angle, false, focused ? focusedSize : unfocusedSize, cooldownOverflow) {
         //     CanCollide = false,
-        //     Color = new Color(0, 255, 0, 100),
+        //     Color4 = new Color4(0, 255, 0, 100),
         //     Velocity = focused ? focusedVelocity : unfocusedVelocity,
         // };
 
         var radius = minRadius + (maxRadius - minRadius) * chargeTime;
         var velocity = minVelocity + (maxVelocity - minVelocity) * chargeTime;
 
-        var projectile = new YinYang(player.Position, angle, false, radius, cooldownOverflow) {
+        var projectile = new YinYang(player.Position, angle, true, false, radius, cooldownOverflow) {
             CanCollide = false,
-            Color = new Color(0, 255, 0, 100),
+            Color = new Color4(0, 255, 0, 100),
             Velocity = velocity
         };
 
-        projectile.CollisionGroups.Add(0);
         player.Scene.AddEntity(projectile);
 
         player.SpendPower(Cost);
 
-        player.ApplyCooldowns(primaryCooldown - cooldownOverflow, PlayerAction.Primary);
-        player.ApplyCooldowns(secondaryCooldown - cooldownOverflow, PlayerAction.Secondary);
-        player.ApplyCooldowns(spellACooldown - cooldownOverflow, PlayerAction.SpellA);
-        player.ApplyCooldowns(spellBCooldown - cooldownOverflow, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
+        player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerActions.Secondary);
+        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerActions.SpellA);
+        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerActions.SpellB);
 
-        player.EnableAttacks(PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellA);
+        player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellA);
 
         player.MovespeedModifier = 1f;
 
         var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerAction.SpellB)
+        .In(PlayerActions.SpellB)
         .In(Game.Network.Time - cooldownOverflow)
         .In(player.Position)
         .In(angle)
@@ -135,65 +134,86 @@ public class ReimuSpellB : Attack {
 
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
-        packet.Out(out Time theirTime).Out(out Vector2f position).Out(out float angle).Out(out float size).Out(out float velocity);
+        packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle).Out(out float size).Out(out float velocity);
         Time delta = Game.Network.Time - theirTime;
 
-        var projectile = new YinYang(position, angle, true, size) {
+        var projectile = new YinYang(position, angle, false, true, size) {
             InterpolatedOffset = delta.AsSeconds(),
-            Color = new Color(255, 0, 0),
+            Color = new Color4(1f, 0f, 0f, 1f),
             GrazeAmount = grazeAmount,
             Velocity = velocity,
         };
 
-        projectile.CollisionGroups.Add(1);
         opponent.Scene.AddEntity(projectile);
     }
 
     public override void PlayerRender(Player player) {
         if (!attackHold) return;
 
-        var indicatorStates = new SpriteStates() {
-            Origin = new Vector2f(0.5f, 0.5f),
+        // var indicatorStates = new SpriteStates() {
+        //     Origin = new Vector2(0.5f, 0.5f),
+        //     Position = player.Position,
+        //     Scale = new Vector2(1f, 1f) * 0.35f,
+        //     Color4 = new Color4(255, 255, 255, 40),
+        // };
+
+        // var shader = new TShader("aimIndicator");
+        // shader.SetUniform("angle", player.AngleToOpponent);
+        // shader.SetUniform("arc", TMathF.degToRad(aimRange));
+
+        //Game.DrawSprite("aimindicator", indicatorStates, shader, Layers.Player);
+
+        float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
+
+        var aimArrowSprite = new Sprite("aimarrow2") {
+            Origin = new Vector2(0.0625f, 0.5f),
             Position = player.Position,
-            Scale = new Vector2f(1f, 1f) * 0.35f,
-            Color = new Color(255, 255, 255, 40),
+            Rotation = player.AngleToOpponent + aimOffset,
+            Scale = Vector2.One * 0.3f,
+            Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
-        var shader = new TShader("aimIndicator");
-        shader.SetUniform("angle", player.AngleToOpponent);
-        shader.SetUniform("arc", TMathF.degToRad(aimRange));
+        Game.Draw(aimArrowSprite, Layers.Player);
 
-        Game.DrawSprite("aimindicator", indicatorStates, shader, Layers.Player);
+        // var arrowStates = new SpriteStates() {
+        //     Origin = new Vector2(10f, 10f),
+        //     OriginType = OriginType.Position,
+        //     Position = player.Position,
+        //     Rotation = TMathF.radToDeg(player.AngleToOpponent + aimOffset),
+        //     Scale = new Vector2(1f, 1f) * 0.35f,
+        //     Color4 = new Color4(255, darkness, darkness)
+        // };
 
-        byte darkness = (byte)MathF.Round(255f - 100f * MathF.Abs(normalizedAimOffset));
+        //Game.DrawSprite("aimarrow", arrowStates, Layers.Player);
 
-        var arrowStates = new SpriteStates() {
-            Origin = new Vector2f(10f, 10f),
-            OriginType = OriginType.Position,
-            Position = player.Position,
-            Rotation = TMathF.radToDeg(player.AngleToOpponent + aimOffset),
-            Scale = new Vector2f(1f, 1f) * 0.35f,
-            Color = new Color(255, darkness, darkness)
-        };
-
-        Game.DrawSprite("aimarrow", arrowStates, Layers.Player);
-
-        var circleStates = new CircleStates() {
-            Origin = new Vector2f(0.5f, 0.5f),
+        var sizeIndicator = new Circle() {
+            Origin = new Vector2(0.5f),
             Radius = minRadius + (maxRadius - minRadius) * chargeTime,
             Position = player.Position,
-            OutlineColor = new Color(255, 255, 255, 80),
-            FillColor = Color.Transparent
+            StrokeWidth = 1f,
+            StrokeColor = new Color4(1f, 1f, 1f, 0.4f),
+            FillColor = Color4.Transparent,
+
         };
 
-        Game.DrawCircle(circleStates, Layers.Player);
+        Game.Draw(sizeIndicator, Layers.Player);
+
+        // var circleStates = new CircleStates() {
+        //     Origin = new Vector2(0.5f, 0.5f),
+        //     Radius = minRadius + (maxRadius - minRadius) * chargeTime,
+        //     Position = player.Position,
+        //     OutlineColor4 = new Color4(255, 255, 255, 80),
+        //     FillColor4 = Color4.Transparent
+        // };
+
+        //Game.DrawCircle(circleStates, Layers.Player);
 
         // var circle = new CircleShape(minRadius + (maxRadius - minRadius) * chargeTime);
-        // circle.Origin = new Vector2f(1f, 1f) * circle.Radius;
+        // circle.Origin = new Vector2(1f, 1f) * circle.Radius;
         // circle.Position = player.Position;
         // circle.OutlineThickness = 1f;
-        // circle.OutlineColor = new Color(255, 255, 255, 80);
-        // circle.FillColor = Color.Transparent;
+        // circle.OutlineColor4 = new Color4(255, 255, 255, 80);
+        // circle.FillColor4 = Color4.Transparent;
         // Game.Draw(circle, 0);
     }
 }

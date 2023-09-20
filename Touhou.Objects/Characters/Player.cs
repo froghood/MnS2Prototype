@@ -1,35 +1,37 @@
 using System.Net;
-using SFML.Graphics;
-using SFML.System;
-using SFML.Window;
 using Touhou.Net;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
 
 using Touhou.Objects.Characters;
 using Touhou.Scenes;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 
 namespace Touhou.Objects.Characters;
 
-public abstract class Player : Entity, IControllable, IReceivable {
+public abstract class Player : Entity, IReceivable {
 
     public float Speed { get; protected init; }
     public float FocusedSpeed { get; protected init; }
 
-    public Vector2f Velocity { get; private set; }
+    public Vector2 Velocity { get; private set; }
 
 
-    public bool Focused { get => Game.IsActionPressed(PlayerAction.Focus); }
+    public bool Focused { get => Game.IsActionPressed(PlayerActions.Focus); }
 
     public bool CanMove { get; private set; } = true;
 
     public Time InvulnerabilityTime { get; private set; }
     public Time InvulnerabilityDuration { get; private set; }
     public Time KnockbackTime { get; private set; }
-    public Vector2f KnockbackStartPosition { get; private set; }
-    public Vector2f KnockbackEndPosition { get; private set; }
+    public Vector2 KnockbackStartPosition { get; private set; }
+    public Vector2 KnockbackEndPosition { get; private set; }
     public Time KnockbackDuration { get; private set; }
 
+
+
+    public IEnumerable<KeyValuePair<PlayerActions, Attack>> Attacks { get => attacks.AsEnumerable(); }
 
 
     // power
@@ -40,20 +42,23 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public float SmoothPower => smoothPower;
     private float smoothPower;
 
-    // hearts
+    // heartss
 
     public int HeartCount { get; private set; } = 5;
 
     private bool isDead;
     private Time deathTime;
 
+    public int BombCount { get; set; } = 3;
+
     public Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
     private Match match;
 
 
-    public Dictionary<PlayerAction, Attack> Attacks { get; } = new();
+    private Dictionary<PlayerActions, Attack> attacks = new();
+    public (PlayerActions Action, Bomb Bomb) Bomb { get; private set; }
 
-    private Shader cooldownShader;
+    //private Shader cooldownShader;
 
     private Dictionary<Attack, (Time Time, bool Focused)> currentlyHeldAttacks = new();
 
@@ -67,7 +72,14 @@ public abstract class Player : Entity, IControllable, IReceivable {
     private bool isDeathConfirmed;
     private Time deathConfirmationTime;
 
-    public Color Color { get; set; } = new Color(0, 255, 100);
+
+
+    private Sprite characterSprite;
+    private Sprite hitboxSprite;
+
+
+
+    public Color4 Color { get; set; } = new Color4(0.4f, 1f, 0f, 1f);
 
 
     public float AngleToOpponent {
@@ -80,23 +92,33 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     public float MovespeedModifier { get; set; } = 1f;
 
+
     public Player(bool hosting) {
 
         this.hosting = hosting;
 
         CanCollide = true;
-        CollisionType = CollisionType.Player;
-        CollisionGroups.Add(0);
-        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 0.5f, Hit));
-        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), 50f, Graze));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 0.5f, CollisionGroups.Player, Hit));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 50f, CollisionGroups.Player, Graze));
 
-        cooldownShader = new Shader(null, null, "assets/shaders/cooldown.frag");
+        //cooldownShader = new Shader(null, null, "assets/shaders/cooldown.frag");
+        characterSprite = new Sprite("reimu") {
+            Origin = new Vector2(0.4f, 0.3f),
+            Color = Color,
+            UseColorSwapping = false,
+
+        };
+
+        hitboxSprite = new Sprite("hitboxfocused") {
+            Origin = new Vector2(0.5f, 0.5f),
+            Scale = new Vector2(1f, 1f) * 0.15f,
+            UseColorSwapping = true,
+        };
     }
 
-    public virtual void Press(PlayerAction action) { }
-    public virtual void Release(PlayerAction action) { }
 
     public override void Update() {
+
 
         if (isDeathConfirmed && Game.Time >= deathConfirmationTime + Time.InSeconds(2f)) {
             var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
@@ -115,19 +137,21 @@ public abstract class Player : Entity, IControllable, IReceivable {
         UpdateKnockback();
         if (CanMove) UpdateMovement();
 
-        Position = new Vector2f(
+        Position = new Vector2(
             Math.Clamp(Position.X, -Match.Bounds.X, Match.Bounds.X),
             Math.Clamp(Position.Y, -Match.Bounds.Y, Match.Bounds.Y)
         );
 
         var order = Game.Input.GetActionOrder();
 
-        foreach (var action in order) InvokeAttackPresses(action);
-        foreach (var action in order) InvokeAttackHolds(action);
+        foreach (var action in order) InvokeActionPresses(action);
+        foreach (var action in order) InvokeActionHolds(action);
     }
 
-    private void InvokeAttackPresses(PlayerAction action) {
-        if (Attacks.TryGetValue(action, out var attack)) {
+    private void InvokeActionPresses(PlayerActions action) {
+
+        // attacks
+        if (attacks.TryGetValue(action, out var attack)) {
 
             if (attack.Cooldown <= 0) attack.Cooldown = 0;
             else attack.Cooldown -= Game.Delta;
@@ -137,10 +161,10 @@ public abstract class Player : Entity, IControllable, IReceivable {
             Time cooldownOverflow = Math.Abs(attack.Cooldown);
 
             // when attack is buffered
-            if (Game.Input.IsActionPressBuffered(action, out var state)) {
+            if (Game.Input.IsActionPressBuffered(action, out _, out var state)) {
                 Game.Input.ConsumePressBuffer(action);
 
-                bool focused = state[PlayerAction.Focus];
+                bool focused = state.HasFlag(PlayerActions.Focus);
                 System.Console.WriteLine(focused);
 
                 attack.PlayerPress(this, cooldownOverflow, focused);
@@ -153,7 +177,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
             // when attack is held but not necessarily buffered
             else if (attack.Holdable && Game.IsActionPressed(action) && !currentlyHeldAttacks.ContainsKey(attack)) {
-                bool focused = Game.IsActionPressed(PlayerAction.Focus);
+                bool focused = Game.IsActionPressed(PlayerActions.Focus);
 
                 attack.PlayerPress(this, cooldownOverflow, focused);
                 currentlyHeldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
@@ -162,10 +186,36 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
             }
         }
+
+        // bomb
+        if (BombCount > 0 && Bomb.Action == action) {
+
+
+
+            var bomb = Bomb.Bomb;
+
+            if (bomb.Cooldown <= 0) bomb.Cooldown = 0;
+            else bomb.Cooldown -= Game.Delta;
+
+            if (bomb.Cooldown > 0) return;
+
+            //System.Console.WriteLine("t");
+
+            if (Game.Input.IsActionPressBuffered(action, out _, out var state)) {
+                Game.Input.ConsumePressBuffer(action);
+
+                Time cooldownOverflow = Math.Abs(bomb.Cooldown);
+                bool focused = state.HasFlag(PlayerActions.Focus);
+
+                bomb.PlayerPress(this, cooldownOverflow, focused);
+
+                BombCount--;
+            }
+        }
     }
 
-    private void InvokeAttackHolds(PlayerAction action) {
-        if (Attacks.TryGetValue(action, out var attack)) {
+    private void InvokeActionHolds(PlayerActions action) {
+        if (attacks.TryGetValue(action, out var attack)) {
             if (currentlyHeldAttacks.TryGetValue(attack, out var heldState)) {
 
 
@@ -184,14 +234,14 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
 
     private void UpdateMovement() {
-        var movementVector = new Vector2f(
-            (Game.IsActionPressed(PlayerAction.Right) ? 1f : 0f) - (Game.IsActionPressed(PlayerAction.Left) ? 1f : 0f),
-            (Game.IsActionPressed(PlayerAction.Down) ? 1f : 0f) - (Game.IsActionPressed(PlayerAction.Up) ? 1f : 0f)
+        var movementVector = new Vector2(
+            (Game.IsActionPressed(PlayerActions.Right) ? 1f : 0f) - (Game.IsActionPressed(PlayerActions.Left) ? 1f : 0f),
+            (Game.IsActionPressed(PlayerActions.Up) ? 1f : 0f) - (Game.IsActionPressed(PlayerActions.Down) ? 1f : 0f)
         );
 
         float movementAngle = MathF.Atan2(movementVector.Y, movementVector.X);
 
-        ChangeVelocity(new Vector2f(
+        ChangeVelocity(new Vector2(
             MathF.Abs(MathF.Cos(movementAngle)) * movementVector.X,
             MathF.Abs(MathF.Sin(movementAngle)) * movementVector.Y)
                 * (Focused ? FocusedSpeed : Speed) * MovespeedModifier);
@@ -216,32 +266,44 @@ public abstract class Player : Entity, IControllable, IReceivable {
     public override void Render() {
 
         if (!isDead) {
-            var states = new SpriteStates() {
-                Origin = new Vector2f(0.4f, 0.7f),
-                Position = Position,
-                Scale = new Vector2f(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.15f,
-                Color = Color
-            };
+            // var states = new SpriteStates() {
+            //     Origin = new Vector2(0.4f, 0.7f),
+            //     Position = Position,
+            //     Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.15f,
+            //     Color4 = Color
+            // };
 
-            Game.DrawSprite("reimu", states, Layers.Player);
+            characterSprite.Position = Position;
+            characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.2f;
+
+            Game.Draw(characterSprite, Layers.Player);
+
+            //Game.DrawSprite("reimu", states, Layers.Player);
 
             if (Focused) {
-                states = new SpriteStates() {
-                    Origin = new Vector2f(0.5f, 0.5f),
-                    Position = Position,
-                    Scale = new Vector2f(1f, 1f) * 0.15f,
-                };
 
-                var shader = new TShader("projectileColor");
-                shader.SetUniform("color", Color);
+                hitboxSprite.Position = Position;
+                hitboxSprite.Color = Color;
+                hitboxSprite.Depth = 1;
 
-                Game.DrawSprite("hitboxfocused", states, shader, Layers.Foreground1);
+                Game.Draw(hitboxSprite, Layers.Foreground1);
+
+                // states = new SpriteStates() {
+                //     Origin = new Vector2(0.5f, 0.5f),
+                //     Position = Position,
+                //     Scale = new Vector2(1f, 1f) * 0.15f,
+                // };
+
+                // var shader = new TShader("projectileColor4");
+                // shader.SetUniform("Color4", Color);
+
+                //Game.DrawSprite("hitboxfocused", states, shader, Layers.Foreground1);
             }
 
 
         }
 
-        foreach (var attack in Attacks.Values) {
+        foreach (var attack in attacks.Values) {
             attack.PlayerRender(this);
         }
     }
@@ -254,8 +316,10 @@ public abstract class Player : Entity, IControllable, IReceivable {
         if (entity is Projectile projectile) {
 
             projectile.Destroy();
-            // must toggle to last bit because the opponents' projectile ids are opposite
+
+            // must toggle the last bit because the opponents' projectile ids are opposite
             var destroyProjectilePacket = new Packet(PacketType.DestroyProjectile).In(projectile.Id ^ 0x80000000);
+
             Game.Network.Send(destroyProjectilePacket);
 
             HeartCount--;
@@ -313,10 +377,10 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     private void ApplyKnockback(float angle, float strength, Time duration) {
         CanMove = false;
-        Velocity = new Vector2f(0f, 0f);
+        Velocity = new Vector2(0f, 0f);
         KnockbackTime = Game.Time;
         KnockbackStartPosition = Position;
-        KnockbackEndPosition = Position + new Vector2f(strength * MathF.Cos(angle), strength * MathF.Sin(angle));
+        KnockbackEndPosition = Position + new Vector2(strength * MathF.Cos(angle), strength * MathF.Sin(angle));
         KnockbackDuration = duration;
     }
 
@@ -325,9 +389,9 @@ public abstract class Player : Entity, IControllable, IReceivable {
         InvulnerabilityDuration = duration;
     }
 
-    public void ApplyCooldowns(Time duration, params PlayerAction[] actions) {
+    public void ApplyAttackCooldowns(Time duration, params PlayerActions[] actions) {
         foreach (var action in actions) {
-            if (Attacks.TryGetValue(action, out var attack) && duration > attack.Cooldown) {
+            if (attacks.TryGetValue(action, out var attack) && duration > attack.Cooldown) {
                 attack.CooldownDuration = duration;
                 attack.Cooldown = duration;
             }
@@ -335,15 +399,15 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
     }
 
-    public void DisableAttacks(params PlayerAction[] actions) {
+    public void DisableAttacks(params PlayerActions[] actions) {
         foreach (var action in actions) {
-            if (Attacks.TryGetValue(action, out var attack)) attack.Disable();
+            if (attacks.TryGetValue(action, out var attack)) attack.Disable();
         }
     }
 
-    public void EnableAttacks(params PlayerAction[] actions) {
+    public void EnableAttacks(params PlayerActions[] actions) {
         foreach (var action in actions) {
-            if (Attacks.TryGetValue(action, out var attack)) attack.Enable();
+            if (attacks.TryGetValue(action, out var attack)) attack.Enable();
         }
     }
 
@@ -357,7 +421,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
         Game.Network.Send(packet);
     }
 
-    private void ChangeVelocity(Vector2f newVelocity) {
+    private void ChangeVelocity(Vector2 newVelocity) {
         if (newVelocity == Velocity) return;
         Velocity = newVelocity;
         var packet = new Packet(PacketType.VelocityChanged);
@@ -400,6 +464,9 @@ public abstract class Player : Entity, IControllable, IReceivable {
 
                 break;
             case PacketType.Rematch:
+
+                System.Console.WriteLine("t");
+
                 packet.Out(out Time startTime, true);
 
                 Game.Command(() => {
@@ -411,6 +478,7 @@ public abstract class Player : Entity, IControllable, IReceivable {
         }
     }
 
-    protected void AddAttack(PlayerAction action, Attack attack) => Attacks[action] = attack;
+    protected void AddAttack(PlayerActions action, Attack attack) => attacks[action] = attack;
+    protected void AddBomb(PlayerActions action, Bomb bomb) => Bomb = (action, bomb);
 
 }

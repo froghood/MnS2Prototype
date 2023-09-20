@@ -1,5 +1,4 @@
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
 using Touhou.Net;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
@@ -31,21 +30,21 @@ public class ReimuSpellA : Attack {
 
         for (int i = 0; i < numShots; i++) {
 
-            var projectile = new TargetingAmulet(player.Position, angle + arcAngle * i, false, velocity, deceleration, cooldownOverflow) {
+            var projectile = new TargetingAmulet(player.Position, angle + arcAngle * i, true, false, velocity, deceleration, cooldownOverflow) {
                 SpawnDelay = spawnDelay,
                 DestroyedOnScreenExit = false,
                 CanCollide = false,
-                Color = new Color(0, 255, 0, 100),
+                Color = new Color4(0f, 1f, 0, 0.4f),
             };
             localGroup.Add(projectile);
             player.Scene.AddEntity(projectile);
         }
 
-        player.ApplyCooldowns(Time.InSeconds(1f), PlayerAction.SpellA);
-        player.ApplyCooldowns(Time.InSeconds(0.25f), PlayerAction.Primary, PlayerAction.Secondary, PlayerAction.SpellB);
+        player.ApplyAttackCooldowns(Time.InSeconds(1f), PlayerActions.SpellA);
+        player.ApplyAttackCooldowns(Time.InSeconds(0.25f), PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
 
         var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerAction.SpellA)
+        .In(PlayerActions.SpellA)
         .In(Game.Network.Time - cooldownOverflow)
         .In(player.Position)
         .In(angle);
@@ -70,7 +69,7 @@ public class ReimuSpellA : Attack {
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
 
-        packet.Out(out Time time).Out(out Vector2f position).Out(out float angle);
+        packet.Out(out Time time).Out(out Vector2 position).Out(out float angle);
         var delta = Game.Network.Time - time;
 
 
@@ -81,14 +80,13 @@ public class ReimuSpellA : Attack {
         var arcAngle = MathF.Tau / numShots;
 
         for (int i = 0; i < numShots; i++) {
-            var projectile = new TargetingAmulet(position, angle + arcAngle * i, true, velocity, deceleration) {
+            var projectile = new TargetingAmulet(position, angle + arcAngle * i, false, true, velocity, deceleration) {
                 SpawnDelay = spawnDelay,
                 InterpolatedOffset = delta.AsSeconds(),
                 DestroyedOnScreenExit = false,
-                Color = new Color(255, 0, 0),
+                Color = new Color4(1f, 0, 0, 1f),
                 GrazeAmount = grazeAmount
             };
-            projectile.CollisionGroups.Add(1);
             remoteGroup.Add(projectile);
             opponent.Scene.AddEntity(projectile);
         }

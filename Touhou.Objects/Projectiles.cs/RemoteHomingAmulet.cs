@@ -1,5 +1,5 @@
-using SFML.Graphics;
-using SFML.System;
+using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Net;
 using Touhou.Objects.Characters;
 
@@ -13,7 +13,7 @@ public class RemoteHomingAmulet : Projectile {
     private float angle;
     private bool isHoming = true;
     private int side = 0;
-    private Vector2f turnPosition;
+    private Vector2 turnPosition;
 
     private float rotation;
 
@@ -26,13 +26,9 @@ public class RemoteHomingAmulet : Projectile {
 
     private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
     private Player player;
+    private Sprite sprite;
 
-
-
-    private RectangleShape rect;
-    private CircleShape circle;
-
-    public RemoteHomingAmulet(Vector2f position, float startAngle, float turnRadius, float velocity, float hitboxRadius, Time spawnTimeOffset = default(Time)) : base(true, spawnTimeOffset) {
+    public RemoteHomingAmulet(Vector2 position, float startAngle, float turnRadius, float velocity, float hitboxRadius, Time spawnTimeOffset = default(Time)) : base(false, true, spawnTimeOffset) {
         Position = position;
         angle = startAngle;
         this.turnRadius = turnRadius;
@@ -41,18 +37,25 @@ public class RemoteHomingAmulet : Projectile {
 
         System.Console.WriteLine($"{position}, {startAngle}, {turnRadius}, {velocity}, {hitboxRadius}, {spawnTimeOffset}");
 
-        turnPosition = Position + new Vector2f() {
+        turnPosition = Position + new Vector2() {
             X = turnRadius * MathF.Cos(angle + MathF.PI / 2f),
             Y = turnRadius * MathF.Sin(angle + MathF.PI / 2f)
         };
 
-        rect = new RectangleShape(new Vector2f(25f, 22f));
-        rect.Rotation = Game.Random.NextSingle() * 180f;
-        rect.Origin = rect.Size / 2f;
+        // rect = new RectangleShape(new Vector2(25f, 22f));
+        // rect.Rotation = Game.Random.NextSingle() * 180f;
+        // rect.Origin = rect.Size / 2f;
 
-        circle = new CircleShape();
+        // circle = new CircleShape();
 
-        Hitboxes.Add(new CircleHitbox(this, new Vector2f(0f, 0f), hitboxRadius));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), hitboxRadius, CollisionGroups.OpponentProjectileMinor));
+
+        sprite = new Sprite("spinningamulet") {
+            Origin = new Vector2(0.5f, 0.5f),
+            Rotation = rotation,
+            Scale = new Vector2(1f, 1f) * 0.45f,
+            UseColorSwapping = true,
+        };
 
     }
 
@@ -87,7 +90,7 @@ public class RemoteHomingAmulet : Projectile {
 
             if (opposite > hitboxRadius || MathF.Abs(a) > MathF.PI / 2f) { // switch to turning
                 side = MathF.Sign(a);
-                turnPosition = Position + new Vector2f() {
+                turnPosition = Position + new Vector2() {
                     X = turnRadius * MathF.Cos(angle + MathF.PI / 2f * side),
                     Y = turnRadius * MathF.Sin(angle + MathF.PI / 2f * side)
                 };
@@ -119,7 +122,7 @@ public class RemoteHomingAmulet : Projectile {
 
             if (targetSide != side) {
                 side = -side;
-                turnPosition = Position + new Vector2f() {
+                turnPosition = Position + new Vector2() {
                     X = turnRadius * MathF.Cos(angle + MathF.PI / 2f * side),
                     Y = turnRadius * MathF.Sin(angle + MathF.PI / 2f * side)
                 };
@@ -143,7 +146,7 @@ public class RemoteHomingAmulet : Projectile {
             if (arcLengthToTarget <= maxTurn) {
                 angle += arcLengthToTarget * side;
 
-                Position = turnPosition + new Vector2f() {
+                Position = turnPosition + new Vector2() {
                     X = turnRadius * MathF.Cos(angle - MathF.PI / 2f * side),
                     Y = turnRadius * MathF.Sin(angle - MathF.PI / 2f * side)
                 };
@@ -157,7 +160,7 @@ public class RemoteHomingAmulet : Projectile {
             } else {
                 angle += maxTurn * side;
 
-                Position = turnPosition + new Vector2f() {
+                Position = turnPosition + new Vector2() {
                     X = turnRadius * MathF.Cos(angle - MathF.PI / 2f * side),
                     Y = turnRadius * MathF.Sin(angle - MathF.PI / 2f * side)
                 };
@@ -165,40 +168,48 @@ public class RemoteHomingAmulet : Projectile {
         }
 
         void Forward(float distance) {
-            Position += new Vector2f(MathF.Cos(angle), MathF.Sin(angle)) * distance;
+            Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * distance;
         }
     }
 
     public override void Render() {
-        // rect.FillColor = isHoming ? Color : new Color(170, 0, 200);
+        // rect.FillColor4 = isHoming ? Color4 : new Color4(170, 0, 200);
         // rect.Position = Position;
         // rect.Rotation += 360f * Game.Delta.AsSeconds() * 2f;
         // Game.Draw(rect, 0);
 
-        rotation += 360f * Game.Delta.AsSeconds() * 2f;
+        rotation += MathF.Tau * Game.Delta.AsSeconds() * 2f;
 
-        var states = new SpriteStates() {
-            Origin = new Vector2f(0.5f, 0.5f),
-            Position = Position,
-            Rotation = rotation,
-            Scale = new Vector2f(1f, 1f) * 0.4f
-        };
+        sprite.Position = Position;
+        sprite.Rotation = rotation;
+        sprite.Color = isHoming ? Color : new Color4(170, 0, 200, 255);
 
-        var color = isHoming ? Color : new Color(170, 0, 200);
+        Game.Draw(sprite, Layers.OpponentProjectiles1);
 
-        var shader = new TShader("projectileColor");
-        shader.SetUniform("color", color);
+        base.Render();
 
-        Game.DrawSprite("spinningamulet", states, shader, Layers.Projectiles2);
+        // var states = new SpriteStates() {
+        //     Origin = new Vector2(0.5f, 0.5f),
+        //     Position = Position,
+        //     Rotation = rotation,
+        //     Scale = new Vector2(1f, 1f) * 0.4f
+        // };
+
+        //var Color4 = isHoming ? Color4 : new Color4(170, 0, 200);
+
+        //var shader = new TShader("projectileColor4");
+        //shader.SetUniform("Color4", Color4);
+
+        //Game.DrawSprite("spinningamulet", states, shader, Layers.Projectiles2);
 
 
         // if (side == 0 || !isHoming) return;
 
         // circle.Radius = turnRadius;
         // circle.Position = turnPosition;
-        // circle.Origin = new Vector2f(1f, 1f) * circle.Radius;
-        // circle.FillColor = Color.Transparent;
-        // circle.OutlineColor = new Color(255, 255, 255, 30);
+        // circle.Origin = new Vector2(1f, 1f) * circle.Radius;
+        // circle.FillColor4 = Color4.Transparent;
+        // circle.OutlineColor4 = new Color4(255, 255, 255, 30);
         // circle.OutlineThickness = 1f;
         // Game.Draw(circle, 0);
     }

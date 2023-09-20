@@ -1,6 +1,6 @@
 {
-  "Width": 1283,
-  "Height": 509,
+  "Width": 1868,
+  "Height": 500,
   "Sprites": {
     "yinyang": {
       "Left": 0,
@@ -14,93 +14,117 @@
       "Width": 416,
       "Height": 371
     },
-    "aimindicator": {
+    "marisa": {
       "Left": 921,
+      "Top": 0,
+      "Width": 388,
+      "Height": 304
+    },
+    "aimindicator": {
+      "Left": 1311,
       "Top": 0,
       "Width": 300,
       "Height": 300
     },
-    "butterfly": {
-      "Left": 921,
+    "reimubombwave": {
+      "Left": 1613,
+      "Top": 0,
+      "Width": 255,
+      "Height": 255
+    },
+    "aimarrow2": {
+      "Left": 1311,
       "Top": 302,
+      "Width": 269,
+      "Height": 87
+    },
+    "butterfly": {
+      "Left": 1613,
+      "Top": 257,
       "Width": 137,
       "Height": 170
     },
     "hitboxfocused": {
-      "Left": 1060,
-      "Top": 302,
+      "Left": 921,
+      "Top": 306,
       "Width": 151,
       "Height": 150
     },
+    "fade": {
+      "Left": 1752,
+      "Top": 257,
+      "Width": 100,
+      "Height": 100
+    },
     "knife2": {
-      "Left": 503,
-      "Top": 373,
+      "Left": 1074,
+      "Top": 306,
       "Width": 150,
       "Height": 50
     },
     "ball": {
-      "Left": 655,
-      "Top": 373,
+      "Left": 1226,
+      "Top": 306,
       "Width": 80,
       "Height": 80
     },
     "ball2": {
-      "Left": 737,
-      "Top": 373,
+      "Left": 1074,
+      "Top": 358,
       "Width": 80,
       "Height": 80
     },
     "heart": {
-      "Left": 819,
-      "Top": 373,
+      "Left": 1752,
+      "Top": 359,
       "Width": 80,
       "Height": 80
     },
     "spinningamulet": {
       "Left": 503,
-      "Top": 425,
+      "Top": 373,
       "Width": 72,
       "Height": 84
     },
     "arrowhead": {
       "Left": 577,
-      "Top": 425,
+      "Top": 373,
       "Width": 73,
       "Height": 58
     },
     "aimarrow": {
-      "Left": 1060,
-      "Top": 454,
+      "Left": 652,
+      "Top": 373,
       "Width": 160,
       "Height": 20
     },
     "amulet": {
-      "Left": 652,
-      "Top": 455,
+      "Left": 814,
+      "Top": 373,
       "Width": 70,
       "Height": 46
     },
     "bullet": {
-      "Left": 724,
-      "Top": 455,
+      "Left": 1156,
+      "Top": 388,
       "Width": 80,
       "Height": 40
     },
     "kunai": {
-      "Left": 806,
-      "Top": 455,
+      "Left": 1238,
+      "Top": 391,
       "Width": 80,
       "Height": 40
     },
     "rice": {
-      "Left": 1213,
-      "Top": 302,
+      "Left": 1320,
+      "Top": 391,
       "Width": 70,
       "Height": 40
     },
     "pellet": {
-      "Left": 1223,
-      "Top": 0,
+      "Left": 1392,
+      "Top": 391,
       "Width": 41,
       "Height": 41
     }
