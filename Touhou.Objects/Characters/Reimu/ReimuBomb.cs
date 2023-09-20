@@ -43,6 +43,9 @@ public class ReimuBomb : Bomb {
 
         Game.Network.Send(packet);
 
+        Game.Sounds.Play("spell");
+        Game.Sounds.Play("bomb");
+
     }
     public override void OpponentPress(Opponent opponent, Packet packet) {
 

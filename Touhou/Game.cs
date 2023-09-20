@@ -15,6 +15,7 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using Vector2i = OpenTK.Mathematics.Vector2i;
 using Touhou.Graphics;
+using Touhou.Sound;
 
 namespace Touhou;
 
@@ -31,11 +32,10 @@ internal static class Game {
     public static Network Network { get => network; }
     public static SceneManager Scenes { get => sceneManager; }
 
-    //public static SoundPlayer Sounds { get => soundPlayer; }
+    public static SoundPlayer Sounds { get => soundPlayer; }
 
 
     public static Vector2i WindowSize { get => window.ClientSize; }
-    public static OldCamera OldCamera { get; private set; }
     public static Camera Camera { get; private set; }
 
 
@@ -65,6 +65,7 @@ internal static class Game {
     private static InputManager inputManager = new();
     private static Network network = new();
     private static SceneManager sceneManager = new();
+    private static SoundPlayer soundPlayer;
 
     private static Clock clock = new();
     private static Time previousTime;
@@ -87,12 +88,19 @@ internal static class Game {
 
         Random = new Random();
 
-        //soundPlayer = new SoundPlayer();
+        soundPlayer = new SoundPlayer(Settings.SoundVolume, 50, 3);
+        soundPlayer.Load("./assets/sounds/hit.wav");
+        soundPlayer.Load("./assets/sounds/death.wav");
+        soundPlayer.Load("./assets/sounds/low_hearts.wav");
+        soundPlayer.Load("./assets/sounds/graze.wav");
+        soundPlayer.Load("./assets/sounds/spell.wav");
+        soundPlayer.Load("./assets/sounds/bomb.wav");
 
 
         var settings = new NativeWindowSettings() {
             Size = new Vector2i(1280, 720),
             NumberOfSamples = 16,
+            StartVisible = false,
         };
 
 
@@ -100,15 +108,8 @@ internal static class Game {
 
         renderer = new Renderer(window.Context);
 
-        OldCamera = new OldCamera(new Vector2(1600f, 900f));
-
         Camera = new Camera(window);
         Camera.View = new Vector2(1600f, 900f);
-        //NewCamera.Position = Vector2.UnitX * 100f;
-
-
-
-        //DefaultFont = new Font("assets/fonts/arial.ttf");
     }
 
     public static void Init(string[] args) {
@@ -142,6 +143,8 @@ internal static class Game {
         //Debug.Fields.Add("postRender");
 
         Scenes.PushScene<MainScene>();
+
+        window.IsVisible = true;
     }
 
     public static void Run() {
@@ -182,8 +185,6 @@ internal static class Game {
     public static void Draw(Renderable renderable, Layers layer) => renderer.Queue(renderable, layer);
 
     private static void Update() {
-        //NativeWindow.ProcessWindowEvents(false);
-
         inputManager.Process(window);
 
         network.Update();
@@ -193,8 +194,6 @@ internal static class Game {
     }
 
     private static void Render() {
-
-        GL.Clear(ClearBufferMask.ColorBufferBit);
 
 
 

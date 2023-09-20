@@ -342,8 +342,8 @@ public abstract class Player : Entity, IReceivable {
             var hitPacket = new Packet(PacketType.Hit).In(Game.Network.Time).In(Position).In(angleToOpponent);
             Game.Network.Send(hitPacket);
 
-            //Game.Sounds.Play("hit");
-            //if (HeartCount == 1) Game.Sounds.Play("low_hearts");
+            Game.Sounds.Play("hit");
+            if (HeartCount == 1) Game.Sounds.Play("low_hearts");
 
         }
     }
@@ -355,7 +355,7 @@ public abstract class Player : Entity, IReceivable {
 
         Scene.AddEntity(new HitExplosion(Position, 1f, 500f, Color));
 
-        //Game.Sounds.Play("death");
+        Game.Sounds.Play("death");
 
         var packet = new Packet(PacketType.Death).In(deathTime).In(Position);
         Game.Network.Send(packet);
@@ -366,7 +366,7 @@ public abstract class Player : Entity, IReceivable {
             if (isDead || projectile.Grazed) return;
             powerGainedFromGrazing += projectile.GrazeAmount;
 
-            //Game.Sounds.Play("graze");
+            Game.Sounds.Play("graze");
 
             projectile.Graze();
 
