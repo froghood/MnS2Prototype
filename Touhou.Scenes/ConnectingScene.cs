@@ -1,9 +1,10 @@
 using System.Net;
-using Touhou.Net;
+using Touhou.Networking;
 using Touhou.Scenes;
 using Touhou.Objects.Generics;
 using Touhou.Graphics;
 using OpenTK.Mathematics;
+using Steamworks;
 
 namespace Touhou.Scenes;
 
@@ -13,8 +14,8 @@ public class ConnectingScene : Scene {
 
     private IPEndPoint endPoint;
 
-    public ConnectingScene(IPEndPoint endPoint) {
-        this.endPoint = endPoint;
+    public ConnectingScene() {
+        endPoint = new IPEndPoint(IPAddress.Parse(Game.Settings.Address), Game.Settings.Port);
 
         text = new Text {
             DisplayedText = "Connecting...",
@@ -28,6 +29,9 @@ public class ConnectingScene : Scene {
     public override void OnInitialize() {
         Game.Network.TimeOffset -= Game.Time;
 
+        AddEntity(new UpdateCallback(OnUpdate));
+
+
         AddEntity(new ReceiveCallback((packet, endPoint) => {
             if (packet.Type != PacketType.ConnectionResponse) return;
             Game.Scenes.PushScene<ClientSyncingScene>();
@@ -36,22 +40,27 @@ public class ConnectingScene : Scene {
         AddEntity(new RenderCallback(() => {
             Game.Draw(text, Layers.UI1);
         }));
+    }
 
-        TryConnecting(endPoint);
-
+    private void OnUpdate() {
+        if (!Game.Network.IsConnected) {
+            Connect();
+        }
     }
 
     public override void OnDisconnect() {
-        Game.Network.Disconnect();
-        System.Console.WriteLine("disconnected");
-
-        TryConnecting(endPoint);
+        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
+        else Game.Network.Disconnect();
     }
 
-    private void TryConnecting(IPEndPoint endPoint) {
-        Game.Network.Connect(endPoint);
+    private void Connect() {
+        if (Game.Settings.UseSteam) Game.Network.ConnectSteam(Game.Settings.SteamID);
+        else Game.Network.Connect(endPoint);
+
+
+
         Game.Network.Send(new Packet(PacketType.Connection));
 
-        System.Console.WriteLine($"Attempting to connect to {endPoint}");
+        System.Console.WriteLine($"Attempting to connect to {Game.Settings.SteamID}");
     }
 }

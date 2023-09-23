@@ -1,4 +1,4 @@
-using Touhou.Net;
+using Touhou.Networking;
 using Touhou.Objects;
 
 namespace Touhou.Objects.Characters;

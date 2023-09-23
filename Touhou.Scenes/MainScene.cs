@@ -32,11 +32,11 @@ public class MainScene : Scene {
 
         AddEntity(new Controller((action) => {
             if (action == PlayerActions.Primary) {
-                Game.Scenes.PushScene<HostingScene>(Game.Settings.Port);
+                Game.Scenes.PushScene<HostingScene>();
             }
 
             if (action == PlayerActions.Secondary) {
-                Game.Scenes.PushScene<ConnectingScene>(new IPEndPoint(IPAddress.Parse(Game.Settings.Address), Game.Settings.Port));
+                Game.Scenes.PushScene<ConnectingScene>();
             }
         }, (_) => { }));
 

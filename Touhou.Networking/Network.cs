@@ -1,27 +1,29 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using Steamworks;
+using Steamworks.Data;
 
-
-namespace Touhou.Net;
+namespace Touhou.Networking;
 
 public class Network {
 
 
 
-    public bool Connected { get => udpClient.Client.Connected; }
+    public bool IsConnected { get => isConnected; }
+
 
     public Time Time { get => Game.Time - connectionTime + TimeOffset; }
 
+
     public Time PerceivedLatency { get; private set; }
     public Time Ping { get => PerceivedLatency * 2; }
+
 
     public Time TheirPerceivedLatency { get; private set; }
     public Time TheirPing { get => TheirPerceivedLatency * 2; }
 
 
-
-    //public float Ping { get => pingSamples.Sum() / pingSamples.Count; }
     public Time TimeOffset { get; set; }
 
 
@@ -29,7 +31,7 @@ public class Network {
     public event Action<Time> DataReceived;
 
 
-    private UdpClient udpClient = new();
+    private UdpClient udpClient;
 
 
     //private Stopwatch packetRetryTimer = new();
@@ -45,7 +47,6 @@ public class Network {
     private Queue<float> pingSamples = new();
 
     private Queue<Packet> packetOutgoingQueue = new();
-    private Queue<Packet> packetArrivalQueue = new();
     private Queue<(int Size, Time Time)> sizeTimeStamps = new();
     private int dataUsage;
 
@@ -60,36 +61,64 @@ public class Network {
 
 
     private bool forceFlush;
+    private SteamSocketManager socketManager;
+    private SteamConnectionManager connectionManager;
+    private bool isConnected;
+
 
 
     public void Host(int port) {
-        if (udpClient.Client.IsBound) return;
-        udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
 
-        System.Console.WriteLine($"Hosting on port {port}");
+        if (isConnected || (udpClient?.Client.IsBound ?? false)) return;
+
+        udpClient = new UdpClient(port);
     }
 
+    public void HostSteam() {
+        if (isConnected) return;
+
+        socketManager = SteamNetworkingSockets.CreateRelaySocket<SteamSocketManager>();
+
+        connectionManager = SteamNetworkingSockets.ConnectRelay<SteamConnectionManager>(SteamClient.SteamId);
+        connectionManager.DataReceived += receivedData;
+        connectionManager.Disconnected += () => Game.Scenes.Current?.OnDisconnect();
+
+        isConnected = true;
+    }
+
+
+
     public void Connect(IPEndPoint endPoint) {
-        if (Connected) return;
+        if (isConnected) return;
+
+        udpClient ??= new UdpClient();
         udpClient.Connect(endPoint);
 
         connectionTime = Game.Time;
         lastReceivedTime = Game.Time;
 
-        //packetRetryTimer.Restart();
-        //disconnectionTimer.Restart();
-
-        System.Console.WriteLine($"Connecting to {endPoint}");
+        isConnected = true;
     }
 
+    public void ConnectSteam(SteamId id) {
+        if (isConnected) return;
+
+        connectionManager = SteamNetworkingSockets.ConnectRelay<SteamConnectionManager>(id);
+        connectionManager.DataReceived += receivedData;
+        connectionManager.Disconnected += () => Game.Scenes.Current?.OnDisconnect();
+
+        connectionTime = Game.Time;
+        lastReceivedTime = Game.Time;
+
+        isConnected = true;
+    }
+
+
+
     public void Disconnect() {
-        if (!Connected) return;
+        if (!isConnected) return;
 
-        udpClient.Close();
-        udpClient = new UdpClient();
-
-        //packetRetryTimer.Reset();
-        //disconnectionTimer.Reset();
+        udpClient?.Close();
 
         packetOutgoingQueue.Clear();
         totalUniquePacketsSent = 0;
@@ -101,130 +130,132 @@ public class Network {
         dataUsage = 0;
     }
 
+    public void DisconnectSteam() {
+        if (!isConnected) return;
+
+        connectionManager?.Close();
+        socketManager?.Close();
+
+        packetOutgoingQueue.Clear();
+        totalUniquePacketsSent = 0;
+        totalUniquePacketsReceived = 0;
+
+        pingSamples.Clear();
+        sizeTimeStamps.Clear();
+
+        dataUsage = 0;
+
+        isConnected = false;
+    }
+
     public void Send(Packet packet) {
-        if (!Connected) return;
+        if (!isConnected) return;
         packetOutgoingQueue.Enqueue(packet);
         totalUniquePacketsSent++;
         forceFlush = true;
-        //SendInternal();
     }
 
     public void Update() {
 
-        if (Connected && Game.Time > lastReceivedTime + Time.InSeconds(5)) {
-            Game.Scenes.Current?.OnDisconnect();
-        }
+        // steam
+        socketManager?.Receive();
+        connectionManager?.Receive();
 
-        while (udpClient.Available > 0) {
-
-
-
-            lastReceivedTime = Game.Time;
-
+        // direct
+        while (udpClient?.Available > 0) {
             var theirEndPoint = new IPEndPoint(IPAddress.Any, 0);
-            byte[] data;
-            try {
-                data = udpClient.Receive(ref theirEndPoint);
-            } catch (Exception e) {
-                System.Console.WriteLine(e);
-                Game.Scenes.Current?.OnDisconnect();
-                return;
-            }
-
-
-            dataUsage = CalculateDataUsage(data.Length);
-            System.Console.WriteLine($"data received: {data.Length} byte(s)");
-
-            // _______[ data format ]_______
-            // their time              [offset: 0,  size: 8]
-            // their percieved latency [offset: 8, size: 8]
-            // total sent              [offset: 16,  size: 4]
-            // total received          [offset: 20, size: 4]
-            // num packets             [offset: 24, size: 4]
-
-            // packet meta block       [offset: 28, size: 8 * n]
-            // packet block            [position: ~,  size: ~]
-
-            // _______[ packet meta ]_______
-            // packet offset           [offset: 0, size: 4]
-            // packet size             [offset: 4, size: 4]
-
-            // _______[ packet ]_______
-            // type                    [offset: 0, size: 1]
-            // data                    [offset: 1, size: ~]
-
-            Time theirTime = BitConverter.ToInt64(data, 0);
-            Time theirPerceivedLatency = BitConverter.ToInt64(data, 8);
-            int totalTheySent = BitConverter.ToInt32(data, 16);
-            int totalTheyReceived = BitConverter.ToInt32(data, 20);
-            int numPackets = BitConverter.ToInt32(data, 24);
-
-            TheirPerceivedLatency = theirPerceivedLatency;
-
-            SampleLatency(theirTime, theirPerceivedLatency);
-            DequeueOutgoingPackets(totalTheyReceived);
-
-            int packetMetaBlockOffset = 28;
-            int packetBlockOffset = packetMetaBlockOffset + 8 * numPackets;
-
-            var individualPacketOffsets = new int[numPackets];
-            var individualPacketSizes = new int[numPackets];
-
-
-            for (int i = 0; i < numPackets; i++) {
-                individualPacketOffsets[i] = BitConverter.ToInt32(data, packetMetaBlockOffset + 8 * i);
-                individualPacketSizes[i] = BitConverter.ToInt32(data, packetMetaBlockOffset + 8 * i + 4);
-            }
-
-            int numToRead = totalTheySent - totalUniquePacketsReceived;
-
-
-            for (int i = numPackets - numToRead; i < numPackets; i++) {
-                var packetType = (PacketType)data[packetBlockOffset + individualPacketOffsets[i]];
-
-                System.Console.WriteLine($"{packetType} from {theirEndPoint}");
-
-                var packet = new Packet(packetType);
-
-                int offset = packetBlockOffset + individualPacketOffsets[i] + 1;
-                int size = individualPacketSizes[i];
-
-                packet.In(data, offset, size);
-
-                totalUniquePacketsReceived++;
-
-                if (packetType == PacketType.LatencyCorrection) {
-                    packet.Out(out Time theirLatency);
-
-
-                    var latencyDifference = Math.Abs(theirLatency - PerceivedLatency);
-                    var latencySign = Math.Sign(theirLatency - PerceivedLatency);
-
-                    var offsetChange = (Time)Math.Round(Math.Min(Math.Pow(latencyDifference * 0.05d, 2d), latencyDifference * 0.5d) * latencySign);
-
-                    //var offsetChange = (Time)Math.Round((PerceivedLatency - theirLatency) * 0.1d);
-                    System.Console.WriteLine(offsetChange);
-                    TimeOffset += offsetChange;
-
-                    isLatencyCorrectionProfiling = true;
-
-                    packet.ResetReadPosition();
-                }
-
-                PacketReceived?.Invoke(packet, theirEndPoint);
-            }
-
-
+            var data = udpClient.Receive(ref theirEndPoint);
+            receivedData(data, theirEndPoint);
         }
-
-        //if (Connected && Game.Time - lastSentTime >= sendRetryInterval) SendInternal();
     }
 
+    private void receivedData(byte[] data, IPEndPoint endPoint) {
+        lastReceivedTime = Game.Time;
+
+        dataUsage = CalculateDataUsage(data.Length);
+
+        // _______[ data format ]_______
+        // their time              [offset: 0,  size: 8]
+        // their percieved latency [offset: 8, size: 8]
+        // total sent              [offset: 16,  size: 4]
+        // total received          [offset: 20, size: 4]
+        // num packets             [offset: 24, size: 4]
+
+        // packet meta block       [offset: 28, size: 8 * n]
+        // packet block            [position: ~,  size: ~]
+
+        // _______[ packet meta ]_______
+        // packet offset           [offset: 0, size: 4]
+        // packet size             [offset: 4, size: 4]
+
+        // _______[ packet ]_______
+        // type                    [offset: 0, size: 1]
+        // data                    [offset: 1, size: ~]
+
+        Time theirTime = BitConverter.ToInt64(data, 0);
+        Time theirPerceivedLatency = BitConverter.ToInt64(data, 8);
+        int totalTheySent = BitConverter.ToInt32(data, 16);
+        int totalTheyReceived = BitConverter.ToInt32(data, 20);
+        int numPackets = BitConverter.ToInt32(data, 24);
+
+        TheirPerceivedLatency = theirPerceivedLatency;
+
+        SampleLatency(theirTime, theirPerceivedLatency);
+        DequeueOutgoingPackets(totalTheyReceived);
+
+        int packetMetaBlockOffset = 28;
+        int packetBlockOffset = packetMetaBlockOffset + 8 * numPackets;
+
+        var individualPacketOffsets = new int[numPackets];
+        var individualPacketSizes = new int[numPackets];
+
+
+        for (int i = 0; i < numPackets; i++) {
+            individualPacketOffsets[i] = BitConverter.ToInt32(data, packetMetaBlockOffset + 8 * i);
+            individualPacketSizes[i] = BitConverter.ToInt32(data, packetMetaBlockOffset + 8 * i + 4);
+        }
+
+        int numToRead = totalTheySent - totalUniquePacketsReceived;
+
+
+        for (int i = numPackets - numToRead; i < numPackets; i++) {
+            var packetType = (PacketType)data[packetBlockOffset + individualPacketOffsets[i]];
+
+            System.Console.WriteLine($"{packetType} packed received");
+
+            var packet = new Packet(packetType);
+
+            int offset = packetBlockOffset + individualPacketOffsets[i] + 1;
+            int size = individualPacketSizes[i];
+
+            packet.In(data, offset, size);
+
+            totalUniquePacketsReceived++;
+
+            if (packetType == PacketType.LatencyCorrection) {
+                packet.Out(out Time theirLatency);
+
+
+                var latencyDifference = Math.Abs(theirLatency - PerceivedLatency);
+                var latencySign = Math.Sign(theirLatency - PerceivedLatency);
+
+                var offsetChange = (Time)Math.Round(Math.Min(Math.Pow(latencyDifference * 0.05d, 2d), latencyDifference * 0.5d) * latencySign);
+
+                //var offsetChange = (Time)Math.Round((PerceivedLatency - theirLatency) * 0.1d);
+                System.Console.WriteLine(offsetChange);
+                TimeOffset += offsetChange;
+
+                isLatencyCorrectionProfiling = true;
+
+                packet.ResetReadPosition();
+            }
+
+            PacketReceived?.Invoke(packet, endPoint);
+        }
+
+    }
     private void SampleLatency(Time theirTime, Time theirPerceivedLatency) {
         var latency = Time - theirTime;
-
-
-
 
         DataReceived?.Invoke(latency);
 
@@ -294,7 +325,9 @@ public class Network {
             .Concat(bufferedPacket.Data);
         }
 
-        udpClient.Send(data.ToArray());
+        connectionManager?.Connection.SendMessage(data.ToArray(), SendType.Unreliable);
+        udpClient?.Send(data.ToArray());
+
         lastSentTime = Game.Time;
     }
 
@@ -361,7 +394,7 @@ public class Network {
             SendInternal();
             forceFlush = false;
         } else {
-            if (Connected && Game.Time - lastSentTime >= sendRetryInterval) SendInternal();
+            if (isConnected && Game.Time - lastSentTime >= sendRetryInterval) SendInternal();
         }
 
 

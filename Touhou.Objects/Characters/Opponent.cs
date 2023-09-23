@@ -1,5 +1,5 @@
 using System.Net;
-using Touhou.Net;
+using Touhou.Networking;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
 using Touhou.Objects.Characters;

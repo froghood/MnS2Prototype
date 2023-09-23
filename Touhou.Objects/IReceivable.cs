@@ -1,5 +1,5 @@
 using System.Net;
-using Touhou.Net;
+using Touhou.Networking;
 
 namespace Touhou.Objects;
 

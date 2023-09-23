@@ -1,5 +1,5 @@
 using System.Net;
-using Touhou.Net;
+using Touhou.Networking;
 using Touhou.Scenes;
 using Touhou.Objects.Generics;
 using Touhou.Graphics;
@@ -13,8 +13,8 @@ public class HostingScene : Scene {
 
     private int port;
 
-    public HostingScene(int port) {
-        this.port = port;
+    public HostingScene() {
+        this.port = Game.Settings.Port;
 
         text = new Text {
             DisplayedText = "Waiting for connection...",
@@ -29,7 +29,8 @@ public class HostingScene : Scene {
 
         Game.Network.TimeOffset -= Game.Time;
 
-        Game.Network.Host(this.port);
+        if (Game.Settings.UseSteam) Game.Network.HostSteam();
+        else Game.Network.Host(port);
 
         AddEntity(new ReceiveCallback(ReceiverCallback));
 
@@ -39,8 +40,10 @@ public class HostingScene : Scene {
     }
 
     private void ReceiverCallback(Packet packet, IPEndPoint endPoint) {
-        if (packet.Type != PacketType.Connection || Game.Network.Connected) return;
-        Game.Network.Connect(endPoint);
+        if (packet.Type != PacketType.Connection) return;
+
+        if (!Game.Settings.UseSteam) Game.Network.Connect(endPoint);
+
         Game.Scenes.PushScene<HostSyncingScene>();
     }
 }
