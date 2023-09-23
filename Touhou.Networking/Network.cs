@@ -125,9 +125,11 @@ public class Network {
         totalUniquePacketsReceived = 0;
 
         pingSamples.Clear();
-
         sizeTimeStamps.Clear();
+
         dataUsage = 0;
+
+        isConnected = false;
     }
 
     public void DisconnectSteam() {
