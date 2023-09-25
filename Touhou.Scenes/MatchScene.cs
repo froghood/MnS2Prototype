@@ -181,7 +181,7 @@ public class MatchScene : Scene {
 
 
     public override void OnDisconnect() {
-        Game.Network.Disconnect();
+        Game.Network.DisconnectSteam();
         System.Console.WriteLine("disconnected");
 
         //Game.Network.DataReceived -= latencyGraphDelegate;

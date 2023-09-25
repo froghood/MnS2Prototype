@@ -2,7 +2,7 @@
 using System.Net;
 using OpenTK.Mathematics;
 using Touhou.Graphics;
-using Touhou.Net;
+using Touhou.Networking;
 using Touhou.Objects.Generics;
 using Touhou.Scenes;
 

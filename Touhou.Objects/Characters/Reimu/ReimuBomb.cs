@@ -1,5 +1,5 @@
 using OpenTK.Mathematics;
-using Touhou.Net;
+using Touhou.Networking;
 using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
@@ -31,11 +31,12 @@ public class ReimuBomb : Bomb {
 
         }
 
-        Cooldown = Time.InSeconds(1f) - cooldownOverflow;
-        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerActions.Primary);
-        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerActions.SpellA);
-        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerActions.SpellB);
+        Cooldown = Time.InSeconds(1.5f) - cooldownOverflow;
+
+        player.ApplyAttackCooldowns(Cooldown, PlayerActions.Primary);
+        player.ApplyAttackCooldowns(Cooldown, PlayerActions.Secondary);
+        player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpellA);
+        player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpellB);
 
         var packet = new Packet(PacketType.BombPressed)
         .In(Game.Network.Time - cooldownOverflow)

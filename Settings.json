@@ -1,5 +1,7 @@
 {
+    "UseSteam": false,
     "Address": "71.197.60.144",
-    "Port": "6189",
+    "Port": 6189,
+    "SteamID": 76561198015744187,
     "SoundVolume": 0.05
 }

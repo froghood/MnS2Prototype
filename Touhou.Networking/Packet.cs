@@ -1,7 +1,7 @@
 using System.Net;
 using System.Runtime.InteropServices;
 
-namespace Touhou.Net;
+namespace Touhou.Networking;
 
 public class Packet {
 

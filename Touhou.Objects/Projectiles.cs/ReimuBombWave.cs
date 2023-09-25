@@ -1,6 +1,6 @@
 using OpenTK.Mathematics;
 using Touhou.Graphics;
-using Touhou.Net;
+using Touhou.Networking;
 
 namespace Touhou.Objects.Projectiles;
 

@@ -1,5 +1,5 @@
 using OpenTK.Mathematics;
-using Touhou.Net;
+using Touhou.Networking;
 using Touhou.Objects;
 using Touhou.Objects.Projectiles;
 

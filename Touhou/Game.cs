@@ -8,7 +8,7 @@ using OpenTK.Windowing.Desktop;
 
 //using Touhou.Audio;
 using Touhou.Debugging;
-using Touhou.Net;
+using Touhou.Networking;
 using Touhou.Scenes;
 //using Debug = Touhou.Debugging.Debug;
 using OpenTK.Graphics.OpenGL4;
@@ -16,6 +16,7 @@ using OpenTK.Mathematics;
 using Vector2i = OpenTK.Mathematics.Vector2i;
 using Touhou.Graphics;
 using Touhou.Sound;
+using Steamworks;
 
 namespace Touhou;
 
@@ -86,6 +87,8 @@ internal static class Game {
 
         Settings = new Settings("./Settings.json");
 
+        System.Console.WriteLine(Settings.SteamID);
+
         Random = new Random();
 
         soundPlayer = new SoundPlayer(Settings.SoundVolume, 50, 3);
@@ -114,7 +117,7 @@ internal static class Game {
 
     public static void Init(string[] args) {
 
-        //soundPlayer.Load("./assets/sounds");
+        SteamClient.Init(480);
 
         window.Title = "MNS2 OPENGL";
 
@@ -180,14 +183,20 @@ internal static class Game {
 
             FrameCount++;
         }
+
+        SteamClient.Shutdown();
     }
 
     public static void Draw(Renderable renderable, Layers layer) => renderer.Queue(renderable, layer);
 
     private static void Update() {
+
+        SteamClient.RunCallbacks();
+
         inputManager.Process(window);
 
         network.Update();
+
         sceneManager.Current.Update();
 
         network.Flush();

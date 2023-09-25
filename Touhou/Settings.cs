@@ -11,10 +11,16 @@ public class Settings {
     }
 
     [JsonRequired]
+    public bool UseSteam { get; private set; }
+
+    [JsonRequired]
     public string Address { get; private set; }
 
     [JsonRequired]
     public int Port { get; private set; }
+
+    [JsonRequired]
+    public ulong SteamID { get; private set; }
 
     [JsonRequired]
     public float SoundVolume { get; private set; }
