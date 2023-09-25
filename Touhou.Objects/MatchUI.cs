@@ -35,7 +35,7 @@ public class MatchUI : Entity {
         RenderHearts(isP1, true);
         RenderHearts(!isP1, false);
 
-        //RenderTimer();
+        RenderTimer();
     }
 
 

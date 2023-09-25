@@ -12,7 +12,6 @@ public class MainScene : Scene {
     private readonly Text text;
 
     public MainScene() {
-        //text = new Text($"Press {PlayerAction.Primary} to host, {PlayerAction.Secondary} to connect", Game.DefaultFont, 14);
 
         text = new Text {
             DisplayedText = $"Press {PlayerActions.Primary} to host, {PlayerActions.Secondary} to connect",
@@ -23,13 +22,11 @@ public class MainScene : Scene {
             Boldness = 0f,
             IsUI = true,
             Alignment = new Vector2(-1f, 1f),
-
         };
+
     }
 
     public override void OnInitialize() {
-        //Game.Renderer.ClearColor4 = new Color44(1f, 1f, 1f, 1f);
-
         AddEntity(new Controller((action) => {
             if (action == PlayerActions.Primary) {
                 Game.Scenes.PushScene<HostingScene>(Game.Settings.Port);
@@ -42,19 +39,8 @@ public class MainScene : Scene {
 
         AddEntity(new RenderCallback(() => {
 
-            var circle = new Circle() {
-                Origin = new Vector2(0.5f),
-                Radius = 100f,
-                IsUI = true,
-            };
-
-            Game.Draw(circle, Layers.UI1);
-
             Game.Draw(text, Layers.UI1);
-            //text.CharacterSize += 50f * Game.Delta.AsSeconds();
-            //text.Boldness = MathF.Sin(Game.Delta.AsSeconds());
 
-            //System.Console.WriteLine(Game.WindowSize);
         }));
 
     }

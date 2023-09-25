@@ -13,7 +13,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     public float Direction { get; private set; }
 
-    public float CurrentTime => lifeTime;
+    public Time LifeTime => lifeTime;
 
     public Time SpawnDelay { get; init; }
 
@@ -25,7 +25,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     private float preCos;
     private float preSin;
-    private float lifeTime;
+    private Time lifeTime;
 
 
 
@@ -51,9 +51,9 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     public sealed override void Update() {
         PrevPosition = Position;
 
-        lifeTime = (Game.Time - SpawnTime).AsSeconds();
+        lifeTime = Game.Time - SpawnTime;
 
-        float spawnTimeAdjustedTime = MathF.Max(lifeTime - SpawnDelay.AsSeconds(), 0f);
+        float spawnTimeAdjustedTime = MathF.Max(lifeTime.AsSeconds() - SpawnDelay.AsSeconds(), 0f);
 
 
         float funcTime = spawnTimeAdjustedTime + Easing.Out(Math.Clamp(spawnTimeAdjustedTime / 2f, 0f, 1f), 3f) * InterpolatedOffset;

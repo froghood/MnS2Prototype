@@ -5,24 +5,18 @@ using Touhou.Net;
 
 namespace Touhou.Objects.Projectiles;
 
-public class LocalHomingAmulet : Projectile {
+public class LocalHomingAmulet : Homing {
 
 
 
-    private readonly float turnRadius;
-    private readonly float velocity;
 
-    private float angle;
-    private int side = 0;
-    private Vector2 turnPosition;
+
+
 
 
 
     private Vector2 visualOffset;
     private float interpolationTime;
-    private bool isHoming = true;
-    private bool hasStartedMoving;
-    private float rotation;
 
 
 
@@ -33,18 +27,14 @@ public class LocalHomingAmulet : Projectile {
     public LocalHomingAmulet(Vector2 position, float startingAngle, float turnRadius, float velocity, float hitboxRadius) : base(true, false) {
         Position = position;
         angle = startingAngle;
+        visualRotation = startingAngle + MathF.PI / 2f;
         this.turnRadius = turnRadius;
         this.velocity = velocity;
 
-
-        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), hitboxRadius, CollisionGroups.PlayerProjectile));
-
-        rotation = Game.Random.NextSingle() * 360f;
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, CollisionGroups.PlayerProjectile));
 
         sprite = new Sprite("spinningamulet") {
-            Origin = new Vector2(0.5f, 0.5f),
-            Rotation = rotation,
-            Scale = new Vector2(1f, 1f) * 0.45f,
+            Origin = new Vector2(0.5f),
             UseColorSwapping = true,
         };
     }
@@ -54,17 +44,24 @@ public class LocalHomingAmulet : Projectile {
 
         var lifeTime = Game.Time - SpawnTime;
 
+        if (state == HomingState.Spawning && lifeTime >= SpawnDuration) {
+            state = HomingState.PreHoming;
+        }
 
-        if (!hasStartedMoving && lifeTime < Time.InSeconds(0.25f)) return;
+        if (state == HomingState.Spawning) return;
 
+        if (state == HomingState.PreHoming) {
+            Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * velocity * 2f * Game.Delta.AsSeconds();
+            return;
+        }
 
-        if (!isHoming) {
+        if (state == HomingState.PostHoming) {
             Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * velocity * Game.Delta.AsSeconds();
             base.Update();
             return;
         }
 
-
+        // homing
         if (side == 0) {
             Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * velocity * Game.Delta.AsSeconds();
         } else {
@@ -91,12 +88,14 @@ public class LocalHomingAmulet : Projectile {
 
         if (id != Id) return;
 
-        packet.Out(out bool theirIsHoming);
+        packet.Out(out Time theirTime).Out(out HomingState theirState);
+
+        state = theirState;
 
         var visualPosition = Position + visualOffset * interpolationTime;
 
-        if (theirIsHoming) {
-            packet.Out(out Time theirTime).Out(out Vector2 theirPosition).Out(out float theirAngle).Out(out int theirSide);
+        if (state == HomingState.Homing) {
+            packet.Out(out Vector2 theirPosition).Out(out float theirAngle).Out(out int theirSide);
 
             Position = theirPosition;
             angle = theirAngle;
@@ -120,66 +119,43 @@ public class LocalHomingAmulet : Projectile {
                 };
             }
         } else {
-            isHoming = false;
 
-            packet.Out(out Time theirTime).Out(out Vector2 theirPosition).Out(out float theirAngle);
-
-
-
-
+            packet.Out(out Vector2 theirPosition).Out(out float theirAngle);
 
             Position = theirPosition;
             angle = theirAngle;
 
             var latency = Game.Network.Time - theirTime;
 
-            System.Console.WriteLine($"{latency},{theirPosition}, {theirAngle}");
-
             Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * velocity * latency.AsSeconds();
         }
 
         visualOffset = visualPosition - Position;
         interpolationTime = 1f;
-
-        hasStartedMoving = true;
     }
 
     public override void Render() {
 
-        rotation += MathF.Tau * Game.Delta.AsSeconds() * 2f;
+        var lifeTime = Game.Time - SpawnTime;
+
+        bool spinning = (state == HomingState.PostHoming || state == HomingState.Homing);
+        var spawnRatio = MathF.Min(1f, lifeTime.AsSeconds() / SpawnDuration.AsSeconds());
+
+        if (spinning) visualRotation += MathF.Tau * Game.Delta.AsSeconds() * 2f;
 
         sprite.Position = Position + visualOffset * interpolationTime;
-        sprite.Rotation = rotation;
-        sprite.Color = Color;
+        sprite.Scale = Vector2.One * (spinning ? 0.40f : 0.35f) * (1f + 3f * (1f - spawnRatio));
+        sprite.Rotation = visualRotation;
+
+        sprite.Color = new Color4(
+             Color.R,
+             Color.G * (state == HomingState.PostHoming ? 0.7f : 1f),
+             Color.B,
+             Color.A * spawnRatio);
 
         Game.Draw(sprite, Layers.PlayerProjectiles1);
 
         base.Render();
-
-
-        // var states = new SpriteStates() {
-        //     Origin = new Vector2(0.5f, 0.5f),
-        //     Position = Position + visualOffset * interpolationTime,
-        //     Rotation = rotation,
-        //     Scale = new Vector2(1f, 1f) * 0.4f
-        // };
-
-
-        //var shader = new TShader("projectileColor4");
-        //shader.SetUniform("Color4", Color);
-
-        //Game.DrawSprite("spinningamulet", states, shader, Layers.Projectiles1);
-
-
-        // if (side == 0) return;
-
-        // circle.Radius = turnRadius;
-        // circle.Position = turnPosition;
-        // circle.Origin = new Vector2(1f, 1f) * circle.Radius;
-        // circle.FillColor4 = Color4.Transparent;
-        // circle.OutlineColor4 = new Color4(255, 255, 255, 30);
-        // circle.OutlineThickness = 1f;
-        // Game.Draw(circle, 0);
     }
 
     public override void PostRender() {

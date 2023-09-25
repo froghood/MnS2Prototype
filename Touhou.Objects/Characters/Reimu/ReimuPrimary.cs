@@ -92,12 +92,11 @@ public class ReimuPrimary : Attack {
                 var projectile = new Amulet(player.Position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), true, false, cooldownOverflow) {
                     SpawnDelay = spawnDelay,
                     CanCollide = false,
-                    Color = new Color4(0f, 1f, 0f, 1f),
+                    Color = new Color4(0f, 1f, 0f, 0.4f),
                     StartingVelocity = unfocusedVelocity * startingVelocityModifier,
                     GoalVelocity = unfocusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.Color = new Color4(0f, 1f, 0f, 0.4f);
                 player.Scene.AddEntity(projectile);
             }
         }
@@ -167,7 +166,7 @@ public class ReimuPrimary : Attack {
         float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
 
         var aimArrowSprite = new Sprite("aimarrow2") {
-            Origin = new Vector2(0.0625f, 0.5f),
+            Origin = new Vector2(-0.0625f, 0.5f),
             Position = player.Position,
             Rotation = player.AngleToOpponent + aimOffset,
             Scale = new Vector2(0.3f),

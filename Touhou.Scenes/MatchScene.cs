@@ -17,7 +17,7 @@ public class MatchScene : Scene {
     private readonly Graph updateTimeGraph;
     private readonly Graph renderTimeGraph;
 
-    private Action<Time> latencyGraphDelegate;
+    //private Action<Time> latencyGraphDelegate;
 
     public MatchScene(bool isHosting, Time startTime) {
 
@@ -70,49 +70,49 @@ public class MatchScene : Scene {
 
 
 
-            Game.Draw(updateTimeGraph, Layers.UI1);
-            Game.Draw(renderTimeGraph, Layers.UI1);
+            // Game.Draw(updateTimeGraph, Layers.UI1);
+            // Game.Draw(renderTimeGraph, Layers.UI1);
 
-            int actionNumber = 0;
-            foreach (var action in Game.Input.GetActionOrder()) {
-                if (Game.Input.IsActionPressBuffered(action, out var time, out _)) {
-                    var rect = new Rectangle() {
-                        Origin = new Vector2(1f, 1f),
-                        Size = new Vector2((300f - (float)(Game.Time - time).AsMilliseconds()) * 0.5f, 18f),
-                        FillColor = Color4.White,
-                        StrokeColor = Color4.Black,
-                        StrokeWidth = 1f,
-                        IsUI = true,
-                        Alignment = new Vector2(0.99f, 0.99f - 0.05f * actionNumber),
-                    };
+            // int actionNumber = 0;
+            // foreach (var action in Game.Input.GetActionOrder()) {
+            //     if (Game.Input.IsActionPressBuffered(action, out var time, out _)) {
+            //         var rect = new Rectangle() {
+            //             Origin = new Vector2(1f, 1f),
+            //             Size = new Vector2((300f - (float)(Game.Time - time).AsMilliseconds()) * 0.5f, 18f),
+            //             FillColor = Color4.White,
+            //             StrokeColor = Color4.Black,
+            //             StrokeWidth = 1f,
+            //             IsUI = true,
+            //             Alignment = new Vector2(0.99f, 0.99f - 0.05f * actionNumber),
+            //         };
 
-                    Game.Draw(rect, Layers.UI1);
+            //         Game.Draw(rect, Layers.UI1);
 
-                    actionNumber++;
-                }
-            }
+            //         actionNumber++;
+            //     }
+            // }
 
-            var localProjectileHistroyDisplay = new ProjectileHistoryDisplay("local", Projectile.LocalProjectileHistory) {
-                Origin = new Vector2(0f, 1f),
-                Size = new Vector2(2600f, 80f),
-                FillColor = new Color4(0f, 0f, 0f, 0.5f),
-                StrokeColor = Color4.White,
-                StrokeWidth = 1f,
-                IsUI = true,
-                Alignment = new Vector2(-0.9f, 0.99f),
-            };
-            Game.Draw(localProjectileHistroyDisplay, Layers.UI1);
+            // var localProjectileHistroyDisplay = new ProjectileHistoryDisplay("local", Projectile.LocalProjectileHistory) {
+            //     Origin = new Vector2(0f, 1f),
+            //     Size = new Vector2(2600f, 80f),
+            //     FillColor = new Color4(0f, 0f, 0f, 0.5f),
+            //     StrokeColor = Color4.White,
+            //     StrokeWidth = 1f,
+            //     IsUI = true,
+            //     Alignment = new Vector2(-0.9f, 0.99f),
+            // };
+            // Game.Draw(localProjectileHistroyDisplay, Layers.UI1);
 
-            var remoteProjectileHistroyDisplay = new ProjectileHistoryDisplay("remote", Projectile.RemoteProjectileHistory) {
-                Origin = new Vector2(0f, 1f),
-                Size = new Vector2(2600f, 80f),
-                FillColor = new Color4(0f, 0f, 0f, 0.5f),
-                StrokeColor = Color4.White,
-                StrokeWidth = 1f,
-                IsUI = true,
-                Alignment = new Vector2(-0.9f, 0.905f),
-            };
-            Game.Draw(remoteProjectileHistroyDisplay, Layers.UI1);
+            // var remoteProjectileHistroyDisplay = new ProjectileHistoryDisplay("remote", Projectile.RemoteProjectileHistory) {
+            //     Origin = new Vector2(0f, 1f),
+            //     Size = new Vector2(2600f, 80f),
+            //     FillColor = new Color4(0f, 0f, 0f, 0.5f),
+            //     StrokeColor = Color4.White,
+            //     StrokeWidth = 1f,
+            //     IsUI = true,
+            //     Alignment = new Vector2(-0.9f, 0.905f),
+            // };
+            // Game.Draw(remoteProjectileHistroyDisplay, Layers.UI1);
 
 
         }));
@@ -130,17 +130,17 @@ public class MatchScene : Scene {
         AddEntity(new MatchUI(isHosting));
 
 
-        Game.Network.DataReceived += latencyGraphDelegate;
+        //Game.Network.DataReceived += latencyGraphDelegate;
 
         //AddEntity(latencyGraph);
 
-        AddEntity(new ValueDisplay<string>(() => $"FPS: {Game.FPS}") {
-            Origin = Vector2.UnitY,
-            Color = Color4.White,
-            CharacterSize = 40f,
-            IsUI = true,
-            UIAlignment = new Vector2(0.75f, 1f),
-        });
+        // AddEntity(new ValueDisplay<string>(() => $"FPS: {Game.FPS}") {
+        //     Origin = Vector2.UnitY,
+        //     Color = Color4.White,
+        //     CharacterSize = 40f,
+        //     IsUI = true,
+        //     UIAlignment = new Vector2(0.75f, 1f),
+        // });
 
         // AddEntity(new ValueDisplay<string>(() => $"Network Time: {Game.Network.Time.AsMilliseconds()}") {
         //     Origin = Vector2.UnitY,
@@ -184,7 +184,7 @@ public class MatchScene : Scene {
         Game.Network.Disconnect();
         System.Console.WriteLine("disconnected");
 
-        Game.Network.DataReceived -= latencyGraphDelegate;
+        //Game.Network.DataReceived -= latencyGraphDelegate;
 
         Game.Scenes.PopScene(); // -> HostSyncingScene / ClientSyncingScene
         Game.Scenes.PopScene(); // -> HostingScene / ConnectingScene

@@ -37,30 +37,19 @@ public class Amulet : ParametricProjectile {
 
     public override void Render() {
 
-        float spawnTime = MathF.Min(CurrentTime / SpawnDelay.AsSeconds(), 1f);
+        float spawnTime = MathF.Min(LifeTime.AsSeconds() / SpawnDelay.AsSeconds(), 1f);
 
         sprite.Position = Position;
         sprite.Scale = new Vector2(0.4f, 0.4f) * (1f + 3f * (1f - spawnTime));
-        sprite.Color = Color;
+        sprite.Color = new Color4(
+           Color.R,
+           Color.G,
+           Color.B,
+           Color.A * spawnTime);
 
         Game.Draw(sprite, IsPlayerOwned ? Layers.PlayerProjectiles1 : Layers.OpponentProjectiles1);
 
         base.Render();
-
-        // var spriteStates = new SpriteStates() {
-        //     Position = Position,
-        //     Rotation = TMathF.radToDeg(Direction),
-        //     Origin = new Vector2(0.5f, 0.5f),
-        //     Scale = new Vector2(0.35f, 0.35f) * (1f + 3f * (1f - spawnTime)),
-        // };
-
-        //var Color4 = new Color4(Color4.R, Color4.G, Color4.B, (byte)MathF.Round(Color4.A * spawnTime));
-
-        // var shader = new TShader("projectileColor4");
-        // shader.SetUniform("Color4", Color4);
-
-        //Game.DrawSprite("amulet", spriteStates, shader, IsPlayerOwned ? Layers.Projectiles1 : Layers.Projectiles2);
-
     }
 
     public override void PostRender() { }

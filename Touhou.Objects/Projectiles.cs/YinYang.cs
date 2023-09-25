@@ -23,16 +23,26 @@ public class YinYang : ParametricProjectile {
 
         sprite = new Sprite("yinyang") {
             Origin = new Vector2(0.5f),
-            Scale = Vector2.One * visualRadius / 250f,
             UseColorSwapping = true,
         };
     }
 
     public override void Render() {
 
+
+        float spawnRatio = MathF.Min(LifeTime.AsSeconds() / SpawnDelay.AsSeconds(), 1f);
+
+
         sprite.Position = Position;
-        sprite.Rotation = Velocity * CurrentTime / visualRadius;
-        sprite.Color = Color;
+        sprite.Scale = Vector2.One * visualRadius / 250f * Easing.Out(spawnRatio, 3f);
+
+        if (LifeTime >= SpawnDelay) sprite.Rotation = Velocity * (LifeTime - SpawnDelay).AsSeconds() / visualRadius;
+
+        sprite.Color = new Color4(
+           Color.R,
+           Color.G,
+           Color.B,
+           Color.A * Easing.Out(spawnRatio, 3f));
 
         Game.Draw(sprite, IsPlayerOwned ? Layers.PlayerProjectiles1 : Layers.OpponentProjectiles1);
 

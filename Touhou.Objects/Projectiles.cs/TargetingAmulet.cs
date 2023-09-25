@@ -39,11 +39,15 @@ public class TargetingAmulet : ParametricProjectile {
     }
 
     public override void Render() {
-        float spawnTime = MathF.Min(CurrentTime / SpawnDelay.AsSeconds(), 1f);
+        float spawnRatio = MathF.Min(LifeTime.AsSeconds() / SpawnDelay.AsSeconds(), 1f);
 
         sprite.Position = Position;
-        sprite.Scale = new Vector2(0.4f, 0.4f) * (1f + 3f * (1f - spawnTime));
-        sprite.Color = Color;
+        sprite.Scale = new Vector2(0.4f, 0.4f) * (1f + 3f * (1f - spawnRatio));
+        sprite.Color = new Color4(
+            Color.R,
+            Color.G,
+            Color.B,
+            Color.A * spawnRatio);
 
         Game.Draw(sprite, IsPlayerOwned ? Layers.PlayerProjectiles1 : Layers.OpponentProjectiles1);
 

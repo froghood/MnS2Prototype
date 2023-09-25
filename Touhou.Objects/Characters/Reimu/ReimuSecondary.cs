@@ -7,8 +7,21 @@ using Touhou.Objects.Projectiles;
 namespace Touhou.Objects.Characters;
 
 public class ReimuSecondary : Attack {
-    private readonly float aimRange = 80f; // degrees
-    private readonly float aimStrength = 0.2f;
+
+    private readonly float velocity = 200f;
+    private readonly float turnRadius = 150f;
+    private readonly float hitboxRadius = 10f;
+    private readonly Time spawnDuration = Time.InSeconds(0.25f);
+    private readonly Time preHomingDuration = Time.InSeconds(0.5f);
+    private readonly Time homingDuration = Time.InSeconds(4f);
+    private readonly float[] angles = { -0.3f, -0.1f, 0.1f, 0.3f };
+
+
+
+
+
+    private readonly float aimRange = 120f; // degrees
+    private readonly float aimStrength = 0.15f;
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
     private bool attackHold;
@@ -61,12 +74,13 @@ public class ReimuSecondary : Attack {
 
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
 
-        float[] angles = { -1.5f, -1f, 1f, 1.5f };
-        //float[] angles = { 0f };
-
         foreach (var angle in angles) {
-            var projectile = new LocalHomingAmulet(player.Position, player.AngleToOpponent + aimOffset + angle, 150f, 200f, 10f) {
-                Color = new Color4(0, 1f, 0.8f, 0.3f),
+            var projectile = new LocalHomingAmulet(player.Position, player.AngleToOpponent + aimOffset + angle, turnRadius, velocity, hitboxRadius) {
+                SpawnDuration = spawnDuration,
+                PreHomingDuration = preHomingDuration,
+                HomingDuration = homingDuration,
+
+                Color = new Color4(0.4f, 1f, 0.667f, 0.4f),
                 CanCollide = false,
             };
 
@@ -101,13 +115,14 @@ public class ReimuSecondary : Attack {
         packet.Out(out Time theirTime).Out(out Vector2 theirPosition).Out(out float theirAngle);
         var delta = Game.Network.Time - theirTime;
 
-
-        float[] angles = { -1.5f, -1f, 1f, 1.5f };
-        //float[] angles = { 0f };
-
         foreach (var angle in angles) {
-            var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, 150f, 200f, 10f, delta) {
-                Color = new Color4(1f, 0, 0.8f, 1f),
+            var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, turnRadius, velocity, hitboxRadius, delta) {
+
+                SpawnDuration = spawnDuration,
+                PreHomingDuration = preHomingDuration,
+                HomingDuration = homingDuration,
+
+                Color = new Color4(1f, 0.4f, 0.667f, 1f),
                 GrazeAmount = 3,
             };
 
@@ -118,40 +133,16 @@ public class ReimuSecondary : Attack {
     public override void PlayerRender(Player player) {
         if (!attackHold) return;
 
-        // var indicatorStates = new SpriteStates() {
-        //     Origin = new Vector2(0.5f, 0.5f),
-        //     Position = player.Position,
-        //     Scale = new Vector2(1f, 1f) * 0.35f,
-        //     Color4 = new Color4(255, 255, 255, 40),
-        // };
-
-        // var shader = new TShader("aimIndicator");
-        // shader.SetUniform("angle", player.AngleToOpponent);
-        // shader.SetUniform("arc", TMathF.degToRad(aimRange));
-
-        //Game.DrawSprite("aimindicator", indicatorStates, shader, Layers.Player);
-
         float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
 
         var aimArrowSprite = new Sprite("aimarrow2") {
-            Origin = new Vector2(0.0625f, 0.5f),
+            Origin = new Vector2(-0.0625f, 0.5f),
             Position = player.Position,
             Rotation = player.AngleToOpponent + aimOffset,
-            Scale = Vector2.One * 0.3f,
+            Scale = new Vector2(0.3f),
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
         Game.Draw(aimArrowSprite, Layers.Player);
-
-        // var arrowStates = new SpriteStates() {
-        //     Origin = new Vector2(10f, 10f),
-        //     OriginType = OriginType.Position,
-        //     Position = player.Position,
-        //     Rotation = TMathF.radToDeg(player.AngleToOpponent + aimOffset),
-        //     Scale = new Vector2(1f, 1f) * 0.35f,
-        //     Color4 = new Color4(255, darkness, darkness)
-        // };
-
-        //Game.DrawSprite("aimarrow", arrowStates, Layers.Player);
     }
 }

@@ -98,8 +98,9 @@ public class ReimuSpellB : Attack {
 
         var projectile = new YinYang(player.Position, angle, true, false, radius, cooldownOverflow) {
             CanCollide = false,
-            Color = new Color4(0, 255, 0, 100),
-            Velocity = velocity
+            Color = new Color4(0f, 1f, 0f, 0.4f),
+            Velocity = velocity,
+            SpawnDelay = Time.InSeconds(0.5f),
         };
 
         player.Scene.AddEntity(projectile);
@@ -142,6 +143,7 @@ public class ReimuSpellB : Attack {
             Color = new Color4(1f, 0f, 0f, 1f),
             GrazeAmount = grazeAmount,
             Velocity = velocity,
+            SpawnDelay = Time.InSeconds(0.5f),
         };
 
         opponent.Scene.AddEntity(projectile);
@@ -150,41 +152,17 @@ public class ReimuSpellB : Attack {
     public override void PlayerRender(Player player) {
         if (!attackHold) return;
 
-        // var indicatorStates = new SpriteStates() {
-        //     Origin = new Vector2(0.5f, 0.5f),
-        //     Position = player.Position,
-        //     Scale = new Vector2(1f, 1f) * 0.35f,
-        //     Color4 = new Color4(255, 255, 255, 40),
-        // };
-
-        // var shader = new TShader("aimIndicator");
-        // shader.SetUniform("angle", player.AngleToOpponent);
-        // shader.SetUniform("arc", TMathF.degToRad(aimRange));
-
-        //Game.DrawSprite("aimindicator", indicatorStates, shader, Layers.Player);
-
         float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
 
         var aimArrowSprite = new Sprite("aimarrow2") {
-            Origin = new Vector2(0.0625f, 0.5f),
+            Origin = new Vector2(-0.0625f, 0.5f),
             Position = player.Position,
             Rotation = player.AngleToOpponent + aimOffset,
-            Scale = Vector2.One * 0.3f,
+            Scale = new Vector2(0.3f),
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
         Game.Draw(aimArrowSprite, Layers.Player);
-
-        // var arrowStates = new SpriteStates() {
-        //     Origin = new Vector2(10f, 10f),
-        //     OriginType = OriginType.Position,
-        //     Position = player.Position,
-        //     Rotation = TMathF.radToDeg(player.AngleToOpponent + aimOffset),
-        //     Scale = new Vector2(1f, 1f) * 0.35f,
-        //     Color4 = new Color4(255, darkness, darkness)
-        // };
-
-        //Game.DrawSprite("aimarrow", arrowStates, Layers.Player);
 
         var sizeIndicator = new Circle() {
             Origin = new Vector2(0.5f),
@@ -197,23 +175,5 @@ public class ReimuSpellB : Attack {
         };
 
         Game.Draw(sizeIndicator, Layers.Player);
-
-        // var circleStates = new CircleStates() {
-        //     Origin = new Vector2(0.5f, 0.5f),
-        //     Radius = minRadius + (maxRadius - minRadius) * chargeTime,
-        //     Position = player.Position,
-        //     OutlineColor4 = new Color4(255, 255, 255, 80),
-        //     FillColor4 = Color4.Transparent
-        // };
-
-        //Game.DrawCircle(circleStates, Layers.Player);
-
-        // var circle = new CircleShape(minRadius + (maxRadius - minRadius) * chargeTime);
-        // circle.Origin = new Vector2(1f, 1f) * circle.Radius;
-        // circle.Position = player.Position;
-        // circle.OutlineThickness = 1f;
-        // circle.OutlineColor4 = new Color4(255, 255, 255, 80);
-        // circle.FillColor4 = Color4.Transparent;
-        // Game.Draw(circle, 0);
     }
 }

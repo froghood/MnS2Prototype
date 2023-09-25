@@ -28,7 +28,7 @@ public class ReimuBombWave : ParametricProjectile {
 
     public override void Render() {
 
-        var alpha = MathF.Min(SpawnDelay.AsSeconds(), CurrentTime) / SpawnDelay.AsSeconds() * Color.A;
+        var alpha = MathF.Min(SpawnDelay.AsSeconds(), LifeTime) / SpawnDelay.AsSeconds() * Color.A;
         //System.Console.WriteLine(alpha);
 
 
