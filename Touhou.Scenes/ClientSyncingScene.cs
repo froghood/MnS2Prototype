@@ -49,8 +49,8 @@ public class ClientSyncingScene : Scene {
             var latency = Time.InSeconds(roundTripTime.AsSeconds() / 2f);
             var targetTime = ourTime + latency;
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"RTR | Estimate: {targetTime}, Actual: {theirTime}, Offset: {theirTime - targetTime}");
+            //Console.ForegroundColor = ConsoleColor.Cyan;
+            //Console.WriteLine($"RTR | Estimate: {targetTime}, Actual: {theirTime}, Offset: {theirTime - targetTime}");
 
             timeResponses.Add((RoundTripTime: roundTripTime, Offset: theirTime - targetTime));
 
@@ -84,8 +84,8 @@ public class ClientSyncingScene : Scene {
     }
 
     private void Request() {
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine($"Requesting Time");
+        //Console.ForegroundColor = ConsoleColor.DarkGray;
+        //Console.WriteLine($"Requesting Time");
         var packet = new Packet(PacketType.TimeRequest).In(Game.Network.Time);
         Game.Network.Send(packet);
         requestCount++;

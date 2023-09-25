@@ -13,6 +13,7 @@ public enum PacketType : byte {
     SpentPower,
     Grazed,
     Hit,
+    Knockback,
     Death,
     DeathConfirmation,
     Rematch,

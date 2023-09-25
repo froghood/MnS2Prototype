@@ -161,10 +161,4 @@ public class LocalHomingAmulet : Homing {
     public override void PostRender() {
         interpolationTime = MathF.Max(interpolationTime - Game.Delta.AsSeconds(), 0f);
     }
-
-    public override void Destroy() {
-        base.Destroy();
-
-        System.Console.WriteLine("destroyed");
-    }
 }

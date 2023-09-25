@@ -31,7 +31,7 @@ public abstract class Opponent : Entity, IReceivable {
 
 
 
-    private bool isHit;
+    private bool isKnockbacked;
     private Time knockbackTime;
     private Vector2 knockbackStartPosition;
     private Vector2 knockbackEndPosition;
@@ -79,6 +79,7 @@ public abstract class Opponent : Entity, IReceivable {
             {PacketType.SpentPower, SpentPower},
             {PacketType.Grazed, Grazed},
             {PacketType.Hit, Hit},
+            {PacketType.Knockback, Knockback},
             {PacketType.Death, Death},
         };
 
@@ -105,7 +106,7 @@ public abstract class Opponent : Entity, IReceivable {
 
     public override void Update() {
 
-        if (isHit) {
+        if (isKnockbacked) {
             UpdateKnockback();
         } else {
             basePosition += velocity * Game.Delta.AsSeconds();
@@ -190,9 +191,6 @@ public abstract class Opponent : Entity, IReceivable {
 
         var latency = Game.Network.Time - theirTime;
 
-
-        System.Console.WriteLine(smoothingOffset);
-
         basePosition = theirPosition;
         smoothingOffset = Position - basePosition;
 
@@ -206,7 +204,7 @@ public abstract class Opponent : Entity, IReceivable {
         predictedOffsetInterpolationTime = 0f;
         smoothingOffsetInterpolationTime = 1f;
 
-        isHit = false;
+        isKnockbacked = false;
     }
 
 
@@ -248,21 +246,25 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     private void Hit(Packet packet) {
-        packet.Out(out Time theirTime, true).Out(out Vector2 theirPosition).Out(out float angle);
+        packet.Out(out Vector2 theirPosition, true);
 
         Scene.AddEntity(new HitExplosion(theirPosition, 0.5f, 100f, Color));
 
+        Game.Sounds.Play("hit");
+    }
+
+    private void Knockback(Packet packet) {
+        packet.Out(out Time theirTime, true).Out(out Vector2 theirPosition).Out(out float angle);
+
         var latency = Game.Network.Time - theirTime;
 
-        isHit = true;
+        isKnockbacked = true;
         knockbackTime = Game.Time;
         knockbackStartPosition = theirPosition;
         knockbackEndPosition = theirPosition + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * 100f;
         knockbackDuration = Time.InSeconds(1);
 
         HeartCount--;
-
-        //Game.Sounds.Play("hit");
     }
 
 
@@ -275,7 +277,7 @@ public abstract class Opponent : Entity, IReceivable {
 
         HeartCount--;
 
-        //Game.Sounds.Play("death");
+        Game.Sounds.Play("death");
     }
 
 
