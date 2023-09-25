@@ -5,3 +5,6 @@ vboxshared/
 
 [Bb]in/
 [Oo]bj/
+
+*ps1
+*SettingsForBuild.json
