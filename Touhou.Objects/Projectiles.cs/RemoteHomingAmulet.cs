@@ -25,7 +25,7 @@ public class RemoteHomingAmulet : Homing {
 
 
 
-    public RemoteHomingAmulet(Vector2 position, float startAngle, float turnRadius, float velocity, float hitboxRadius, Time spawnTimeOffset = default(Time)) : base(false, true, spawnTimeOffset) {
+    public RemoteHomingAmulet(Vector2 position, float startAngle, float turnRadius, float velocity, float hitboxRadius) : base(false, true) {
         Position = position;
         angle = startAngle;
         visualRotation = startAngle + MathF.PI / 2f;
@@ -33,7 +33,7 @@ public class RemoteHomingAmulet : Homing {
         this.velocity = velocity;
         this.hitboxRadius = hitboxRadius;
 
-        System.Console.WriteLine($"{position}, {startAngle}, {turnRadius}, {velocity}, {hitboxRadius}, {spawnTimeOffset}");
+        System.Console.WriteLine($"{position}, {startAngle}, {turnRadius}, {velocity}, {hitboxRadius}");
 
         turnPosition = Position + new Vector2() {
             X = turnRadius * MathF.Cos(angle + MathF.PI / 2f),
@@ -53,19 +53,17 @@ public class RemoteHomingAmulet : Homing {
 
     public override void Update() {
 
-        var lifeTime = Game.Time - SpawnTime;
-
-        if (state == HomingState.Spawning && lifeTime >= SpawnDuration) {
+        if (state == HomingState.Spawning && LifeTime >= SpawnDuration) {
             state = HomingState.PreHoming;
 
-            Forward(velocity * 2f * MathF.Min(PreHomingDuration.AsSeconds(), lifeTime.AsSeconds() - SpawnDuration.AsSeconds()));
+            Forward(velocity * 2f * MathF.Min(PreHomingDuration.AsSeconds(), LifeTime.AsSeconds() - SpawnDuration.AsSeconds()));
         }
 
-        if (state == HomingState.PreHoming && lifeTime >= SpawnDuration + PreHomingDuration) {
+        if (state == HomingState.PreHoming && LifeTime >= SpawnDuration + PreHomingDuration) {
             state = HomingState.Homing;
         }
 
-        if (state == HomingState.Homing && lifeTime >= SpawnDuration + PreHomingDuration + HomingDuration) {
+        if (state == HomingState.Homing && LifeTime >= SpawnDuration + PreHomingDuration + HomingDuration) {
             state = HomingState.PostHoming;
 
             var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time).In(state).In(Position).In(angle);
@@ -116,12 +114,12 @@ public class RemoteHomingAmulet : Homing {
 
         // prevents excessive packet spam
         if (side != prevSide) lastSideChange = side;
-        if (lastSideChange.HasValue && lifeTime >= nextPacketTimeThreshold) {
+        if (lastSideChange.HasValue && LifeTime >= nextPacketTimeThreshold) {
             var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time).In(state).In(Position).In(angle).In(side);
             Game.Network.Send(packet);
 
             lastSideChange = null;
-            nextPacketTimeThreshold = lifeTime + Time.InSeconds(0.2f);//Game.Random.NextSingle() * 0.1f);
+            nextPacketTimeThreshold = LifeTime + Time.InSeconds(0.2f);//Game.Random.NextSingle() * 0.1f);
         }
 
         void Forward(float distance) {
@@ -178,10 +176,9 @@ public class RemoteHomingAmulet : Homing {
     }
 
     public override void Render() {
-        var lifeTime = Game.Time - SpawnTime;
 
         bool spinning = (state == HomingState.PostHoming || state == HomingState.Homing);
-        var spawnRatio = MathF.Min(1f, lifeTime.AsSeconds() / SpawnDuration.AsSeconds());
+        var spawnRatio = MathF.Min(1f, LifeTime.AsSeconds() / SpawnDuration.AsSeconds());
 
         if (spinning) visualRotation += MathF.Tau * Game.Delta.AsSeconds() * 2f;
 

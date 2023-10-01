@@ -15,7 +15,7 @@ public abstract class Opponent : Entity, IReceivable {
     public float BombCount { get; private set; } = 3;
     public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     public IEnumerable<KeyValuePair<PlayerActions, Attack>> Attacks { get => attacks.AsEnumerable(); }
-    public Color4 Color { get; set; } = new Color4(1f, 0f, 0.4f, 1f);
+    public Color4 Color { get; set; } = new Color4(1f, 0.7f, 0.7f, 1f);
     private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
     private Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
 
@@ -49,6 +49,12 @@ public abstract class Opponent : Entity, IReceivable {
     private Bomb bomb;
 
 
+
+
+    private Dictionary<Type, Effect> effects = new();
+
+
+
     // power
     private int powerGainedFromGrazing;
     private int powerSpent;
@@ -66,7 +72,6 @@ public abstract class Opponent : Entity, IReceivable {
     private Sprite characterSprite;
 
 
-
     public Opponent(Vector2 startingPosition) {
         basePosition = startingPosition;
 
@@ -77,13 +82,14 @@ public abstract class Opponent : Entity, IReceivable {
             {PacketType.AttackReleased, AttackReleased},
             {PacketType.BombPressed, BombPressed},
             {PacketType.SpentPower, SpentPower},
+            {PacketType.EffectCancelled, EffectCancelled},
             {PacketType.Grazed, Grazed},
             {PacketType.Hit, Hit},
             {PacketType.Knockback, Knockback},
             {PacketType.Death, Death},
         };
 
-        characterSprite = new Sprite("reimu") {
+        characterSprite = new Sprite("sakuya") {
             Origin = new Vector2(0.4f, 0.3f),
             Color = Color,
             UseColorSwapping = false,
@@ -106,6 +112,8 @@ public abstract class Opponent : Entity, IReceivable {
 
     public override void Update() {
 
+        UpdateEffects();
+
         if (isKnockbacked) {
             UpdateKnockback();
         } else {
@@ -121,6 +129,64 @@ public abstract class Opponent : Entity, IReceivable {
         );
     }
 
+
+    public void ApplyEffect<T>(T effect) where T : Effect {
+        if (!effects.ContainsKey(typeof(T))) {
+            effects.TryAdd(typeof(T), effect);
+        }
+    }
+
+    public bool GetEffect<T>(out T effect) where T : Effect {
+        var type = typeof(T);
+        if (effects.ContainsKey(type)) {
+            effect = (T)effects[type];
+            return true;
+        }
+        effect = null;
+        return false;
+    }
+
+    public bool HasEffect<T>() where T : Effect {
+        var type = typeof(T);
+        return (
+            effects.ContainsKey(type) &&
+            !effects[type].HasTimedOut &&
+            !effects[type].IsCanceled);
+    }
+
+    public void CancelEffect<T>(Time time) where T : Effect {
+        if (effects.TryGetValue(typeof(T), out var effect)) {
+            effect.Cancel(time);
+        }
+    }
+    public void CancelEffect(Type type, Time time) {
+        if (!type.IsSubclassOf(typeof(Effect))) return;
+
+        if (effects.TryGetValue(type, out var effect)) {
+            effect.Cancel(time);
+        }
+    }
+
+    private void UpdateEffects() {
+
+        var toRemove = new List<Type>();
+
+        foreach (var (type, effect) in effects) {
+            if (effect.HasTimedOut || effect.IsCanceled) {
+                toRemove.Add(type);
+                continue;
+            }
+
+            effect.OpponentUpdate(this);
+        }
+
+        foreach (var name in toRemove) {
+            System.Console.WriteLine("removing effect");
+            effects.Remove(name);
+            System.Console.WriteLine("removed effect");
+        }
+    }
+
     private void UpdateKnockback() {
         var t = MathF.Min((Game.Time - knockbackTime).AsSeconds() / knockbackDuration.AsSeconds(), 1f);
 
@@ -132,7 +198,7 @@ public abstract class Opponent : Entity, IReceivable {
         if (isDead) return;
 
         characterSprite.Position = Position;
-        characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.2f;
+        characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.22f;
 
         Game.Draw(characterSprite, Layers.Opponent);
 
@@ -234,6 +300,22 @@ public abstract class Opponent : Entity, IReceivable {
     private void SpentPower(Packet packet) {
         packet.Out(out int amount, true);
         SpendPower(amount);
+    }
+
+
+
+    private void EffectCancelled(Packet packet) {
+        packet
+        .Out(out EffectType type, true)
+        .Out(out Time theirTime);
+
+        var latency = Game.Network.Time - theirTime;
+
+        CancelEffect(type switch {
+            EffectType.Timestop => typeof(Timestop),
+            _ => throw new Exception("Invalid effect type")
+        }, latency);
+
     }
 
 

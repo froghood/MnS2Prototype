@@ -12,7 +12,7 @@ public enum PlayerActions : int {
     Focus = 16,
     Primary = 32,
     Secondary = 64,
-    SpellA = 128,
-    SpellB = 256,
+    SpecialA = 128,
+    SpecialB = 256,
     Bomb = 512
 }

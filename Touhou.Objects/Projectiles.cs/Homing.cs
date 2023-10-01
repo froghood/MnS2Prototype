@@ -17,7 +17,7 @@ public class Homing : Projectile {
     protected HomingState state;
     protected int side;
     protected Vector2 turnPosition;
-    protected Homing(bool isPlayerOwned, bool isRemote, Time spawnTimeOffset = default) : base(isPlayerOwned, isRemote, spawnTimeOffset) { }
+    protected Homing(bool isPlayerOwned, bool isRemote) : base(isPlayerOwned, isRemote) { }
 
     protected enum HomingState : byte {
         Spawning,

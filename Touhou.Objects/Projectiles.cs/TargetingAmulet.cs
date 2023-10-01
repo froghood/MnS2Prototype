@@ -16,7 +16,7 @@ public class TargetingAmulet : ParametricProjectile {
     private Sprite sprite;
 
 
-    public TargetingAmulet(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float velocity, float deceleration, Time spawnTimeOffset = default) : base(origin, direction, isPlayerOwned, isRemote, spawnTimeOffset) {
+    public TargetingAmulet(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float velocity, float deceleration) : base(origin, direction, isPlayerOwned, isRemote) {
         this.velocity = velocity;
         this.deceleration = deceleration;
 
@@ -24,18 +24,18 @@ public class TargetingAmulet : ParametricProjectile {
 
         sprite = new Sprite("amulet") {
             Origin = new Vector2(0.5f, 0.5f),
-            Rotation = Direction,
+            Rotation = Orientation,
             UseColorSwapping = true,
         };
 
     }
 
-    protected override float FuncX(float t) {
-        return MathF.Max((velocity - t * deceleration) * t, 0f) + MathF.Min((deceleration * t * t) / 2f, MathF.Pow(velocity, 2f) / deceleration / 2f);
-    }
-
-    protected override float FuncY(float t) {
-        return 0f;
+    protected override Vector2 PositionFunction(float t) {
+        return new Vector2(
+            MathF.Max((velocity - t * deceleration) * t, 0f) +
+            MathF.Min((deceleration * t * t) / 2f, MathF.Pow(velocity, 2f) / deceleration / 2f),
+            0f
+        );
     }
 
     public override void Render() {
@@ -72,12 +72,13 @@ public class TargetingAmulet : ParametricProjectile {
         Destroy();
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
-        var projectile = new SpellAmulet(Position, angle, false, false, timeOverflow) {
+        var projectile = new SpecialAmulet(Position, angle, false, false) {
             GrazeAmount = 1,
             Color = Color,
             StartingVelocity = 500f,
             GoalVelocity = 500f,
         };
+        projectile.IncreaseTime(timeOverflow, false);
 
         if (Grazed) projectile.Graze();
 
@@ -88,16 +89,16 @@ public class TargetingAmulet : ParametricProjectile {
         Destroy();
 
 
-        var delta = Game.Network.Time - theirTime;
+        var latency = Game.Network.Time - theirTime;
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
-        var projectile = new SpellAmulet(Position, angle, true, true) {
-            InterpolatedOffset = delta.AsSeconds(),
+        var projectile = new SpecialAmulet(Position, angle, true, true) {
             CanCollide = false,
             Color = Color,
             StartingVelocity = 500f,
             GoalVelocity = 500f,
         };
+        projectile.IncreaseTime(latency, true);
 
         Scene.AddEntity(projectile);
     }

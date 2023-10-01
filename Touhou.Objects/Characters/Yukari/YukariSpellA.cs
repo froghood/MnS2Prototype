@@ -5,7 +5,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class YukariSpellA : Attack {
+public class YukariSpecialA : Attack {
 
     private float startingAngle;
 
@@ -25,10 +25,10 @@ public class YukariSpellA : Attack {
     private readonly float startingVelocityModifier = 2f;
     private readonly float velocityFalloff = 0.25f;
 
-    private readonly Time spellCooldown = Time.InSeconds(1f);
+    private readonly Time specialCooldown = Time.InSeconds(1f);
     private readonly Time globalCooldown = Time.InSeconds(0.25f);
 
-    public YukariSpellA() {
+    public YukariSpecialA() {
         Holdable = true;
         Cost = 8;
     }
@@ -46,7 +46,7 @@ public class YukariSpellA : Attack {
 
         player.MovespeedModifier = 0.2f;
 
-        player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
+        player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialB);
     }
 
 
@@ -61,20 +61,22 @@ public class YukariSpellA : Attack {
             float angle = startingAngle + angleOffset / 360f * MathF.Tau + MathF.PI;
 
             for (int i = 0; i < numShots; i++) {
-                var projectile = new Amulet(player.Position, angle + MathF.Tau / numShots * i, true, false, cooldownOverflow + timeOffset) {
+                var projectile = new Amulet(player.Position, angle + MathF.Tau / numShots * i, true, false) {
                     CanCollide = false,
                     Color = new Color4(0, 1f, 0, 0.4f),
                     StartingVelocity = velocity * startingVelocityModifier,
                     GoalVelocity = velocity,
                     VelocityFalloff = velocityFalloff,
                 };
+                projectile.IncreaseTime(cooldownOverflow + timeOffset, false);
+
                 player.Scene.AddEntity(projectile);
 
             }
             player.SpendPower(Cost);
 
             var packet = new Packet(PacketType.AttackReleased)
-            .In(PlayerActions.SpellA)
+            .In(PlayerActions.SpecialA)
             .In(Game.Network.Time - cooldownOverflow + timeOffset)
             .In(player.Position)
             .In(angle);
@@ -91,28 +93,28 @@ public class YukariSpellA : Attack {
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
         player.MovespeedModifier = 1f;
 
-        player.ApplyAttackCooldowns(spellCooldown, PlayerActions.SpellA);
-        player.ApplyAttackCooldowns(globalCooldown, PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
+        player.ApplyAttackCooldowns(specialCooldown, PlayerActions.SpecialA);
+        player.ApplyAttackCooldowns(globalCooldown, PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialB);
 
-        player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
+        player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialB);
     }
 
 
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle);
-        var delta = Game.Network.Time - theirTime;
+        var latency = Game.Network.Time - theirTime;
 
         for (int i = 0; i < numShots; i++) {
             var projectile = new Amulet(position, angle + MathF.Tau / numShots * i, false, true) {
-                InterpolatedOffset = delta.AsSeconds(),
-
                 Color = new Color4(1f, 0f, 0f, 1f),
                 GrazeAmount = grazeAmount,
                 StartingVelocity = velocity * startingVelocityModifier,
                 GoalVelocity = velocity,
                 VelocityFalloff = velocityFalloff,
             };
+            projectile.IncreaseTime(latency, true);
+
             opponent.Scene.AddEntity(projectile);
         }
     }

@@ -1,3 +1,5 @@
+
+namespace Touhou.Networking;
 public enum PacketType : byte {
     LatencyCorrection,
     Connection,
@@ -11,6 +13,8 @@ public enum PacketType : byte {
     AttackReleased,
     BombPressed,
     SpentPower,
+    EffectApplied,
+    EffectCancelled,
     Grazed,
     Hit,
     Knockback,

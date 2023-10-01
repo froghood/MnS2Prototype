@@ -15,6 +15,12 @@ public abstract class Entity {
     //public CollisionType CollisionType { get; protected set; }
     //public List<CollisionGroups> CollisionGroups { get; private set; } = new();
     public List<Hitbox> Hitboxes { get; private set; } = new();
+    public Time CreationTime { get; }
+    public Time LifeTime { get => Game.Time - CreationTime; }
+
+    public Entity() {
+        CreationTime = Game.Time;
+    }
 
     public virtual void Init() { }
     public virtual void Update() { }

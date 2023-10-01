@@ -86,9 +86,9 @@ public abstract class Player : Entity, IReceivable {
     private bool isHit;
     private Time hitTime;
     private Time hitDuration;
+    private Dictionary<Type, Effect> effects = new();
 
-
-    public Color4 Color { get; set; } = new Color4(0.4f, 1f, 0f, 1f);
+    public Color4 Color { get; set; } = new Color4(0.7f, 1f, 0.7f, 1f);
 
 
     public float AngleToOpponent {
@@ -111,7 +111,7 @@ public abstract class Player : Entity, IReceivable {
         Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 50f, CollisionGroups.Player, Graze));
 
         //cooldownShader = new Shader(null, null, "assets/shaders/cooldown.frag");
-        characterSprite = new Sprite("reimu") {
+        characterSprite = new Sprite("sakuya") {
             Origin = new Vector2(0.4f, 0.3f),
             Color = Color,
             UseColorSwapping = false,
@@ -142,6 +142,7 @@ public abstract class Player : Entity, IReceivable {
 
         if (!Match.Started || isDead) return;
 
+        UpdateEffects();
         UpdateHit();
         UpdateKnockback();
         UpdateMovement();
@@ -154,6 +155,28 @@ public abstract class Player : Entity, IReceivable {
         var order = Game.Input.GetActionOrder();
         foreach (var action in order) InvokeActionPresses(action);
         foreach (var action in order) InvokeActionHolds(action);
+    }
+
+
+
+    private void UpdateEffects() {
+
+        var toRemove = new List<Type>();
+
+        foreach (var (type, effect) in effects) {
+            if (effect.HasTimedOut || effect.IsCanceled) {
+                toRemove.Add(type);
+                continue;
+            }
+
+            effect.PlayerUpdate(this);
+        }
+
+        foreach (var name in toRemove) {
+            System.Console.WriteLine("removing effect");
+            effects.Remove(name);
+            System.Console.WriteLine("removed effect");
+        }
     }
 
 
@@ -320,7 +343,7 @@ public abstract class Player : Entity, IReceivable {
         if (!isDead) {
 
             characterSprite.Position = Position;
-            characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.2f;
+            characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.22f;
 
             Game.Draw(characterSprite, Layers.Player);
 
@@ -440,6 +463,38 @@ public abstract class Player : Entity, IReceivable {
 
     }
 
+    public void ApplyEffect<T>(T effect) where T : Effect {
+        if (!effects.ContainsKey(typeof(T))) {
+            effects.TryAdd(typeof(T), effect);
+        }
+    }
+
+    public bool GetEffect<T>(out T effect) where T : Effect {
+        var type = typeof(T);
+        if (effects.ContainsKey(type)) {
+            effect = (T)effects[type];
+            return true;
+        }
+        effect = null;
+        return false;
+    }
+
+    public bool HasEffect<T>() where T : Effect {
+        var type = typeof(T);
+        return (
+            effects.ContainsKey(type) &&
+            !effects[type].HasTimedOut &&
+            !effects[type].IsCanceled);
+    }
+
+    public void CancelEffect<T>() where T : Effect {
+        if (effects.TryGetValue(typeof(T), out var effect)) {
+            effect.Cancel();
+        }
+    }
+
+
+
     public void DisableAttacks(params PlayerActions[] actions) {
         foreach (var action in actions) {
             if (attacks.TryGetValue(action, out var attack)) attack.Disable();
@@ -452,6 +507,12 @@ public abstract class Player : Entity, IReceivable {
         }
     }
 
+    public T GetAttack<T>(PlayerActions action) where T : Attack {
+        return attacks[action] as T;
+    }
+
+
+
     public void SpendPower(int amount) {
         var powerOverflow = Math.Max((Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent) - 400, 0);
 
@@ -462,6 +523,8 @@ public abstract class Player : Entity, IReceivable {
         Game.Network.Send(packet);
     }
 
+
+
     private void ChangeVelocity(Vector2 newVelocity) {
         if (newVelocity == Velocity) return;
         Velocity = newVelocity;
@@ -469,6 +532,8 @@ public abstract class Player : Entity, IReceivable {
         packet.In((long)Game.Network.Time).In(Position).In(Velocity).In(Focused);
         Game.Network.Send(packet);
     }
+
+
 
     public void Receive(Packet packet, IPEndPoint endPoint) {
         switch (packet.Type) {
@@ -517,7 +582,10 @@ public abstract class Player : Entity, IReceivable {
         }
     }
 
+
+
     protected void AddAttack(PlayerActions action, Attack attack) => attacks[action] = attack;
     protected void AddBomb(PlayerActions action, Bomb bomb) => Bomb = (action, bomb);
+
 
 }

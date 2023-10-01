@@ -14,7 +14,7 @@ public class ProjectileHistoryDisplay : Rectangle {
         {Projectile.ProjectileType.LocalTargetingAmuletGroup, "aimindicator"},
         {Projectile.ProjectileType.RemoteTargetingAmuletGroup, "aimindicator"},
         {Projectile.ProjectileType.TargetingAmulet, "amulet"},
-        {Projectile.ProjectileType.SpellAmulet, "amulet"},
+        {Projectile.ProjectileType.SpecialAmulet, "amulet"},
         {Projectile.ProjectileType.YinYang, "yinyang"},
         {Projectile.ProjectileType.BombWave, "reimubombwave"},
     };

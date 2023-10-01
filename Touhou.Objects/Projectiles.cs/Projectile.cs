@@ -15,7 +15,7 @@ public abstract class Projectile : Entity, IReceivable {
         LocalTargetingAmuletGroup,
         RemoteTargetingAmuletGroup,
         TargetingAmulet,
-        SpellAmulet,
+        SpecialAmulet,
         YinYang,
         BombWave,
     }
@@ -26,8 +26,6 @@ public abstract class Projectile : Entity, IReceivable {
 
     public bool IsPlayerOwned { get; }
     public bool IsRemote { get; }
-
-    public Time SpawnTime { get; }
 
     public uint Id { get; }
 
@@ -49,10 +47,9 @@ public abstract class Projectile : Entity, IReceivable {
     public static Queue<List<(uint, ProjectileType, bool, bool, Color4)>> LocalProjectileHistory = new();
     public static Queue<List<(uint, ProjectileType, bool, bool, Color4)>> RemoteProjectileHistory = new();
 
-    public Projectile(bool isPlayerOwned, bool isRemote, Time spawnTimeOffset = default(Time)) {
+    public Projectile(bool isPlayerOwned, bool isRemote) {
         IsPlayerOwned = isPlayerOwned;
         IsRemote = isRemote;
-        SpawnTime = Game.Time - spawnTimeOffset;
 
         Id = IsRemote ? TotalRemoteProjectiles++ : TotalLocalProjectiles++;
 
@@ -66,7 +63,7 @@ public abstract class Projectile : Entity, IReceivable {
     public override void Init() {
 
         var type = this switch {
-            SpellAmulet => ProjectileType.SpellAmulet,
+            SpecialAmulet => ProjectileType.SpecialAmulet,
             Amulet => ProjectileType.Amulet,
             LocalHomingAmulet => ProjectileType.LocalHoming,
             RemoteHomingAmulet => ProjectileType.RemoteHoming,
@@ -116,7 +113,12 @@ public abstract class Projectile : Entity, IReceivable {
 
 
     public override void Update() {
-        if (DestroyedOnScreenExit && Game.Time >= SpawnTime + Time.InSeconds(1f)) {
+        DestroyIfOutOfBounds();
+    }
+
+    private void DestroyIfOutOfBounds() {
+        if (Hitboxes.Count == 0) return;
+        if (DestroyedOnScreenExit && Game.Time >= CreationTime + Time.InSeconds(1f)) {
             foreach (var hitbox in Hitboxes) {
                 var bounds = hitbox.GetBounds();
                 if ((bounds.Min.X < Match.Bounds.X && bounds.Max.X > -Match.Bounds.X) &&
@@ -127,8 +129,6 @@ public abstract class Projectile : Entity, IReceivable {
             Destroy();
         }
     }
-
-
 
     public virtual void Receive(Packet packet, IPEndPoint endPoint) {
         if (packet.Type != PacketType.DestroyProjectile) return;

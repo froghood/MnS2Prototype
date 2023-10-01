@@ -42,9 +42,7 @@ public class LocalHomingAmulet : Homing {
     public override void Update() {
 
 
-        var lifeTime = Game.Time - SpawnTime;
-
-        if (state == HomingState.Spawning && lifeTime >= SpawnDuration) {
+        if (state == HomingState.Spawning && LifeTime >= SpawnDuration) {
             state = HomingState.PreHoming;
         }
 
@@ -136,10 +134,8 @@ public class LocalHomingAmulet : Homing {
 
     public override void Render() {
 
-        var lifeTime = Game.Time - SpawnTime;
-
         bool spinning = (state == HomingState.PostHoming || state == HomingState.Homing);
-        var spawnRatio = MathF.Min(1f, lifeTime.AsSeconds() / SpawnDuration.AsSeconds());
+        var spawnRatio = MathF.Min(1f, LifeTime.AsSeconds() / SpawnDuration.AsSeconds());
 
         if (spinning) visualRotation += MathF.Tau * Game.Delta.AsSeconds() * 2f;
 

@@ -5,14 +5,14 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class ReimuSpellA : Attack {
+public class ReimuSpecialA : Attack {
     private readonly int numShots = 30;
     private readonly float velocity = 500;
     private readonly float deceleration = 600;
     private readonly Time spawnDelay = Time.InSeconds(0.15f);
     private readonly int grazeAmount = 1;
 
-    public ReimuSpellA() {
+    public ReimuSpecialA() {
         Cost = 80;
     }
 
@@ -30,21 +30,23 @@ public class ReimuSpellA : Attack {
 
         for (int i = 0; i < numShots; i++) {
 
-            var projectile = new TargetingAmulet(player.Position, angle + arcAngle * i, true, false, velocity, deceleration, cooldownOverflow) {
+            var projectile = new TargetingAmulet(player.Position, angle + arcAngle * i, true, false, velocity, deceleration) {
                 SpawnDelay = spawnDelay,
                 DestroyedOnScreenExit = false,
                 CanCollide = false,
                 Color = new Color4(0f, 1f, 0, 0.4f),
             };
+            projectile.IncreaseTime(cooldownOverflow, false);
+
             localGroup.Add(projectile);
             player.Scene.AddEntity(projectile);
         }
 
-        player.ApplyAttackCooldowns(Time.InSeconds(1f), PlayerActions.SpellA);
-        player.ApplyAttackCooldowns(Time.InSeconds(0.25f), PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellB);
+        player.ApplyAttackCooldowns(Time.InSeconds(1f), PlayerActions.SpecialA);
+        player.ApplyAttackCooldowns(Time.InSeconds(0.25f), PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialB);
 
         var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.SpellA)
+        .In(PlayerActions.SpecialA)
         .In(Game.Network.Time - cooldownOverflow)
         .In(player.Position)
         .In(angle);
@@ -57,23 +59,21 @@ public class ReimuSpellA : Attack {
 
 
     public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
-        throw new NotImplementedException();
     }
 
 
 
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
-        throw new NotImplementedException();
     }
 
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
 
         packet.Out(out Time time).Out(out Vector2 position).Out(out float angle);
-        var delta = Game.Network.Time - time;
+        var latency = Game.Network.Time - time;
 
 
-        var remoteGroup = new RemoteTargetingAmuletGroup(Time.InSeconds(1.5f), delta);
+        var remoteGroup = new RemoteTargetingAmuletGroup(Time.InSeconds(1.5f));
         opponent.Scene.AddEntity(remoteGroup);
 
 
@@ -82,11 +82,12 @@ public class ReimuSpellA : Attack {
         for (int i = 0; i < numShots; i++) {
             var projectile = new TargetingAmulet(position, angle + arcAngle * i, false, true, velocity, deceleration) {
                 SpawnDelay = spawnDelay,
-                InterpolatedOffset = delta.AsSeconds(),
                 DestroyedOnScreenExit = false,
                 Color = new Color4(1f, 0, 0, 1f),
                 GrazeAmount = grazeAmount
             };
+            projectile.IncreaseTime(latency, true);
+
             remoteGroup.Add(projectile);
             opponent.Scene.AddEntity(projectile);
         }

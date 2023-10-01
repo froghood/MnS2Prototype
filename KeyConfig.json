@@ -7,8 +7,8 @@
         "Focus": "LeftShift",
         "Primary": "Z",
         "Secondary": "X",
-        "SpellA": "C",
-        "SpellB": "V",
+        "SpecialA": "C",
+        "SpecialB": "V",
         "Bomb": "Space"
     },
     "Gamepad": {
@@ -19,8 +19,8 @@
         "Focus": "LeftShoulder",
         "Primary": "X",
         "Secondary": "A",
-        "SpellA": "B",
-        "SpellB": "RightShoulder",
+        "SpecialA": "B",
+        "SpecialB": "RightShoulder",
         "Bomb": "Y"
     }
 }

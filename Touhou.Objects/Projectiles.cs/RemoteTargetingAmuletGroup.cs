@@ -10,20 +10,18 @@ public class RemoteTargetingAmuletGroup : Projectile {
     private List<TargetingAmulet> targetingAmulets = new();
     private readonly Time targetTime;
 
-    public RemoteTargetingAmuletGroup(Time targetTime, Time spawnTimeOffset = default(Time)) : base(false, true, spawnTimeOffset) {
+    public RemoteTargetingAmuletGroup(Time targetTime) : base(false, true) {
         this.targetTime = targetTime;
     }
 
 
     public override void Update() {
 
-        var lifeTime = Game.Time - SpawnTime;
-
-        if (lifeTime >= targetTime) {
+        if (LifeTime >= targetTime) {
             Destroy();
 
             var player = Scene.GetFirstEntity<Player>();
-            var timeOverflow = lifeTime - targetTime;
+            var timeOverflow = LifeTime - targetTime;
 
             foreach (var targetingAmulet in targetingAmulets) {
 

@@ -32,8 +32,8 @@ public class ReimuSecondary : Attack {
     // cooldowns
     private readonly Time primaryCooldown = Time.InSeconds(0.5f);
     private readonly Time secondaryCooldown = Time.InSeconds(2.5f);
-    private readonly Time spellACooldown = Time.InSeconds(0.5f);
-    private readonly Time spellBCooldown = Time.InSeconds(0.5f);
+    private readonly Time specialACooldown = Time.InSeconds(0.5f);
+    private readonly Time specialBCooldown = Time.InSeconds(0.5f);
 
 
 
@@ -42,7 +42,7 @@ public class ReimuSecondary : Attack {
     }
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks(PlayerActions.Primary, PlayerActions.SpellA, PlayerActions.SpellB);
+        player.DisableAttacks(PlayerActions.Primary, PlayerActions.SpecialA, PlayerActions.SpecialB);
     }
 
 
@@ -99,10 +99,10 @@ public class ReimuSecondary : Attack {
 
         player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
         player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerActions.SpellA);
-        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerActions.SpellB);
+        player.ApplyAttackCooldowns(specialACooldown - cooldownOverflow, PlayerActions.SpecialA);
+        player.ApplyAttackCooldowns(specialBCooldown - cooldownOverflow, PlayerActions.SpecialB);
 
-        player.EnableAttacks(PlayerActions.Primary, PlayerActions.SpellA, PlayerActions.SpellB);
+        player.EnableAttacks(PlayerActions.Primary, PlayerActions.SpecialA, PlayerActions.SpecialB);
 
         attackHold = false;
         aimOffset = 0f;
@@ -116,7 +116,7 @@ public class ReimuSecondary : Attack {
         var delta = Game.Network.Time - theirTime;
 
         foreach (var angle in angles) {
-            var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, turnRadius, velocity, hitboxRadius, delta) {
+            var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, turnRadius, velocity, hitboxRadius) {
 
                 SpawnDuration = spawnDuration,
                 PreHomingDuration = preHomingDuration,

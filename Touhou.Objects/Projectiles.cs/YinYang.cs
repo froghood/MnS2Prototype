@@ -14,7 +14,7 @@ public class YinYang : ParametricProjectile {
 
     private readonly Sprite sprite;
 
-    public YinYang(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float radius, Time spawnTimeOffset = default(Time)) : base(origin, direction, isPlayerOwned, isRemote, spawnTimeOffset) {
+    public YinYang(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float radius) : base(origin, direction, isPlayerOwned, isRemote) {
 
         this.radius = radius;
         this.visualRadius = radius + 8f;
@@ -84,16 +84,18 @@ public class YinYang : ParametricProjectile {
         }
     }
 
-    protected override float FuncX(float t) {
-        // float t = MathF.Max(time - 0.15f, 0f);
-        return Velocity * t;
+
+
+    protected override Vector2 PositionFunction(float t) {
+        return new Vector2(
+            Velocity * t,
+            0f
+        );
     }
 
-    protected override float FuncY(float time) {
-        return 0f;
-    }
 
-    protected override Vector2 Adjust(float time, Vector2 position) {
+
+    protected override Vector2 SecondaryPositionFunction(float time, Vector2 position) {
 
         var adjustedMatchBounds = Match.Bounds; // - new Vector2(radius, radius);
 

@@ -6,7 +6,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class ReimuSpellB : Attack {
+public class ReimuSpecialB : Attack {
 
     // aiming
     private bool attackHold;
@@ -31,12 +31,12 @@ public class ReimuSpellB : Attack {
     // cooldowns
     private readonly Time primaryCooldown = Time.InSeconds(0.5f);
     private readonly Time secondaryCooldown = Time.InSeconds(0.5f);
-    private readonly Time spellACooldown = Time.InSeconds(0.5f);
-    private readonly Time spellBCooldown = Time.InSeconds(1f);
+    private readonly Time specialACooldown = Time.InSeconds(0.5f);
+    private readonly Time specialBCooldown = Time.InSeconds(1f);
 
 
 
-    public ReimuSpellB() {
+    public ReimuSpecialB() {
         Holdable = true;
         //Focusable = true;
         Cost = 80;
@@ -46,7 +46,7 @@ public class ReimuSpellB : Attack {
 
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellA);
+        player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialA);
 
         player.MovespeedModifier = 0.1f;
 
@@ -96,12 +96,13 @@ public class ReimuSpellB : Attack {
         var radius = minRadius + (maxRadius - minRadius) * chargeTime;
         var velocity = minVelocity + (maxVelocity - minVelocity) * chargeTime;
 
-        var projectile = new YinYang(player.Position, angle, true, false, radius, cooldownOverflow) {
+        var projectile = new YinYang(player.Position, angle, true, false, radius) {
             CanCollide = false,
             Color = new Color4(0f, 1f, 0f, 0.4f),
             Velocity = velocity,
             SpawnDelay = Time.InSeconds(0.5f),
         };
+        projectile.IncreaseTime(cooldownOverflow, false);
 
         player.Scene.AddEntity(projectile);
 
@@ -109,15 +110,15 @@ public class ReimuSpellB : Attack {
 
         player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
         player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerActions.SpellA);
-        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerActions.SpellB);
+        player.ApplyAttackCooldowns(specialACooldown - cooldownOverflow, PlayerActions.SpecialA);
+        player.ApplyAttackCooldowns(specialBCooldown - cooldownOverflow, PlayerActions.SpecialB);
 
-        player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpellA);
+        player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialA);
 
         player.MovespeedModifier = 1f;
 
         var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.SpellB)
+        .In(PlayerActions.SpecialB)
         .In(Game.Network.Time - cooldownOverflow)
         .In(player.Position)
         .In(angle)
@@ -139,12 +140,12 @@ public class ReimuSpellB : Attack {
         Time delta = Game.Network.Time - theirTime;
 
         var projectile = new YinYang(position, angle, false, true, size) {
-            InterpolatedOffset = delta.AsSeconds(),
             Color = new Color4(1f, 0f, 0f, 1f),
             GrazeAmount = grazeAmount,
             Velocity = velocity,
             SpawnDelay = Time.InSeconds(0.5f),
         };
+        projectile.IncreaseTime(delta, true);
 
         opponent.Scene.AddEntity(projectile);
     }

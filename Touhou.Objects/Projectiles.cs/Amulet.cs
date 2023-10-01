@@ -13,26 +13,27 @@ public class Amulet : ParametricProjectile {
 
     private Sprite sprite;
 
-    public Amulet(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, Time spawnTimeOffset = default(Time)) : base(origin, direction, isPlayerOwned, isRemote, spawnTimeOffset) {
+    public Amulet(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote) : base(origin, direction, isPlayerOwned, isRemote) {
 
         Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMinor));
 
         sprite = new Sprite("amulet") {
             Origin = new Vector2(0.5f, 0.5f),
-            Rotation = Direction,
+            Rotation = Orientation,
             UseColorSwapping = true,
         };
     }
 
-    protected override float FuncX(float t) {
 
+
+    protected override Vector2 PositionFunction(float t) {
         var _t = MathF.Min(t, VelocityFalloff);
-        return (StartingVelocity * MathF.Pow(_t, 2) - GoalVelocity * MathF.Pow(_t, 2) + 2 * GoalVelocity * _t * t - 2 * StartingVelocity * _t * t) / (2 * VelocityFalloff) + StartingVelocity * t;
+        return new Vector2(
+            (StartingVelocity * MathF.Pow(_t, 2) - GoalVelocity * MathF.Pow(_t, 2) + 2 * GoalVelocity * _t * t - 2 * StartingVelocity * _t * t) / (2 * VelocityFalloff) + StartingVelocity * t,
+            0f
+        );
     }
 
-    protected override float FuncY(float t) {
-        return 0f;
-    }
 
 
     public override void Render() {

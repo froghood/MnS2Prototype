@@ -23,4 +23,6 @@ public struct Time {
 
     public override string ToString() => microseconds.ToString();
 
+    public static Time Max(Time a, Time b) => (Time)Math.Max(a, b);
+    public static Time Min(Time a, Time b) => (Time)Math.Min(a, b);
 }

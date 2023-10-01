@@ -120,8 +120,8 @@ public class MatchScene : Scene {
         Game.Network.ResetPing();
         if (isHosting) Game.Network.StartLatencyCorrection();
 
-        var opponent = new OpponentReimu(new Vector2(!isHosting ? -200 : 200, 0f));
-        var player = new PlayerReimu(isHosting) { Position = new Vector2(isHosting ? -200 : 200, 0f) };
+        var opponent = new OpponentSakuya(new Vector2(!isHosting ? -200 : 200, 0f));
+        var player = new PlayerSakuya(isHosting) { Position = new Vector2(isHosting ? -200 : 200, 0f) };
         //var player = new PlayerReimu() { Position = new Vector2(80f, Game.Window.Size.Y / 2f) };
 
         AddEntity(player);

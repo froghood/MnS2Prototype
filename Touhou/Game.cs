@@ -83,7 +83,7 @@ internal static class Game {
 
     static Game() {
 
-
+        System.Console.WriteLine(0f * float.PositiveInfinity);
 
         Settings = new Settings("./Settings.json");
 
@@ -91,7 +91,7 @@ internal static class Game {
 
         Random = new Random();
 
-        soundPlayer = new SoundPlayer(Settings.SoundVolume, 50, 3);
+        soundPlayer = new SoundPlayer(Settings.SoundVolume, 64, 4);
         soundPlayer.Load("./assets/sounds/hit.wav");
         soundPlayer.Load("./assets/sounds/death.wav");
         soundPlayer.Load("./assets/sounds/low_hearts.wav");

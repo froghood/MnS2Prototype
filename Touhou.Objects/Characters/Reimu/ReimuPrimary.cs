@@ -34,8 +34,8 @@ public class ReimuPrimary : Attack {
 
     private readonly Time primaryCooldown = Time.InSeconds(0.5f);
     private readonly Time secondaryCooldown = Time.InSeconds(0.5f);
-    private readonly Time spellACooldown = Time.InSeconds(0.5f);
-    private readonly Time spellBCooldown = Time.InSeconds(0.5f);
+    private readonly Time specialACooldown = Time.InSeconds(0.5f);
+    private readonly Time specialBCooldown = Time.InSeconds(0.5f);
 
     public ReimuPrimary() {
         Focusable = true;
@@ -43,7 +43,7 @@ public class ReimuPrimary : Attack {
     }
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks(PlayerActions.Secondary, PlayerActions.SpellA, PlayerActions.SpellB);
+        player.DisableAttacks(PlayerActions.Secondary, PlayerActions.SpecialA, PlayerActions.SpecialB);
     }
 
     public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
@@ -60,7 +60,7 @@ public class ReimuPrimary : Attack {
                 normalizedAimOffset += MathF.Abs(arcLengthToVelocity / aimRangeRadians) < gamma ? arcLengthToVelocity / aimRangeRadians : gamma * MathF.Sign(arcLengthToVelocity);
                 //_normalizedAimOffset += MathF.Min(gamma * MathF.Sign(arcLengthToVelocity), arcLengthToVelocity / aimRange);
             } else {
-                normalizedAimOffset -= normalizedAimOffset * 0.1f;
+                normalizedAimOffset -= normalizedAimOffset * gamma;
             }
         } else {
             attackHold = false;
@@ -77,7 +77,7 @@ public class ReimuPrimary : Attack {
         if (focused) {
             for (int index = 0; index < numShots; index++) {
                 var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
-                var projectile = new Amulet(player.Position + offset, angle, true, false, cooldownOverflow) {
+                var projectile = new Amulet(player.Position + offset, angle, true, false) {
                     SpawnDelay = spawnDelay,
                     CanCollide = false,
                     Color = new Color4(0f, 1f, 0f, 0.4f),
@@ -85,11 +85,13 @@ public class ReimuPrimary : Attack {
                     GoalVelocity = focusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
+                projectile.IncreaseTime(cooldownOverflow, false);
+
                 player.Scene.AddEntity(projectile);
             }
         } else {
             for (int index = 0; index < numShots; index++) {
-                var projectile = new Amulet(player.Position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), true, false, cooldownOverflow) {
+                var projectile = new Amulet(player.Position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), true, false) {
                     SpawnDelay = spawnDelay,
                     CanCollide = false,
                     Color = new Color4(0f, 1f, 0f, 0.4f),
@@ -97,16 +99,18 @@ public class ReimuPrimary : Attack {
                     GoalVelocity = unfocusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
+                projectile.IncreaseTime(cooldownOverflow, false);
+
                 player.Scene.AddEntity(projectile);
             }
         }
 
         player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
         player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(spellACooldown - cooldownOverflow, PlayerActions.SpellA);
-        player.ApplyAttackCooldowns(spellBCooldown - cooldownOverflow, PlayerActions.SpellB);
+        player.ApplyAttackCooldowns(specialACooldown - cooldownOverflow, PlayerActions.SpecialA);
+        player.ApplyAttackCooldowns(specialBCooldown - cooldownOverflow, PlayerActions.SpecialB);
 
-        player.EnableAttacks(PlayerActions.Secondary, PlayerActions.SpellA, PlayerActions.SpellB);
+        player.EnableAttacks(PlayerActions.Secondary, PlayerActions.SpecialA, PlayerActions.SpecialB);
 
         attackHold = false;
         aimOffset = 0f;
@@ -134,26 +138,26 @@ public class ReimuPrimary : Attack {
                 var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
                 var projectile = new Amulet(position + offset, angle, false, true) {
                     SpawnDelay = spawnDelay,
-                    InterpolatedOffset = delta.AsSeconds(),
                     Color = new Color4(1f, 0, 0, 1f),
                     GrazeAmount = grazeAmount,
                     StartingVelocity = focusedVelocity * startingVelocityModifier,
                     GoalVelocity = focusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
+                projectile.IncreaseTime(delta, true);
                 opponent.Scene.AddEntity(projectile);
             }
         } else {
             for (int index = 0; index < numShots; index++) {
                 var projectile = new Amulet(position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), false, true) {
                     SpawnDelay = spawnDelay,
-                    InterpolatedOffset = delta.AsSeconds(),
                     Color = new Color4(1f, 0, 0, 1f),
                     GrazeAmount = grazeAmount,
                     StartingVelocity = unfocusedVelocity * startingVelocityModifier,
                     GoalVelocity = unfocusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
+                projectile.IncreaseTime(delta, true);
                 opponent.Scene.AddEntity(projectile);
             }
         }

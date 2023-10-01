@@ -9,74 +9,96 @@ namespace Touhou.Objects.Projectiles;
 
 public abstract class ParametricProjectile : Projectile, IReceivable {
 
+
+
     public Vector2 Origin { get; private set; }
-
-    public float Direction { get; private set; }
-
-    public Time LifeTime => lifeTime;
-
+    public float Orientation { get; private set; }
     public Time SpawnDelay { get; init; }
 
-    public float InterpolatedOffset { get; init; }
-
-    public Vector2 PrevPosition { get; private set; }
 
 
-
-    private float preCos;
-    private float preSin;
-    private Time lifeTime;
+    private Time timeOffset;
+    private Time interpolationOffset;
+    private float interpolationTime;
 
 
 
-    protected ParametricProjectile(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, Time spawnTimeOffset = default(Time)) : base(isPlayerOwned, isRemote, spawnTimeOffset) {
+    private Matrix2 orientationMatrix;
+
+
+
+    protected ParametricProjectile(Vector2 origin, float orientation, bool isPlayerOwned, bool isRemote) : base(isPlayerOwned, isRemote) {
         Origin = origin;
-        Direction = direction;
+        Orientation = orientation;
 
         Position = Origin;
-        this.preCos = MathF.Cos(Direction);
-        this.preSin = MathF.Sin(Direction);
+        orientationMatrix = Matrix2.CreateRotation(orientation);
     }
 
 
 
-    protected abstract float FuncX(float t);
-    protected abstract float FuncY(float t);
-    protected virtual float FuncAngle(float t) => 0f;
-    protected virtual Vector2 Adjust(float t, Vector2 position) => position;
+    protected abstract Vector2 PositionFunction(float t);
+    protected virtual Vector2 SecondaryPositionFunction(float t, Vector2 position) => position;
+    protected virtual float AngleFunction(float t) => 0f;
+
     protected virtual void Tick(float t) { }
 
 
 
-    public sealed override void Update() {
-        PrevPosition = Position;
+    public override void Update() {
 
-        lifeTime = Game.Time - SpawnTime;
-
-        float spawnTimeAdjustedTime = MathF.Max(lifeTime.AsSeconds() - SpawnDelay.AsSeconds(), 0f);
+        var easingFactor = Easing.In(interpolationTime, 2f);
+        interpolationTime = MathF.Max(interpolationTime - Game.Delta.AsSeconds(), 0f);
 
 
-        float funcTime = spawnTimeAdjustedTime + Easing.Out(Math.Clamp(spawnTimeAdjustedTime / 2f, 0f, 1f), 3f) * InterpolatedOffset;
+        float funcTime = Time.Max(LifeTime + timeOffset + interpolationOffset * easingFactor - SpawnDelay, 0L).AsSeconds();
 
-        //var realTime = InterpolateOffset ? Time + EaseOutSine(Math.Clamp(Time / 2f, 0f, 1f)) * TimeOffset : Time + TimeOffset;
-        Position = Adjust(funcTime, SamplePosition(funcTime));
+
+        Position = SecondaryPositionFunction(funcTime, Origin + PositionFunction(funcTime) * orientationMatrix);
         Tick(funcTime);
 
         base.Update();
 
     }
 
+    public float GetTangent(float t) => AngleFunction(t) + Orientation;
 
+    public void SetTime(Time amount, bool interpolate) {
+        if (interpolate) {
+            var easingFactor = Easing.In(interpolationTime, 2f);
+            var currentTime = LifeTime + timeOffset + interpolationOffset * easingFactor;
 
-    protected Vector2 SamplePosition(float t) {
-        var x = FuncX(t);
-        var y = FuncY(t);
-        return Origin + new Vector2(preCos * x - preSin * y, preSin * x + preCos * y);
+            timeOffset = -LifeTime + amount;
+
+            var newTime = LifeTime + timeOffset;
+
+            interpolationOffset = newTime - currentTime;
+            interpolationTime = 1f;
+        } else {
+            timeOffset = -LifeTime + amount;
+            interpolationOffset = 0L;
+            interpolationTime = 0f;
+        }
+
     }
 
-    protected float SampleTangent(float t) => Direction + FuncAngle(t);
+    public void IncreaseTime(Time amount, bool interpolate) {
+        if (interpolate) {
+            var easingFactor = Easing.In(interpolationTime, 2f);
+            var currentTime = LifeTime + timeOffset + interpolationOffset * easingFactor;
 
-    protected float SampleNormal(float t) => Direction + FuncAngle(t) + MathF.PI / 2f;
+            timeOffset += amount;
+
+            var newTime = LifeTime + timeOffset;
+
+            interpolationOffset = currentTime - newTime;
+            interpolationTime = 1f;
+        } else {
+            timeOffset += amount;
+            interpolationOffset = 0L;
+            interpolationTime = 0f;
+        }
+    }
 
 
 

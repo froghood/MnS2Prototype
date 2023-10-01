@@ -7,23 +7,22 @@ namespace Touhou.Objects.Projectiles;
 public class ReimuBombWave : ParametricProjectile {
 
     public float Velocity { get; init; }
-    public ReimuBombWave(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, Time spawnTimeOffset = default) : base(origin, direction, isPlayerOwned, isRemote, spawnTimeOffset) { }
+    public ReimuBombWave(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote) : base(origin, direction, isPlayerOwned, isRemote) { }
 
     public override void Init() {
 
-        float width = (Match.Bounds.Y * MathF.Abs(MathF.Cos(Direction)) + Match.Bounds.X * MathF.Abs(MathF.Sin(Direction))) * 2f;
+        float width = (Match.Bounds.Y * MathF.Abs(MathF.Cos(Orientation)) + Match.Bounds.X * MathF.Abs(MathF.Sin(Orientation))) * 2f;
 
-        Hitboxes.Add(new RectangleHitbox(this, Vector2.Zero, new Vector2(250f, width), Direction, IsPlayerOwned ? CollisionGroups.PlayerBomb : CollisionGroups.OpponentBomb, Hit));
+        Hitboxes.Add(new RectangleHitbox(this, Vector2.Zero, new Vector2(250f, width), Orientation, IsPlayerOwned ? CollisionGroups.PlayerBomb : CollisionGroups.OpponentBomb, Hit));
 
         base.Init();
     }
 
-    protected override float FuncX(float t) {
-        return t * Velocity;
-    }
-
-    protected override float FuncY(float t) {
-        return 0f;
+    protected override Vector2 PositionFunction(float t) {
+        return new Vector2(
+            Velocity * t,
+            0f
+        );
     }
 
     public override void Render() {
@@ -35,7 +34,7 @@ public class ReimuBombWave : ParametricProjectile {
         var sprite = new Sprite("reimubombwave") {
             Origin = new Vector2(0f, 0.5f),
             Position = Position,
-            Rotation = Direction,
+            Rotation = Orientation,
             Scale = new Vector2(1f, 20f) * 0.7f,
             Color = new Color4(Color.R, Color.G, Color.B, alpha),
             UseColorSwapping = false,

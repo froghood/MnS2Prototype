@@ -20,12 +20,13 @@ public class ReimuBomb : Bomb {
 
             System.Console.WriteLine($"{x}, {y}");
 
-            var projectile = new ReimuBombWave(player.Position * new Vector2(x, y), direction, true, false, cooldownOverflow) {
+            var projectile = new ReimuBombWave(player.Position * new Vector2(x, y), direction, true, false) {
                 Velocity = 750f,
                 SpawnDelay = Time.InSeconds(0.5f),
                 DestroyedOnScreenExit = true,
                 Color = (i % 2 == 0) ? new Color4(0.5f, 1f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
+            projectile.IncreaseTime(cooldownOverflow, false);
 
             player.Scene.AddEntity(projectile);
 
@@ -35,8 +36,8 @@ public class ReimuBomb : Bomb {
 
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.Primary);
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpellA);
-        player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpellB);
+        player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpecialA);
+        player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpecialB);
 
         var packet = new Packet(PacketType.BombPressed)
         .In(Game.Network.Time - cooldownOverflow)
@@ -60,7 +61,6 @@ public class ReimuBomb : Bomb {
             var projectile = new ReimuBombWave(opponent.Position, MathF.PI / 2f * i, false, true) {
                 Velocity = 750f,
                 SpawnDelay = Time.InSeconds(0.5f),
-                //InterpolatedOffset = delta.AsSeconds(),
                 DestroyedOnScreenExit = true,
                 Color = (i % 2 == 0) ? new Color4(1f, 0.5f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
