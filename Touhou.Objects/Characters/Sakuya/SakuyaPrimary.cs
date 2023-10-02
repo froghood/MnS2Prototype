@@ -11,8 +11,8 @@ public class SakuyaPrimary : Attack {
     private byte fireCount;
     private float aimAngle;
     private int grazeAmount = 2;
-    private readonly float velocity = 600f;
-    private readonly float spacing = 60f;
+    private readonly float velocity = 500f;
+    private readonly float spacing = 50f;
     private readonly Time timeBetweenFiring = Time.InSeconds(0.32f);
     private readonly Time globalCooldown = Time.InSeconds(0.25f);
 
@@ -122,16 +122,17 @@ public class SakuyaPrimary : Attack {
         player.ApplyAttackCooldowns(globalCooldown,
             PlayerActions.Primary,
             PlayerActions.Secondary,
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB
+            PlayerActions.SpecialA
         );
+
+
     }
 
 
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
 
-        System.Console.WriteLine("t");
+        //System.Console.WriteLine("t");
 
         packet
         .Out(out Time theirTime)
@@ -139,7 +140,7 @@ public class SakuyaPrimary : Attack {
         .Out(out Vector2 theirPosition)
         .Out(out float theirAngle);
 
-        System.Console.WriteLine($"{theirTime}, {fireCount}, {theirPosition}, {theirAngle}");
+        //System.Console.WriteLine($"{theirTime}, {fireCount}, {theirPosition}, {theirAngle}");
 
         var latency = Game.Network.Time - theirTime;
 

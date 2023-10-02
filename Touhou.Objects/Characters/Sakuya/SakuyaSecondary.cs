@@ -7,12 +7,14 @@ namespace Touhou.Objects.Characters;
 
 public class SakuyaSecondary : Attack {
 
-    private readonly int numShots = 9;
-    private readonly float spreadAngle = 0.12f;
+    private readonly int numShots = 5;
+    private readonly float spreadAngle = 0.2f;
+
+    private readonly float deadzone = 40f;
     private readonly float velocity = 400f;
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
-    private readonly Time cooldown = Time.InSeconds(1f);
+    private readonly Time cooldown = Time.InSeconds(0.75f);
     private readonly Time otherCooldown = Time.InSeconds(0.25f);
 
     private readonly int grazeAmount = 4;
@@ -50,7 +52,7 @@ public class SakuyaSecondary : Attack {
 
         if (isMoving) {
             aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.025f, Game.Delta.AsSeconds())));
-            aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 3.5f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
+            aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 4.5f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
         } else {
             aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.001f, Game.Delta.AsSeconds())));
 
@@ -69,8 +71,8 @@ public class SakuyaSecondary : Attack {
 
             var angle = aimAngle + spreadAngle * i - spreadAngle * (numShots - 1) / 2f;
 
-            var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * 12f;
-            var offset = angleVector;
+            var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+            var offset = angleVector * deadzone;
 
             var projectile = new Kunai(player.Position + offset, angle, velocity, isTimestopped, true, false) {
                 SpawnDelay = Time.InSeconds(0.25f),
@@ -93,7 +95,6 @@ public class SakuyaSecondary : Attack {
         player.ApplyAttackCooldowns(otherCooldown - cooldownOverflow, PlayerActions.Primary);
         player.ApplyAttackCooldowns(Math.Max(cooldown - heldTime, Time.InSeconds(0.25f)) - cooldownOverflow, PlayerActions.Secondary);
         player.ApplyAttackCooldowns(otherCooldown - cooldownOverflow, PlayerActions.SpecialA);
-        player.ApplyAttackCooldowns(otherCooldown - cooldownOverflow, PlayerActions.SpecialB);
 
 
         player.EnableAttacks(
@@ -128,8 +129,10 @@ public class SakuyaSecondary : Attack {
 
             var angle = theirAngle + spreadAngle * i - spreadAngle * (numShots - 1) / 2f;
 
-            var angleVector = new Vector2(MathF.Cos(theirAngle), MathF.Sin(theirAngle)) * 12f;
-            var offset = angleVector;
+            var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+            var offset = angleVector * deadzone;
+
+            System.Console.WriteLine(offset);
 
             var projectile = new Kunai(theirPosition + offset, angle, velocity, isTimestopped, false, true) {
                 SpawnDelay = Time.InSeconds(0.25f),

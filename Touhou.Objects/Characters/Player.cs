@@ -112,7 +112,7 @@ public abstract class Player : Entity, IReceivable {
 
         //cooldownShader = new Shader(null, null, "assets/shaders/cooldown.frag");
         characterSprite = new Sprite("sakuya") {
-            Origin = new Vector2(0.4f, 0.3f),
+            Origin = new Vector2(0.45f, 0.35f),
             Color = Color,
             UseColorSwapping = false,
 

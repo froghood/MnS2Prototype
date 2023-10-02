@@ -9,16 +9,18 @@ public class Timestop : Effect {
     private Queue<TimestopProjectile> projectiles = new();
     private Time procTime = Time.InSeconds(0f);
     private bool isPlayerOwned;
+    private Action cancelCallback;
 
-    public Timestop(bool isPlayerOwned, Time duration) : base(duration) {
+    public Timestop(bool isPlayerOwned, Time duration, Action cancelCallback = null) : base(duration) {
         this.isPlayerOwned = isPlayerOwned;
+        this.cancelCallback = cancelCallback;
     }
 
     public override void PlayerUpdate(Player player) {
         while (LifeTime >= procTime) {
 
-            if (player.Power >= 16) {
-                player.SpendPower(16);
+            if (player.Power >= 12) {
+                player.SpendPower(12);
                 procTime += Time.InSeconds(0.25f);
             } else {
                 Cancel();
@@ -45,6 +47,8 @@ public class Timestop : Effect {
         } else {
             while (projectiles.Count > 0) projectiles.Dequeue().Unfreeze(time, true);
         }
+
+        cancelCallback?.Invoke();
 
         base.Cancel();
     }

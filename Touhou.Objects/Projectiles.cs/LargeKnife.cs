@@ -10,7 +10,7 @@ public class LargeKnife : TimestopProjectile {
 
         this.velocity = velocity;
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 3.75f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 6f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMinor));
 
     }
 
@@ -77,18 +77,22 @@ public class LargeKnife : TimestopProjectile {
 
         float spawnTime = MathF.Min(LifeTime.AsSeconds() / SpawnDelay.AsSeconds(), 1f);
 
-        var sprite = new Sprite("knife2") {
+
+        float middle = (MathF.Max(MathF.Max(Color.R, Color.G), Color.B) + MathF.Min(MathF.Min(Color.R, Color.G), Color.B)) / 2f;
+        float saturation = IsTimestopped ? 0.25f : 1f;
+
+        var sprite = new Sprite("largeknife") {
 
             Origin = new Vector2(0.5f),
 
             Position = Position,
             Rotation = Tangent,
-            Scale = new Vector2(0.45f) * (1f + 3f * (1f - spawnTime)),
+            Scale = new Vector2(0.48f) * (1f + 3f * (1f - spawnTime)),
 
             Color = new Color4(
-                Color.R,
-                Color.G,
-                Color.B,
+                middle + (Color.R - middle) * saturation,
+                middle + (Color.G - middle) * saturation,
+                middle + (Color.B - middle) * saturation,
                 Color.A * spawnTime),
 
             UseColorSwapping = true,

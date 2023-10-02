@@ -10,6 +10,8 @@ public abstract class TimestopProjectile : Projectile {
     public float Orientation { get => orientation; }
     public float Tangent { get => tangent; }
 
+    public bool IsTimestopped { get => isTimestopped; }
+
     private Vector2 origin;
 
 
@@ -23,7 +25,7 @@ public abstract class TimestopProjectile : Projectile {
 
 
     private bool startsTimeStopped;
-    private bool isTimeStopped;
+    private bool isTimestopped;
 
 
     private Time unfreezeTime;
@@ -42,7 +44,7 @@ public abstract class TimestopProjectile : Projectile {
         this.orientation = orientation;
 
         this.startsTimeStopped = startsTimeStopped;
-        isTimeStopped = startsTimeStopped;
+        isTimestopped = startsTimeStopped;
 
         Position = origin;
         orientationMatrix = Matrix2.CreateRotation(orientation);
@@ -61,10 +63,10 @@ public abstract class TimestopProjectile : Projectile {
 
 
         if (startsTimeStopped) {
-            if (isTimeStopped) {
+            if (isTimestopped) {
 
                 Position = Origin;
-                tangent = orientation + AngleFunction(0f);
+                tangent = TMathF.NormalizeAngle(orientation + AngleFunction(0f));
 
             } else {
 
@@ -77,7 +79,7 @@ public abstract class TimestopProjectile : Projectile {
                 funcTime -= (1f - MathF.Pow(MathF.Min(funcTime, 1f) - 1f, 2f)) / 2f;
 
                 Position = SecondaryPositionFunction(funcTime, Origin + PositionFunction(funcTime) * orientationMatrix);
-                tangent = orientation + AngleFunction(funcTime);
+                tangent = TMathF.NormalizeAngle(orientation + AngleFunction(funcTime));
             }
 
         } else {
@@ -88,7 +90,7 @@ public abstract class TimestopProjectile : Projectile {
             float funcTime = Time.Max(LifeTime + timeOffset + interpolationOffset * easingFactor - SpawnDelay, 0L).AsSeconds();
 
             Position = SecondaryPositionFunction(funcTime, SamplePosition(funcTime));
-            tangent = orientation + AngleFunction(funcTime);
+            tangent = TMathF.NormalizeAngle(orientation + AngleFunction(funcTime));
         }
 
         base.Update();
@@ -98,7 +100,7 @@ public abstract class TimestopProjectile : Projectile {
     protected Vector2 SamplePosition(float t) => Origin + PositionFunction(t) * orientationMatrix;
 
     public void Unfreeze(Time timeIncrease, bool interpolate) {
-        isTimeStopped = false;
+        isTimestopped = false;
         SetTime(Time.Min(LifeTime, SpawnDelay), false);
         IncreaseTime(timeIncrease, interpolate);
     }

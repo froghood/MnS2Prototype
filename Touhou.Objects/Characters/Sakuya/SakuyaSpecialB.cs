@@ -5,23 +5,30 @@ namespace Touhou.Objects.Characters;
 
 public class SakuyaSpecialB : Attack {
 
-
-
-
+    public SakuyaSpecialB() {
+        Cost = 12;
+    }
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
 
         if (player.HasEffect<Timestop>()) {
             player.CancelEffect<Timestop>();
+
         } else {
-            player.ApplyEffect(new Timestop(true, long.MaxValue));
+            var vfx = new TimestopVFX(() => player.Position, Graphics.Layers.Background1);
+
+            player.ApplyEffect(new Timestop(true, long.MaxValue, vfx.Destroy));
+
+            player.Scene.AddEntity(vfx);
+
+            var packet = new Packet(PacketType.AttackReleased)
+        .In(PlayerActions.SpecialB);
+
+            Game.Network.Send(packet);
         }
 
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.SpecialB);
 
-        Game.Network.Send(packet);
 
     }
 
@@ -45,9 +52,11 @@ public class SakuyaSpecialB : Attack {
 
         if (opponent.HasEffect<Timestop>()) return;
 
-        System.Console.WriteLine("timestop");
+        var vfx = new TimestopVFX(() => opponent.Position, Graphics.Layers.Background2);
 
-        opponent.ApplyEffect(new Timestop(false, long.MaxValue));
+        opponent.ApplyEffect(new Timestop(false, long.MaxValue, vfx.Destroy));
+
+        opponent.Scene.AddEntity(vfx);
     }
 
 }

@@ -9,7 +9,7 @@ public class SmallKnife : TimestopProjectile {
     public SmallKnife(Vector2 origin, float direction, float velocity, bool isFrozen, bool isPlayerOwned, bool isRemote) : base(origin, direction, isFrozen, isPlayerOwned, isRemote) {
         this.velocity = velocity;
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 3f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 4.5f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMinor));
     }
 
     protected override Vector2 PositionFunction(float t) {
@@ -23,18 +23,30 @@ public class SmallKnife : TimestopProjectile {
 
         float spawnTime = MathF.Min(LifeTime.AsSeconds() / SpawnDelay.AsSeconds(), 1f);
 
-        var sprite = new Sprite("knife2") {
+
+        // timestop saturation
+        float middle = (MathF.Max(MathF.Max(Color.R, Color.G), Color.B) + MathF.Min(MathF.Min(Color.R, Color.G), Color.B)) / 2f;
+        float saturation = IsTimestopped ? 0.25f : 1f;
+
+
+        // invert Y scale depending on if it's facing right or left 
+        var flipped = new Vector2(1f, MathF.Abs(Tangent) > MathF.PI / 2f ? -1f : 1f);
+
+
+        var sprite = new Sprite("smallknife") {
 
             Origin = new Vector2(0.5f),
 
             Position = Position,
             Rotation = Tangent,
-            Scale = new Vector2(0.35f) * (1f + 3f * (1f - spawnTime)),
+            Scale = new Vector2(0.35f) * flipped * (1f + 3f * (1f - spawnTime)),
+
+
 
             Color = new Color4(
-                Color.R,
-                Color.G,
-                Color.B,
+                middle + (Color.R - middle) * saturation,
+                middle + (Color.G - middle) * saturation,
+                middle + (Color.B - middle) * saturation,
                 Color.A * spawnTime),
 
             UseColorSwapping = true,

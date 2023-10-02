@@ -7,16 +7,19 @@ namespace Touhou.Objects.Characters;
 public class SakuyaSpecialA : Attack {
 
 
-    private readonly float velocity = 360f;
-    private readonly float velocityDecreasePerWave = 30f;
+    private readonly float velocity = 450f;
+    private readonly float velocityChangePerWave = 75f;
+
+    private readonly float deadzone = 24f;
+    private readonly float deadzoneChangePerWave = 12f;
 
     private readonly int waveCount = 3;
-    private readonly int spreadCount = 6;
+    private readonly int spreadCount = 4;
     private readonly int shotCountPerSpread = 3;
     private readonly float spreadAngle = 0.05f;
 
     public SakuyaSpecialA() {
-        Cost = 80;
+        Cost = 40;
     }
 
 
@@ -37,8 +40,10 @@ public class SakuyaSpecialA : Attack {
 
                     var angle = spreadAngle + this.spreadAngle * i - this.spreadAngle / 2f * (shotCountPerSpread - 1);
 
+                    var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+                    var offset = angleVector * (deadzone - deadzoneChangePerWave * wave);
 
-                    var projectile = new LargeKnife(player.Position, angle, velocity - velocityDecreasePerWave * wave, isTimestopped, true, false) {
+                    var projectile = new LargeKnife(player.Position + offset, angle, velocity - velocityChangePerWave * wave, isTimestopped, true, false) {
                         SpawnDelay = Time.InSeconds(0.25f),
                         CanCollide = false,
                         Color = new Color4(0f, 1f, 0f, 0.4f)
@@ -56,8 +61,7 @@ public class SakuyaSpecialA : Attack {
 
         player.ApplyAttackCooldowns(Time.InSeconds(0.25f) - cooldownOverflow, PlayerActions.Primary);
         player.ApplyAttackCooldowns(Time.InSeconds(0.25f) - cooldownOverflow, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(Time.InSeconds(1f) - cooldownOverflow, PlayerActions.SpecialA);
-        player.ApplyAttackCooldowns(Time.InSeconds(0.25f) - cooldownOverflow, PlayerActions.SpecialB);
+        player.ApplyAttackCooldowns(Time.InSeconds(1.5f) - cooldownOverflow, PlayerActions.SpecialA);
 
 
         var packet = new Packet(PacketType.AttackReleased)
@@ -105,7 +109,10 @@ public class SakuyaSpecialA : Attack {
                     var angle = spreadAngle + this.spreadAngle * i - this.spreadAngle / 2f * (shotCountPerSpread - 1);
 
 
-                    var projectile = new LargeKnife(theirPosition, angle, velocity - velocityDecreasePerWave * wave, isTimestopped, false, true) {
+                    var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+                    var offset = angleVector * (deadzone - deadzoneChangePerWave * wave);
+
+                    var projectile = new LargeKnife(theirPosition + offset, angle, velocity - velocityChangePerWave * wave, isTimestopped, false, true) {
                         SpawnDelay = Time.InSeconds(0.25f),
                         Color = new Color4(1f, 0f, 0f, 1f),
                         GrazeAmount = 3,
