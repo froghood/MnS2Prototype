@@ -3,6 +3,7 @@
 layout(location = 0) in vec2 aPosition;
 layout(location = 1) in vec2 aUV;
 
+uniform vec2 cameraPosition;
 uniform mat4 modelMatrix;
 uniform mat4 projectionMatrix;
 uniform vec2 alignment;

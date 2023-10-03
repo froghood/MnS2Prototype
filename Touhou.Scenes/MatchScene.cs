@@ -55,6 +55,8 @@ public class MatchScene : Scene {
 
         var match = new Match(startTime);
         AddEntity(match);
+
+
         AddEntity(new RenderCallback(() => {
 
             var matchBoundsRectangle = new Rectangle() {
@@ -122,10 +124,30 @@ public class MatchScene : Scene {
 
         var opponent = new OpponentSakuya(new Vector2(!isHosting ? -200 : 200, 0f));
         var player = new PlayerSakuya(isHosting) { Position = new Vector2(isHosting ? -200 : 200, 0f) };
+
+
+
+
         //var player = new PlayerReimu() { Position = new Vector2(80f, Game.Window.Size.Y / 2f) };
 
         AddEntity(player);
         AddEntity(opponent);
+
+        AddEntity(new UpdateCallback(() => {
+
+            var distance = MathF.Sqrt(
+                MathF.Pow(opponent.Position.X - player.Position.X, 2f) +
+                MathF.Pow(opponent.Position.Y - player.Position.Y, 2f)
+            );
+
+            float zoom = MathF.Max(MathF.Min((distance - 250f) / 750f, 1f), 0f);
+
+            var targetView = new Vector2(1600f, 900f) * (0.9f + 0.1f * zoom);
+            Game.Camera.View += (targetView - Game.Camera.View) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
+
+            var targetPosition = (player.Position + opponent.Position) / new Vector2(3f, 9f);
+            Game.Camera.Position += (targetPosition - Game.Camera.Position) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
+        }));
 
         AddEntity(new MatchUI(isHosting));
 

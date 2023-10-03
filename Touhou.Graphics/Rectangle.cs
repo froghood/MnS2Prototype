@@ -100,13 +100,14 @@ public class Rectangle : Renderable {
     }
 
     private Vector2 TransformModelToNDC(Vector2 vertex, Matrix2 rotationMatrix) {
-        vertex = vertex * rotationMatrix * Scale + Position; // world space
+
+        vertex = vertex * rotationMatrix * Scale + Position + (!IsUI ? -Game.Camera.Position : Vector2.Zero); // world space
 
         // if (!IsUI) vertex = vertex * Game.NewCamera.WorldToCameraScale - Game.NewCamera.Position; // camera space
         // vertex = IsUI ? vertex / new Vector2(2160f * Game.AspectRatio, 2160f) * 2f - UIAlignment : vertex / Game.WindowSize * 2f; // clip space
 
         vertex = vertex / Game.Camera.GetCameraSize(IsUI) * 2f;
-        vertex += IsUI ? Alignment : -Game.Camera.Position;
+        vertex += Alignment;
 
         return vertex;
     }

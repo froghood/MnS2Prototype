@@ -12,7 +12,7 @@ public class SakuyaPrimary : Attack {
     private float aimAngle;
     private int grazeAmount = 2;
     private readonly float velocity = 500f;
-    private readonly float spacing = 50f;
+    private readonly float spacing = 80f;
     private readonly Time timeBetweenFiring = Time.InSeconds(0.32f);
     private readonly Time globalCooldown = Time.InSeconds(0.25f);
 

@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using Touhou.Graphics;
 using Touhou.Networking;
 using Touhou.Objects.Projectiles;
 
@@ -8,17 +9,27 @@ public class SakuyaSpecialA : Attack {
 
 
     private readonly float velocity = 450f;
-    private readonly float velocityChangePerWave = 75f;
+    private readonly float velocityChangePerWave = 80f;
 
     private readonly float deadzone = 24f;
     private readonly float deadzoneChangePerWave = 12f;
 
     private readonly int waveCount = 3;
+
     private readonly int spreadCount = 4;
+
+    private readonly float angleBetweenSpreads = MathF.PI / 4f;
     private readonly int shotCountPerSpread = 3;
-    private readonly float spreadAngle = 0.05f;
+    private readonly float angleBetweenShots = 0.05f;
+
+
+    private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
+    private float aimAngle;
+    private bool isAiming;
+
 
     public SakuyaSpecialA() {
+        Holdable = true;
         Cost = 40;
     }
 
@@ -26,19 +37,49 @@ public class SakuyaSpecialA : Attack {
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
 
+        aimAngle = player.AngleToOpponent;
+
+        player.DisableAttacks(
+            PlayerActions.Primary,
+            PlayerActions.Secondary,
+            PlayerActions.SpecialB
+        );
+
+    }
+
+
+
+    public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
+        if (holdTime < aimHoldTimeThreshhold) return;
+
+        isAiming = true;
+
+        float targetAngle = MathF.Atan2(player.Velocity.Y, player.Velocity.X);
+        bool isMoving = (player.Velocity.X != 0f || player.Velocity.Y != 0f);
+        float angleFromTarget = TMathF.NormalizeAngle(targetAngle - aimAngle);
+
+        if (isMoving) {
+            aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.1f, Game.Delta.AsSeconds())));
+            aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 5.5f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
+        } else {
+            aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.001f, Game.Delta.AsSeconds())));
+
+        }
+    }
+
+
+
+    public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
         var isTimestopped = player.GetEffect<Timestop>(out var timestop);
-
-
-
 
         for (int wave = 0; wave < waveCount; wave++) {
             for (int spread = 0; spread < spreadCount; spread++) {
 
-                float spreadAngle = player.AngleToOpponent + MathF.Tau / spreadCount * spread + MathF.PI / spreadCount;
+                float spreadAngle = aimAngle + angleBetweenSpreads * spread - angleBetweenSpreads / 2f * (spreadCount - 1);
 
-                for (int i = 0; i < shotCountPerSpread; i++) {
+                for (int shot = 0; shot < shotCountPerSpread; shot++) {
 
-                    var angle = spreadAngle + this.spreadAngle * i - this.spreadAngle / 2f * (shotCountPerSpread - 1);
+                    float angle = spreadAngle + angleBetweenShots * shot - angleBetweenShots / 2f * (shotCountPerSpread - 1);
 
                     var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
                     var offset = angleVector * (deadzone - deadzoneChangePerWave * wave);
@@ -59,31 +100,25 @@ public class SakuyaSpecialA : Attack {
 
         player.SpendPower(Cost);
 
+        player.EnableAttacks(
+            PlayerActions.Primary,
+            PlayerActions.Secondary,
+            PlayerActions.SpecialB
+        );
+
         player.ApplyAttackCooldowns(Time.InSeconds(0.25f) - cooldownOverflow, PlayerActions.Primary);
         player.ApplyAttackCooldowns(Time.InSeconds(0.25f) - cooldownOverflow, PlayerActions.Secondary);
         player.ApplyAttackCooldowns(Time.InSeconds(1.5f) - cooldownOverflow, PlayerActions.SpecialA);
 
+        isAiming = false;
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.SpecialA)
         .In(Game.Network.Time - cooldownOverflow)
         .In(player.Position)
-        .In(player.AngleToOpponent);
+        .In(aimAngle);
 
         Game.Network.Send(packet);
-
-
-    }
-
-
-
-    public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
-
-    }
-
-
-
-    public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
 
     }
 
@@ -102,11 +137,11 @@ public class SakuyaSpecialA : Attack {
         for (int wave = 0; wave < waveCount; wave++) {
             for (int spread = 0; spread < spreadCount; spread++) {
 
-                float spreadAngle = theirAngle + MathF.Tau / spreadCount * spread + MathF.PI / spreadCount;
+                float spreadAngle = theirAngle + angleBetweenSpreads * spread - angleBetweenSpreads / 2f * (spreadCount - 1);
 
-                for (int i = 0; i < shotCountPerSpread; i++) {
+                for (int shot = 0; shot < shotCountPerSpread; shot++) {
 
-                    var angle = spreadAngle + this.spreadAngle * i - this.spreadAngle / 2f * (shotCountPerSpread - 1);
+                    var angle = spreadAngle + this.angleBetweenShots * shot - this.angleBetweenShots / 2f * (shotCountPerSpread - 1);
 
 
                     var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
@@ -126,5 +161,24 @@ public class SakuyaSpecialA : Attack {
             }
         }
 
+    }
+
+    public override void PlayerRender(Player player) {
+
+        if (!isAiming) return;
+
+        var aimArrowSprite = new Sprite("aimarrow2") {
+            Origin = new Vector2(-0.0625f, 0.5f),
+            Position = player.Position,
+            Rotation = aimAngle,
+            Scale = new Vector2(0.3f),
+            Color = new Color4(1f, 1f, 1f, 0.5f),
+        };
+
+        Game.Draw(aimArrowSprite, Layers.Player);
+
+        base.PlayerRender(player);
+
+        base.PlayerRender(player);
     }
 }

@@ -3,8 +3,8 @@ namespace Touhou.Objects.Characters;
 public class PlayerSakuya : Player {
     public PlayerSakuya(bool hosting) : base(hosting) {
 
-        Speed = 280f;
-        FocusedSpeed = 170f;
+        Speed = 350f;
+        FocusedSpeed = 250f;
 
         AddAttack(PlayerActions.Primary, new SakuyaPrimary());
         AddAttack(PlayerActions.Secondary, new SakuyaSecondary());

@@ -39,7 +39,7 @@ void main() {
     
     vertexColor = gl_VertexID == 0 ? fillColor : strokeColor;
  
-    gl_Position = vec4(((aPosition * rotation * scale + position) / getCameraScale() * 2.) + (isUI ? uiAlignment : -cameraPosition), 0., 1.);
+    gl_Position = vec4(((aPosition * rotation * scale + position) / getCameraScale() * 2.) + uiAlignment, 0., 1.);
 
 }
 

@@ -44,13 +44,17 @@ public class Sprite : Renderable {
 
         var rotationMatrix = Matrix2.CreateRotation(Rotation);
 
+        var cameraPosition = IsUI ? Vector2.Zero : Game.Camera.Position;
 
         var modelMatrix = Matrix4.Identity;
         modelMatrix *= Matrix4.CreateScale(Scale.X, Scale.Y, 0f);
         modelMatrix *= Matrix4.CreateRotationZ(Rotation);
         modelMatrix *= Matrix4.CreateTranslation(Position.X, Position.Y, 0f);
+        modelMatrix *= Matrix4.CreateTranslation(-cameraPosition.X, -cameraPosition.Y, 0f);
 
         var cameraScale = Game.Camera.GetCameraScale(IsUI);
+
+
 
         var projectionMatrix = Matrix4.CreateOrthographicOffCenter(
             Game.WindowSize.X * -cameraScale / 2f,
@@ -95,6 +99,7 @@ public class Sprite : Renderable {
 
         Game.Renderer.ShaderLibrary.UseShader("spriteb");
 
+        Game.Renderer.ShaderLibrary.Uniform("cameraPosition", cameraPosition);
         Game.Renderer.ShaderLibrary.Uniform("modelMatrix", modelMatrix);
         Game.Renderer.ShaderLibrary.Uniform("projectionMatrix", projectionMatrix);
         Game.Renderer.ShaderLibrary.Uniform("alignment", Alignment);

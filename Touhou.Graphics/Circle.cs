@@ -66,7 +66,7 @@ public class Circle : Renderable {
 
         Game.Renderer.ShaderLibrary.UseShader("circle");
 
-        Game.Renderer.ShaderLibrary.Uniform("position", Position);
+        Game.Renderer.ShaderLibrary.Uniform("position", Position - (IsUI ? Vector2.Zero : Game.Camera.Position));
         Game.Renderer.ShaderLibrary.Uniform("scale", Scale);
         Game.Renderer.ShaderLibrary.Uniform("rotation", rotationMatrix);
 
