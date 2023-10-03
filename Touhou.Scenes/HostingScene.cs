@@ -44,6 +44,6 @@ public class HostingScene : Scene {
 
         if (!Game.Settings.UseSteam) Game.Network.Connect(endPoint);
 
-        Game.Scenes.PushScene<HostSyncingScene>();
+        Game.Scenes.ChangeScene<HostSyncingScene>();
     }
 }

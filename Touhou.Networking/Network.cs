@@ -119,6 +119,8 @@ public class Network {
         if (!isConnected) return;
 
         udpClient?.Close();
+        udpClient?.Dispose();
+        udpClient = null;
 
         packetOutgoingQueue.Clear();
         totalUniquePacketsSent = 0;
@@ -159,12 +161,19 @@ public class Network {
 
     public void Update() {
 
+        if (isConnected && Game.Time > lastReceivedTime + Time.InSeconds(3)) {
+            Game.Scenes.Current?.OnDisconnect();
+        }
+
         // steam
         socketManager?.Receive();
         connectionManager?.Receive();
 
+
+
         // direct
         while (udpClient?.Available > 0) {
+
             var theirEndPoint = new IPEndPoint(IPAddress.Any, 0);
             var data = udpClient.Receive(ref theirEndPoint);
             receivedData(data, theirEndPoint);
@@ -172,6 +181,9 @@ public class Network {
     }
 
     private void receivedData(byte[] data, IPEndPoint endPoint) {
+
+
+
         lastReceivedTime = Game.Time;
 
         dataUsage = CalculateDataUsage(data.Length);

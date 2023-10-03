@@ -145,7 +145,7 @@ internal static class Game {
         Stats.Add("render");
         //Debug.Fields.Add("postRender");
 
-        Scenes.PushScene<MainScene>();
+        Scenes.ChangeScene<MainScene>();
 
         window.IsVisible = true;
     }

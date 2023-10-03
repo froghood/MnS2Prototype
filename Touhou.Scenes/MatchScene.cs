@@ -210,8 +210,12 @@ public class MatchScene : Scene {
 
         //Game.Network.DataReceived -= latencyGraphDelegate;
 
-        Game.Scenes.PopScene(); // -> HostSyncingScene / ClientSyncingScene
-        Game.Scenes.PopScene(); // -> HostingScene / ConnectingScene
-        Game.Scenes.PopScene(); // -> MainScene
+        // Game.Scenes.PopScene(); // -> HostSyncingScene / ClientSyncingScene
+        // Game.Scenes.PopScene(); // -> HostingScene / ConnectingScene
+        // Game.Scenes.PopScene(); // -> MainScene
+
+
+        Game.Scenes.ChangeScene<MainScene>();
+
     }
 }

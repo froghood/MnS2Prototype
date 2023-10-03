@@ -68,7 +68,7 @@ public class ClientSyncingScene : Scene {
 
                 var matchStartTime = Game.Network.Time + Time.InSeconds(3);
                 Game.Network.Send(new Packet(PacketType.SyncFinished).In(matchStartTime));
-                Game.Scenes.PushScene<MatchScene>(false, matchStartTime);
+                Game.Scenes.ChangeScene<MatchScene>(false, false, matchStartTime);
             }
         }
     }

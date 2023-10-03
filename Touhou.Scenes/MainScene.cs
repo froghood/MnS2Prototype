@@ -29,11 +29,11 @@ public class MainScene : Scene {
     public override void OnInitialize() {
         AddEntity(new Controller((action) => {
             if (action == PlayerActions.Primary) {
-                Game.Scenes.PushScene<HostingScene>();
+                Game.Scenes.ChangeScene<HostingScene>();
             }
 
             if (action == PlayerActions.Secondary) {
-                Game.Scenes.PushScene<ConnectingScene>();
+                Game.Scenes.ChangeScene<ConnectingScene>();
             }
         }, (_) => { }));
 

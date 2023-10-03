@@ -34,7 +34,7 @@ public class ConnectingScene : Scene {
 
         AddEntity(new ReceiveCallback((packet, endPoint) => {
             if (packet.Type != PacketType.ConnectionResponse) return;
-            Game.Scenes.PushScene<ClientSyncingScene>();
+            Game.Scenes.ChangeScene<ClientSyncingScene>();
         }));
 
         AddEntity(new RenderCallback(() => {

@@ -42,7 +42,7 @@ public class HostSyncingScene : Scene {
 
             case PacketType.SyncFinished:
                 packet.Out(out Time gameStartTime);
-                Game.Scenes.PushScene<MatchScene>(true, gameStartTime);
+                Game.Scenes.ChangeScene<MatchScene>(false, true, gameStartTime);
                 break;
         }
     }

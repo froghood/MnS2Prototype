@@ -135,8 +135,8 @@ public abstract class Player : Entity, IReceivable {
             Game.Network.Send(matchRestartPacket);
 
             Game.Command(() => {
-                Game.Scenes.PopScene();
-                Game.Scenes.PushScene<MatchScene>(hosting, matchStartTime);
+                //Game.Scenes.PopScene();
+                Game.Scenes.ChangeScene<MatchScene>(false, hosting, matchStartTime);
             });
         }
 
@@ -574,8 +574,8 @@ public abstract class Player : Entity, IReceivable {
                 packet.Out(out Time startTime, true);
 
                 Game.Command(() => {
-                    Game.Scenes.PopScene();
-                    Game.Scenes.PushScene<MatchScene>(hosting, startTime);
+                    //Game.Scenes.PopScene();
+                    Game.Scenes.ChangeScene<MatchScene>(false, hosting, startTime);
                 });
                 break;
 
