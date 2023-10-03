@@ -17,13 +17,13 @@ public class LocalTargetingAmuletGroup : Projectile {
 
     public override void Receive(Packet packet, IPEndPoint endPoint) {
 
-        //System.Console.WriteLine("local group receive");
+        //Log.Info("local group receive");
 
         if (packet.Type != PacketType.UpdateProjectile) return;
 
         packet.Out(out uint id, true);
 
-        //System.Console.WriteLine($"{Id}, {id}");
+        //Log.Info($"{Id}, {id}");
 
         if (id != Id) return;
 

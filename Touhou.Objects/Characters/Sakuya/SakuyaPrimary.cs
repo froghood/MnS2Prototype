@@ -132,7 +132,7 @@ public class SakuyaPrimary : Attack {
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
 
-        //System.Console.WriteLine("t");
+        //Log.Info("t");
 
         packet
         .Out(out Time theirTime)
@@ -140,7 +140,7 @@ public class SakuyaPrimary : Attack {
         .Out(out Vector2 theirPosition)
         .Out(out float theirAngle);
 
-        //System.Console.WriteLine($"{theirTime}, {fireCount}, {theirPosition}, {theirAngle}");
+        //Log.Info($"{theirTime}, {fireCount}, {theirPosition}, {theirAngle}");
 
         var latency = Game.Network.Time - theirTime;
 

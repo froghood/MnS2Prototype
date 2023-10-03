@@ -46,6 +46,6 @@ public class SteamConnectionManager : ConnectionManager {
     }
 
     private void log(string name, ConnectionInfo info) {
-        System.Console.WriteLine($"[CM] {name}: {info.Identity.Address}, {info.Identity.SteamId.Value}, {info.State}, {info.EndReason}");
+        Log.Info($"[CM] {name}: {info.Identity.Address}, {info.Identity.SteamId.Value}, {info.State}, {info.EndReason}");
     }
 }

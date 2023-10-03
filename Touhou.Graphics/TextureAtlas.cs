@@ -24,7 +24,7 @@ public class TextureAtlas {
         JsonConvert.PopulateObject(data, this);
 
         foreach (var item in sprites) {
-            System.Console.WriteLine($"{item.Key}, {item.Value.Left}");
+            Log.Info($"{item.Key}, {item.Value.Left}");
         }
     }
 
@@ -34,16 +34,16 @@ public class TextureAtlas {
 
         var size = new Vector2(width, height);
 
-        //System.Console.WriteLine(size);
+        //Log.Info(size);
 
         if (sprites.TryGetValue(name, out var bounds)) {
 
-            //System.Console.WriteLine($"boudns: {bounds}");
+            //Log.Info($"boudns: {bounds}");
 
             var bottomLeft = new Vector2(bounds.Left, size.Y - (bounds.Top + bounds.Height));
 
             if (name == "reimu") {
-                //System.Console.WriteLine($"{new Vector2(bounds.Left, size.Y - (bounds.Top + bounds.Height))} | {new Vector2(bounds.Width, bounds.Height)}");
+                //Log.Info($"{new Vector2(bounds.Left, size.Y - (bounds.Top + bounds.Height))} | {new Vector2(bounds.Width, bounds.Height)}");
             }
 
             return new Box2(new Vector2(bounds.Left, size.Y - bounds.Top) / size, new Vector2(bounds.Left + bounds.Width, size.Y - (bounds.Top + bounds.Height)) / size);

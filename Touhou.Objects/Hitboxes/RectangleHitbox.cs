@@ -40,7 +40,7 @@ namespace Touhou.Objects {
         public override Box2 GetBounds() {
             var boundsSize = new Vector2(Size.X * Cos + Size.Y * Sin, Size.X * Sin + Size.Y * Cos);
 
-            //System.Console.WriteLine(boundsSize);
+            //Log.Info(boundsSize);
 
             return new Box2(Position - boundsSize / 2f, Position + boundsSize / 2f);
         }

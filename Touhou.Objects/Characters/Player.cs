@@ -173,9 +173,9 @@ public abstract class Player : Entity, IReceivable {
         }
 
         foreach (var name in toRemove) {
-            System.Console.WriteLine("removing effect");
+            Log.Info("removing effect");
             effects.Remove(name);
-            System.Console.WriteLine("removed effect");
+            Log.Info("removed effect");
         }
     }
 
@@ -265,7 +265,7 @@ public abstract class Player : Entity, IReceivable {
                 attack.PlayerPress(this, cooldownOverflow, focused);
                 if (attack.Holdable) currentlyHeldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
 
-                //System.Console.WriteLine($"buffer: {action}, {attack.Cooldown}");
+                //Log.Info($"buffer: {action}, {attack.Cooldown}");
             }
 
             // when attack is held but not necessarily buffered
@@ -275,7 +275,7 @@ public abstract class Player : Entity, IReceivable {
                 attack.PlayerPress(this, cooldownOverflow, focused);
                 currentlyHeldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
 
-                System.Console.WriteLine($"held: {action}, {attack.Cooldown}");
+                Log.Info($"held: {action}, {attack.Cooldown}");
 
             }
         }
@@ -292,7 +292,7 @@ public abstract class Player : Entity, IReceivable {
 
             if (bomb.Cooldown > 0) return;
 
-            //System.Console.WriteLine("t");
+            //Log.Info("t");
 
             if (Game.Input.IsActionPressBuffered(action, out _, out var state)) {
                 Game.Input.ConsumePressBuffer(action);
@@ -569,7 +569,7 @@ public abstract class Player : Entity, IReceivable {
 
             case PacketType.Rematch:
 
-                System.Console.WriteLine("t");
+                Log.Info("t");
 
                 packet.Out(out Time startTime, true);
 

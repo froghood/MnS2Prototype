@@ -235,7 +235,7 @@ public class Network {
         for (int i = numPackets - numToRead; i < numPackets; i++) {
             var packetType = (PacketType)data[packetBlockOffset + individualPacketOffsets[i]];
 
-            System.Console.WriteLine($"{packetType} packed received");
+            Log.Info($"{packetType} packed received");
 
             var packet = new Packet(packetType);
 
@@ -256,7 +256,7 @@ public class Network {
                 var offsetChange = (Time)Math.Round(Math.Min(Math.Pow(latencyDifference * 0.05d, 2d), latencyDifference * 0.5d) * latencySign);
 
                 //var offsetChange = (Time)Math.Round((PerceivedLatency - theirLatency) * 0.1d);
-                System.Console.WriteLine(offsetChange);
+                Log.Info(offsetChange);
                 TimeOffset += offsetChange;
 
                 isLatencyCorrectionProfiling = true;
@@ -294,7 +294,7 @@ public class Network {
         }
 
         // var offsetChange = (Time)Math.Round((PerceivedLatency - theirPerceivedLatency) * 0.01d);
-        // System.Console.WriteLine(offsetChange);
+        // Log.Info(offsetChange);
         // TimeOffset -= offsetChange;
 
 

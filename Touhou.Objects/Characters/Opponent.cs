@@ -76,7 +76,7 @@ public abstract class Opponent : Entity, IReceivable {
         basePosition = startingPosition;
 
         packetDelegates = new Dictionary<PacketType, Action<Packet>>() {
-            {PacketType.MatchStarted, (_) => {System.Console.WriteLine("match started");matchStarted = true;}},
+            {PacketType.MatchStarted, (_) => {Log.Info("match started");matchStarted = true;}},
             {PacketType.VelocityChanged, VelocityChanged},
             {PacketType.AttackPressed, AttackPressed},
             {PacketType.AttackReleased, AttackReleased},
@@ -181,9 +181,9 @@ public abstract class Opponent : Entity, IReceivable {
         }
 
         foreach (var name in toRemove) {
-            System.Console.WriteLine("removing effect");
+            Log.Info("removing effect");
             effects.Remove(name);
-            System.Console.WriteLine("removed effect");
+            Log.Info("removed effect");
         }
     }
 

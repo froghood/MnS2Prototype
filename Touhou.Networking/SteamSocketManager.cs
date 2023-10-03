@@ -56,10 +56,10 @@ public class SteamSocketManager : SocketManager {
     }
 
     private void log(string name, ConnectionInfo info) {
-        System.Console.WriteLine($"[SM] {name}: {info.Identity.Address}, {info.Identity.SteamId.Value}, {info.State}, {info.EndReason}");
+        Log.Info($"[SM] {name}: {info.Identity.Address}, {info.Identity.SteamId.Value}, {info.State}, {info.EndReason}");
     }
 
     private void log(string name, string message) {
-        System.Console.WriteLine($"[SM] {name}: {message}");
+        Log.Info($"[SM] {name}: {message}");
     }
 }

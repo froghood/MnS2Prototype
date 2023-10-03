@@ -83,11 +83,7 @@ internal static class Game {
 
     static Game() {
 
-        System.Console.WriteLine(0f * float.PositiveInfinity);
-
         Settings = new Settings("./Settings.json");
-
-        System.Console.WriteLine(Settings.SteamID);
 
         Random = new Random();
 
@@ -226,7 +222,7 @@ internal static class Game {
         commandBuffer.Enqueue(action);
     }
 
-    public static void Log(string name, string message) {
-        File.AppendAllLines($"./log-{name}.txt", new[] { message });
-    }
+    // public static void Log(string name, string message) {
+    //     File.AppendAllLines($"./log-{name}.txt", new[] { message });
+    // }
 }

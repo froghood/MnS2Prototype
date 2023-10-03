@@ -39,7 +39,7 @@ public class CollisionGrid {
     }
 
     public bool TryGet(int x, int y, out List<Hitbox> list) {
-        //System.Console.WriteLine($"{x}, {y}");
+        //Log.Info($"{x}, {y}");
         if (_gridDict.TryGetValue((x, y), out var _list)) {
             list = _list;
             return true;

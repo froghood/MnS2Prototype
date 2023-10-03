@@ -115,7 +115,7 @@ public class Sprite : Renderable {
     }
 
     private Vector2 TransformModelToNDC(Vector2 position, Matrix2 rotation) {
-        //if (!IsUI) System.Console.WriteLine(Game.Camera.GetCameraScale(IsUI));
+        //if (!IsUI) Log.Info(Game.Camera.GetCameraScale(IsUI));
 
         position = position * rotation * Scale + Position; // world space
         position = position / ((Vector2)Game.WindowSize * Game.Camera.GetCameraScale(IsUI)) * 2f;

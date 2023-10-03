@@ -98,7 +98,7 @@ public class OpenGLTestScene : Scene {
             // //text.Padding = (MathF.Sin(Game.Time.AsSeconds() * MathF.PI) * 0.5f + 0.5f) * 0.2f;
             // text.Boldness = (MathF.Sin(Game.Time.AsSeconds() * MathF.Tau * 2f) * 0.5f + 0.5f);
 
-            // System.Console.WriteLine(Game.WindowSize);
+            // Log.Info(Game.WindowSize);
 
             //rect.Rotation = Game.Time.AsSeconds();
         }));

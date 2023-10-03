@@ -38,7 +38,7 @@ public class YukariSpecialA : Attack {
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
         startingAngle = player.AngleToOpponent;
 
-        System.Console.WriteLine(startingAngle);
+        Log.Info(startingAngle);
 
         angleOffsetVelocity = 0f;
         angleOffset = 0f;

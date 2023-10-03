@@ -206,7 +206,7 @@ public class MatchScene : Scene {
         if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
         else Game.Network.Disconnect();
 
-        System.Console.WriteLine("disconnected");
+        Log.Info("disconnected");
 
         //Game.Network.DataReceived -= latencyGraphDelegate;
 

@@ -61,6 +61,6 @@ public class ConnectingScene : Scene {
 
         Game.Network.Send(new Packet(PacketType.Connection));
 
-        System.Console.WriteLine($"Attempting to connect to {Game.Settings.SteamID}");
+        Log.Info($"Attempting to connect to {Game.Settings.SteamID}");
     }
 }

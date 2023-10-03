@@ -49,13 +49,13 @@ public class Graph : Renderable {
 
         var value = valueDelegate.Invoke();
 
-        //System.Console.WriteLine(value);
+        //Log.Info(value);
 
         if (valueDelegate != null) marks.Add(value);
         while (marks.Count > maxMarks) marks.RemoveAt(0);
 
-        //System.Console.WriteLine(maxMarks);
-        //System.Console.WriteLine(marks.Count);
+        //Log.Info(maxMarks);
+        //Log.Info(marks.Count);
 
 
         var largestMark = 0f;
@@ -63,7 +63,7 @@ public class Graph : Renderable {
             if (mark > largestMark) largestMark = mark;
         }
 
-        //System.Console.WriteLine(largestMark);
+        //Log.Info(largestMark);
 
 
         var rotationMatrix = Matrix2.CreateRotation(Rotation);
@@ -80,7 +80,7 @@ public class Graph : Renderable {
                 marks[i] / largestMark * Size.Y
             ) - Size * Origin;
 
-            //System.Console.WriteLine(vertex);
+            //Log.Info(vertex);
 
             vertices[i * 2 + 0] = vertex.X;
             vertices[i * 2 + 1] = vertex.Y;

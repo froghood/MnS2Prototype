@@ -33,7 +33,7 @@ public class RemoteHomingAmulet : Homing {
         this.velocity = velocity;
         this.hitboxRadius = hitboxRadius;
 
-        System.Console.WriteLine($"{position}, {startAngle}, {turnRadius}, {velocity}, {hitboxRadius}");
+        Log.Info($"{position}, {startAngle}, {turnRadius}, {velocity}, {hitboxRadius}");
 
         turnPosition = Position + new Vector2() {
             X = turnRadius * MathF.Cos(angle + MathF.PI / 2f),

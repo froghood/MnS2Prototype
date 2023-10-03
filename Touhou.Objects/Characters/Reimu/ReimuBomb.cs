@@ -10,7 +10,7 @@ public class ReimuBomb : Bomb {
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
 
-        System.Console.WriteLine("t");
+        Log.Info("t");
 
         for (int i = 0; i < numShots; i++) {
 
@@ -18,7 +18,7 @@ public class ReimuBomb : Bomb {
             float x = MathF.Abs(MathF.Cos(direction));
             float y = MathF.Abs(MathF.Sin(direction));
 
-            System.Console.WriteLine($"{x}, {y}");
+            Log.Info($"{x}, {y}");
 
             var projectile = new ReimuBombWave(player.Position * new Vector2(x, y), direction, true, false) {
                 Velocity = 750f,
@@ -54,7 +54,7 @@ public class ReimuBomb : Bomb {
         packet.Out(out Time theirTime).Out(out Vector2 position);
         Time delta = Game.Network.Time - theirTime;
 
-        System.Console.WriteLine(delta.AsSeconds());
+        Log.Info(delta.AsSeconds());
 
         for (int i = 0; i < numShots; i++) {
 

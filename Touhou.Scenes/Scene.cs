@@ -103,7 +103,7 @@ public abstract class Scene {
             CheckCollisions(entity, ref numCollisions);
         });
 
-        //System.Console.WriteLine(numCollisions);
+        //Log.Info(numCollisions);
 
 
     }
