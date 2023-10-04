@@ -91,4 +91,13 @@ public class ClientSyncingScene : Scene {
         requestCount++;
         requestTimer.Restart();
     }
+
+    public override void OnDisconnect() {
+        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
+        else Game.Network.Disconnect();
+
+        Log.Warn("Opponent disconnected");
+
+        Game.Scenes.ChangeScene<MainScene>();
+    }
 }

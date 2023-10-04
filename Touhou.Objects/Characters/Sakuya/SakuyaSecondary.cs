@@ -132,8 +132,6 @@ public class SakuyaSecondary : Attack {
             var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
             var offset = angleVector * deadzone;
 
-            Log.Info(offset);
-
             var projectile = new Kunai(theirPosition + offset, angle, velocity, isTimestopped, false, true) {
                 SpawnDelay = Time.InSeconds(0.25f),
                 Color = new Color4(1f, 0f, 0f, 1f),

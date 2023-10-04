@@ -256,7 +256,7 @@ public class Network {
                 var offsetChange = (Time)Math.Round(Math.Min(Math.Pow(latencyDifference * 0.05d, 2d), latencyDifference * 0.5d) * latencySign);
 
                 //var offsetChange = (Time)Math.Round((PerceivedLatency - theirLatency) * 0.1d);
-                Log.Info(offsetChange);
+                Log.Info($"Adjusting network time offset: {offsetChange}μs");
                 TimeOffset += offsetChange;
 
                 isLatencyCorrectionProfiling = true;

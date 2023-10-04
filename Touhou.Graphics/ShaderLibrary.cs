@@ -30,7 +30,7 @@ public class ShaderLibrary {
         GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int status);
         if (status == 0) {
             string infoLog = GL.GetProgramInfoLog(program);
-            Log.Info(infoLog);
+            Log.Error(infoLog);
         }
 
     }
@@ -94,7 +94,7 @@ public class ShaderLibrary {
 
         if (status == 0) {
             string infoLog = GL.GetShaderInfoLog(handle);
-            Log.Info(infoLog);
+            //Log.Error($"\n{infoLog}");
         }
 
         return status;

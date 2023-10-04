@@ -206,16 +206,8 @@ public class MatchScene : Scene {
         if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
         else Game.Network.Disconnect();
 
-        Log.Info("disconnected");
-
-        //Game.Network.DataReceived -= latencyGraphDelegate;
-
-        // Game.Scenes.PopScene(); // -> HostSyncingScene / ClientSyncingScene
-        // Game.Scenes.PopScene(); // -> HostingScene / ConnectingScene
-        // Game.Scenes.PopScene(); // -> MainScene
-
+        Log.Warn("Opponent disconnected");
 
         Game.Scenes.ChangeScene<MainScene>();
-
     }
 }

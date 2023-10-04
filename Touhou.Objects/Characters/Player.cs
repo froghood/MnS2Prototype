@@ -173,9 +173,7 @@ public abstract class Player : Entity, IReceivable {
         }
 
         foreach (var name in toRemove) {
-            Log.Info("removing effect");
             effects.Remove(name);
-            Log.Info("removed effect");
         }
     }
 
@@ -275,7 +273,7 @@ public abstract class Player : Entity, IReceivable {
                 attack.PlayerPress(this, cooldownOverflow, focused);
                 currentlyHeldAttacks.Add(attack, (Game.Time - cooldownOverflow, focused));
 
-                Log.Info($"held: {action}, {attack.Cooldown}");
+                //Log.Info($"Attack held: {action}, {attack.Cooldown}");
 
             }
         }
@@ -291,8 +289,6 @@ public abstract class Player : Entity, IReceivable {
             else bomb.Cooldown -= Game.Delta;
 
             if (bomb.Cooldown > 0) return;
-
-            //Log.Info("t");
 
             if (Game.Input.IsActionPressBuffered(action, out _, out var state)) {
                 Game.Input.ConsumePressBuffer(action);
@@ -569,12 +565,9 @@ public abstract class Player : Entity, IReceivable {
 
             case PacketType.Rematch:
 
-                Log.Info("t");
-
                 packet.Out(out Time startTime, true);
 
                 Game.Command(() => {
-                    //Game.Scenes.PopScene();
                     Game.Scenes.ChangeScene<MatchScene>(false, hosting, startTime);
                 });
                 break;

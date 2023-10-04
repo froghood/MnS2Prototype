@@ -10,7 +10,6 @@ public class Program {
         Log.Warn("warning test");
         Log.Error("error test");
 
-
         try {
             Game.Init(args);
             Game.Run();
@@ -18,7 +17,6 @@ public class Program {
             Log.Error(e);
             Console.ReadLine();
         }
-
 
     }
 }

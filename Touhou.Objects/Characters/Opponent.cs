@@ -76,7 +76,7 @@ public abstract class Opponent : Entity, IReceivable {
         basePosition = startingPosition;
 
         packetDelegates = new Dictionary<PacketType, Action<Packet>>() {
-            {PacketType.MatchStarted, (_) => {Log.Info("match started");matchStarted = true;}},
+            {PacketType.MatchStarted, (_) => {Log.Info("Match started"); matchStarted = true;}},
             {PacketType.VelocityChanged, VelocityChanged},
             {PacketType.AttackPressed, AttackPressed},
             {PacketType.AttackReleased, AttackReleased},
