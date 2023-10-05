@@ -19,7 +19,7 @@ public class ReimuSpecialB : Attack {
 
     // pattern
     private readonly int grazeAmount = 20;
-    private readonly Time maxChargeTime = Time.InSeconds(2f);
+    private readonly Time maxChargeTime = Time.InSeconds(1.5f);
 
     private readonly float minRadius = 30f;
     private readonly float maxRadius = 72f;
@@ -38,9 +38,7 @@ public class ReimuSpecialB : Attack {
 
     public ReimuSpecialB() {
         Holdable = true;
-        //Focusable = true;
-        Cost = 80;
-
+        Cost = 60;
     }
 
 

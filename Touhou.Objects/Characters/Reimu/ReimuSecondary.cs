@@ -14,7 +14,7 @@ public class ReimuSecondary : Attack {
     private readonly Time spawnDuration = Time.InSeconds(0.25f);
     private readonly Time preHomingDuration = Time.InSeconds(0.5f);
     private readonly Time homingDuration = Time.InSeconds(4f);
-    private readonly float[] angles = { -0.3f, -0.1f, 0.1f, 0.3f };
+    private readonly float[] angles = { -0.4f, -0.133f, 0.133f, 0.4f };
 
 
 

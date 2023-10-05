@@ -8,7 +8,7 @@ namespace Touhou.Objects.Characters;
 public class ReimuSpecialA : Attack {
     private readonly int numShots = 30;
     private readonly float velocity = 500;
-    private readonly float deceleration = 600;
+    private readonly float deceleration = 500;
     private readonly Time spawnDelay = Time.InSeconds(0.15f);
     private readonly int grazeAmount = 1;
 
