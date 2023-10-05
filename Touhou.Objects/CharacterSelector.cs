@@ -68,7 +68,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             Game.Network.Send(packet);
 
             Game.Command(() => {
-                Game.Scenes.ChangeScene<MatchScene>(true, true, matchStartTime,
+                Game.Scenes.ChangeScene<MatchScene>(false, true, matchStartTime,
                 GetPlayerCharacterType((CharacterSelectOption)playerPosition),
                 GetOpponentCharacterType((CharacterSelectOption)opponentPosition));
             });
@@ -202,7 +202,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
         .Out(out CharacterSelectOption playerCharacter);
 
         Game.Command(() => {
-            Game.Scenes.ChangeScene<MatchScene>(true, false, matchStartTime,
+            Game.Scenes.ChangeScene<MatchScene>(false, false, matchStartTime,
             GetPlayerCharacterType(playerCharacter),
             GetOpponentCharacterType(opponentCharacter));
         });
