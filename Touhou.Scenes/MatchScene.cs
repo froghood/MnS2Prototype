@@ -11,18 +11,23 @@ namespace Touhou.Scenes;
 
 public class MatchScene : Scene {
 
-    private readonly bool isHosting;
+    private readonly bool isP1;
     private readonly Time startTime;
-
+    private readonly Type playerType;
+    private readonly Type opponentType;
     private readonly Graph updateTimeGraph;
     private readonly Graph renderTimeGraph;
+    private readonly Player player;
+    private readonly Opponent opponent;
 
     //private Action<Time> latencyGraphDelegate;
 
-    public MatchScene(bool isHosting, Time startTime) {
+    public MatchScene(bool isP1, Time startTime, Type playerType, Type opponentType) {
 
-        this.isHosting = isHosting;
+        this.isP1 = isP1;
         this.startTime = startTime;
+        this.playerType = playerType;
+        this.opponentType = opponentType;
 
         updateTimeGraph = new Graph(() => {
             Game.Stats.TryGet("update", out var value);
@@ -46,6 +51,8 @@ public class MatchScene : Scene {
             Alignment = new Vector2(0.42f, -1f),
         };
 
+        player = (Player)Activator.CreateInstance(playerType, new object[] { isP1 });
+        opponent = (Opponent)Activator.CreateInstance(opponentType, new object[] { isP1 });
     }
 
     public override void OnInitialize() {
@@ -53,8 +60,11 @@ public class MatchScene : Scene {
         Projectile.TotalLocalProjectiles = 0;
         Projectile.TotalRemoteProjectiles = 0x80000000;
 
-        var match = new Match(startTime);
+        var match = new Match(isP1, startTime, player, opponent);
         AddEntity(match);
+
+        AddEntity(player);
+        AddEntity(opponent);
 
 
         AddEntity(new RenderCallback(() => {
@@ -120,18 +130,12 @@ public class MatchScene : Scene {
         }));
 
         Game.Network.ResetPing();
-        if (isHosting) Game.Network.StartLatencyCorrection();
-
-        var opponent = new OpponentSakuya(new Vector2(!isHosting ? -200 : 200, 0f));
-        var player = new PlayerSakuya(isHosting) { Position = new Vector2(isHosting ? -200 : 200, 0f) };
-
-
-
+        if (isP1) Game.Network.StartLatencyCorrection();
 
         //var player = new PlayerReimu() { Position = new Vector2(80f, Game.Window.Size.Y / 2f) };
 
-        AddEntity(player);
-        AddEntity(opponent);
+        //AddEntity(player);
+        //AddEntity(opponent);
 
         AddEntity(new UpdateCallback(() => {
 
@@ -149,7 +153,7 @@ public class MatchScene : Scene {
             Game.Camera.Position += (targetPosition - Game.Camera.Position) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
         }));
 
-        AddEntity(new MatchUI(isHosting));
+        AddEntity(new MatchUI(isP1));
 
 
         //Game.Network.DataReceived += latencyGraphDelegate;

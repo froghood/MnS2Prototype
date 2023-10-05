@@ -16,11 +16,13 @@ public abstract class Opponent : Entity, IReceivable {
     public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     public IEnumerable<KeyValuePair<PlayerActions, Attack>> Attacks { get => attacks.AsEnumerable(); }
     public Color4 Color { get; set; } = new Color4(1f, 0.7f, 0.7f, 1f);
-    private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
+    public bool IsDead { get => isDead; }
+
+    protected Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
     private Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
 
 
-
+    private bool isP1;
     private Vector2 basePosition;
     private Vector2 predictedOffset;
     private Vector2 interpolatedPosition;
@@ -72,8 +74,11 @@ public abstract class Opponent : Entity, IReceivable {
     private Sprite characterSprite;
 
 
-    public Opponent(Vector2 startingPosition) {
-        basePosition = startingPosition;
+    public Opponent(bool isP1) {
+
+        this.isP1 = isP1;
+
+        basePosition = new Vector2(isP1 ? 200 : -200, 0f); ;
 
         packetDelegates = new Dictionary<PacketType, Action<Packet>>() {
             {PacketType.MatchStarted, (_) => {Log.Info("Match started"); matchStarted = true;}},
@@ -195,12 +200,12 @@ public abstract class Opponent : Entity, IReceivable {
     }
 
     public override void Render() {
-        if (isDead) return;
+        // if (isDead) return;
 
-        characterSprite.Position = Position;
-        characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.22f;
+        // characterSprite.Position = Position;
+        // characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.22f;
 
-        Game.Draw(characterSprite, Layers.Opponent);
+        // Game.Draw(characterSprite, Layers.Opponent);
 
         // var states = new SpriteStates() {
         //     Origin = new Vector2(0.4f, 0.7f),

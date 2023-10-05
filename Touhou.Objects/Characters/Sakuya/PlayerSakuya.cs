@@ -1,7 +1,10 @@
+using OpenTK.Mathematics;
+using Touhou.Graphics;
+
 namespace Touhou.Objects.Characters;
 
 public class PlayerSakuya : Player {
-    public PlayerSakuya(bool hosting) : base(hosting) {
+    public PlayerSakuya(bool isP1) : base(isP1) {
 
         Speed = 350f;
         FocusedSpeed = 250f;
@@ -13,5 +16,24 @@ public class PlayerSakuya : Player {
 
         AddBomb(PlayerActions.Bomb, new ReimuBomb());
 
+
+
+    }
+
+    public override void Render() {
+
+        if (IsDead) return;
+
+        var sprite = new Sprite("sakuya") {
+            Origin = new Vector2(0.45f, 0.35f),
+            Position = Position,
+            Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.22f,
+            Color = Color,
+            UseColorSwapping = false,
+        };
+
+        Game.Draw(sprite, Layers.Player);
+
+        base.Render();
     }
 }

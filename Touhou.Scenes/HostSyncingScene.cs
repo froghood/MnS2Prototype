@@ -41,8 +41,11 @@ public class HostSyncingScene : Scene {
                 break;
 
             case PacketType.SyncFinished:
-                packet.Out(out Time gameStartTime);
-                Game.Scenes.ChangeScene<MatchScene>(false, true, gameStartTime);
+                // packet.Out(out Time gameStartTime);
+                // Game.Scenes.ChangeScene<MatchScene>(false, true, gameStartTime);
+                // break;
+
+                Game.Scenes.ChangeScene<CharacterSelectScene>(false, true);
                 break;
         }
     }

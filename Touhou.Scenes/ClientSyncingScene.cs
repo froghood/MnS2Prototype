@@ -66,9 +66,12 @@ public class ClientSyncingScene : Scene {
                 var minResponse = timeResponses.MinBy(e => (long)e.RoundTripTime);
                 Game.Network.TimeOffset += minResponse.Offset;
 
-                var matchStartTime = Game.Network.Time + Time.InSeconds(3);
-                Game.Network.Send(new Packet(PacketType.SyncFinished).In(matchStartTime));
-                Game.Scenes.ChangeScene<MatchScene>(false, false, matchStartTime);
+                // var matchStartTime = Game.Network.Time + Time.InSeconds(3);
+                // Game.Network.Send(new Packet(PacketType.SyncFinished).In(matchStartTime));
+                // Game.Scenes.ChangeScene<MatchScene>(false, false, matchStartTime);
+
+                Game.Network.Send(new Packet(PacketType.SyncFinished));
+                Game.Scenes.ChangeScene<CharacterSelectScene>(false, false);
             }
         }
     }

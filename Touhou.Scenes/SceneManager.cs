@@ -9,29 +9,49 @@ public class SceneManager {
 
 
     private Scene currentScene;
-    private Dictionary<Type, Scene> loadedScenes = new();
+    private Dictionary<Type, Scene> savedScenes = new();
 
 
-    public void ChangeScene<T>(bool saveScene = false, params object[] args) where T : Scene {
+    public void ChangeScene<T>(bool saveCurrent = false, params object[] args) where T : Scene {
 
-        if (currentScene != null && loadedScenes.ContainsKey(currentScene.GetType())) {
+        if (currentScene != null && saveCurrent) {
+            currentScene?.OnDeactivate();
+            savedScenes.TryAdd(currentScene.GetType(), currentScene);
+        } else {
+            currentScene?.OnTerminate();
+        }
+
+        var type = typeof(T);
+        if (savedScenes.TryGetValue(type, out var savedScene)) {
+            currentScene = savedScene;
+            currentScene?.OnReactivate();
+            savedScenes.Remove(type);
+        } else {
+            currentScene = (T)Activator.CreateInstance(type, args);
+            currentScene?.OnInitialize();
+        }
+
+    }
+    public void ChangeSceneOld<T>(bool saveCurrent = false, params object[] args) where T : Scene {
+
+        if (currentScene != null && savedScenes.ContainsKey(currentScene.GetType())) {
             currentScene?.OnDeactivate();
         } else {
             currentScene?.OnTerminate();
         }
 
         var type = typeof(T);
-        if (loadedScenes.TryGetValue(type, out var scene)) {
+        if (savedScenes.TryGetValue(type, out var scene)) {
 
             currentScene = scene;
             currentScene?.OnReactivate();
-            if (!saveScene) loadedScenes.Remove(type);
+            if (!saveCurrent) savedScenes.Remove(type);
 
         } else {
 
             currentScene = (T)Activator.CreateInstance(type, args);
             currentScene?.OnInitialize();
-            if (saveScene) loadedScenes.Add(type, currentScene);
+            if (saveCurrent) savedScenes.Add(type, currentScene);
 
         }
     }
@@ -39,8 +59,8 @@ public class SceneManager {
     public void UnloadScene<T>() where T : Scene {
         var type = typeof(T);
 
-        if (loadedScenes.TryGetValue(type, out var scene)) {
-            loadedScenes.Remove(type);
+        if (savedScenes.TryGetValue(type, out var scene)) {
+            savedScenes.Remove(type);
         }
 
     }

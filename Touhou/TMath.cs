@@ -28,3 +28,9 @@ public static class TMathF {
     public static float radToDeg(float a) => a * 180f / MathF.PI;
     public static float degToRad(float a) => a * MathF.PI / 180f;
 }
+
+public static class TMath {
+    public static int Mod(int a, int b) {
+        return a - b * (a / b);
+    }
+}

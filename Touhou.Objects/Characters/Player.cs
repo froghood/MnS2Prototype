@@ -25,6 +25,9 @@ public abstract class Player : Entity, IReceivable {
     public Time InvulnerabilityTime { get; private set; }
     public Time InvulnerabilityDuration { get; private set; }
 
+    public bool IsDead { get => isDead; }
+    public Time DeathTime { get => deathTime; }
+
     private bool isKnockbacked;
     private Time knockbackTime;
     private Time knockbackDuration;
@@ -62,17 +65,16 @@ public abstract class Player : Entity, IReceivable {
     private Dictionary<PlayerActions, Attack> attacks = new();
     public (PlayerActions Action, Bomb Bomb) Bomb { get; private set; }
 
-    //private Shader cooldownShader;
 
     private Dictionary<Attack, (Time Time, bool Focused)> currentlyHeldAttacks = new();
 
 
 
-    public Opponent Opponent => opponent is null ? opponent = Scene.GetFirstEntity<Opponent>() : opponent;
+    protected Opponent Opponent => opponent is null ? opponent = Scene.GetFirstEntity<Opponent>() : opponent;
     private Opponent opponent;
 
 
-    private bool hosting;
+    private bool isP1;
     private bool isDeathConfirmed;
     private Time deathConfirmationTime;
 
@@ -102,9 +104,11 @@ public abstract class Player : Entity, IReceivable {
     public float MovespeedModifier { get; set; } = 1f;
 
 
-    public Player(bool hosting) {
+    public Player(bool isP1) {
 
-        this.hosting = hosting;
+        this.isP1 = isP1;
+
+        Position = new Vector2(isP1 ? -200 : 200, 0f);
 
         CanCollide = true;
         Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 0.5f, CollisionGroups.Player, Hit));
@@ -136,7 +140,7 @@ public abstract class Player : Entity, IReceivable {
 
             Game.Command(() => {
                 //Game.Scenes.PopScene();
-                Game.Scenes.ChangeScene<MatchScene>(false, hosting, matchStartTime);
+                Game.Scenes.ChangeScene<MatchScene>(false, isP1, matchStartTime);
             });
         }
 
@@ -239,6 +243,8 @@ public abstract class Player : Entity, IReceivable {
 
         Position += Velocity * Game.Delta.AsSeconds();
 
+        System.Console.WriteLine(Velocity * Game.Delta.AsSeconds());
+
 
     }
 
@@ -336,25 +342,13 @@ public abstract class Player : Entity, IReceivable {
 
     public override void Render() {
 
-        if (!isDead) {
+        if (Focused) {
 
-            characterSprite.Position = Position;
-            characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.22f;
+            hitboxSprite.Position = Position;
+            hitboxSprite.Color = Color;
+            hitboxSprite.Depth = 1;
 
-            Game.Draw(characterSprite, Layers.Player);
-
-
-
-            if (Focused) {
-
-                hitboxSprite.Position = Position;
-                hitboxSprite.Color = Color;
-                hitboxSprite.Depth = 1;
-
-                Game.Draw(hitboxSprite, Layers.Foreground1);
-            }
-
-
+            Game.Draw(hitboxSprite, Layers.Foreground1);
         }
 
         foreach (var attack in attacks.Values) {
@@ -532,46 +526,8 @@ public abstract class Player : Entity, IReceivable {
 
 
     public void Receive(Packet packet, IPEndPoint endPoint) {
-        switch (packet.Type) {
-            case PacketType.Death:
-
-                // received death before death confirmation: resolve tie
-                if (isDead) {
-                    packet.Out(out Time theirDeathTime, true);
-
-                    // send confirmation if opponent died before we did
-                    if (theirDeathTime < deathTime || (theirDeathTime == deathTime && hosting)) {
-                        Game.Network.Send(new Packet(PacketType.DeathConfirmation));
-
-                        // give us a point
-                    }
-
-
-                } else {
-                    ApplyInvulnerability(Time.InSeconds(999f));
-
-                    Game.Network.Send(new Packet(PacketType.DeathConfirmation));
-
-                    // give us a point
-                }
-
-
-                break;
-            case PacketType.DeathConfirmation:
-
-                isDeathConfirmed = true;
-                deathConfirmationTime = Game.Time;
-                break;
-
-            case PacketType.Rematch:
-
-                packet.Out(out Time startTime, true);
-
-                Game.Command(() => {
-                    Game.Scenes.ChangeScene<MatchScene>(false, hosting, startTime);
-                });
-                break;
-
+        if (packet.Type == PacketType.Death) {
+            ApplyInvulnerability(Time.InSeconds(999f));
         }
     }
 
