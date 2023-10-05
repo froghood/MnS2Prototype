@@ -13,6 +13,7 @@
     <PackageReference Include="OpenTK" Version="4.8.0" />
     <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
     <PackageReference Include="StbImageSharp" Version="2.27.13" />
+    <PackageReference Include="Vortice.XInput" Version="3.2.0" />
   </ItemGroup>
 
 </Project>

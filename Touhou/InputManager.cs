@@ -6,17 +6,19 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Input.Hid;
 using OpenTK.Windowing.Common.Input;
-using SharpDX.XInput;
+
 using OpenTK.Mathematics;
+
+using Vortice.XInput;
 
 namespace Touhou;
 public class InputManager {
 
 
     public Dictionary<PlayerActions, Keys> KeyboardConfig { get; private set; }
-    public Dictionary<PlayerActions, GamepadButtonFlags> GamepadButtonConfig { get; private set; }
+    public Dictionary<PlayerActions, GamepadButtons> GamepadButtonConfig { get; private set; }
 
-    //public Dictionary<PlayerAction, uint> GamepadConfig { get; private set; }
+
 
     public event Action<PlayerActions> ActionPressed;
     public event Action<PlayerActions> ActionReleased;
@@ -34,9 +36,6 @@ public class InputManager {
 
 
 
-    private readonly Controller[] controllers;
-
-
 
     public InputManager() {
 
@@ -44,19 +43,17 @@ public class InputManager {
         var json = JObject.Parse(jsonText);
 
         KeyboardConfig = json["Keyboard"].ToObject<Dictionary<PlayerActions, Keys>>();
-        GamepadButtonConfig = json["Gamepad"].ToObject<Dictionary<PlayerActions, GamepadButtonFlags>>();
+        GamepadButtonConfig = json["Gamepad"].ToObject<Dictionary<PlayerActions, GamepadButtons>>();
 
         playerActions = Enum.GetValues<PlayerActions>().Skip(1).ToArray();
         actionPressOrder = Enum.GetValues<PlayerActions>().Skip(1).ToList();
 
-        controllers = new Controller[] {
-            new Controller(UserIndex.One),
-            new Controller(UserIndex.Two),
-            new Controller(UserIndex.Three),
-            new Controller(UserIndex.Four),
-        };
-
-        Controller.SetReporting(true);
+        // controllers = new Controller[] {
+        //     new Controller(UserIndex.One),
+        //     new Controller(UserIndex.Two),
+        //     new Controller(UserIndex.Three),
+        //     new Controller(UserIndex.Four),
+        // };
     }
 
 
@@ -91,11 +88,10 @@ public class InputManager {
         if (window.IsFocused) {
 
             // controller
-            for (int i = 0; i < controllers.Length; i++) {
-                var controller = controllers[i];
-                if (!controller.IsConnected) continue;
+            for (int i = 0; i < 4; i++) {
+                if (!XInput.GetState(0, out var state)) continue;
 
-                var gamepad = controller.GetState().Gamepad;
+                var gamepad = state.Gamepad;
 
                 // buttons
                 foreach (var action in playerActions) {
@@ -125,7 +121,6 @@ public class InputManager {
                         _ => PlayerActions.None
                     };
                 }
-
             }
 
 
