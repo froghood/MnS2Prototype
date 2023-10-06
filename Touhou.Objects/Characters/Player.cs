@@ -242,10 +242,6 @@ public abstract class Player : Entity, IReceivable {
         ChangeVelocity(velocityVector);
 
         Position += Velocity * Game.Delta.AsSeconds();
-
-        System.Console.WriteLine(Velocity * Game.Delta.AsSeconds());
-
-
     }
 
     private void InvokeActionPresses(PlayerActions action) {

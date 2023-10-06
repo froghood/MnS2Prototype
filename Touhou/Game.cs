@@ -121,6 +121,9 @@ internal static class Game {
             GL.Viewport(0, 0, e.Width, e.Height);
         };
 
+        window.JoystickConnected += (e) => {
+            Log.Info($"Controller connected: {e.JoystickId}, {e.IsConnected}");
+        };
         //inputManager.AttachEvents(Window);
 
         var keyboardState = window.KeyboardState;

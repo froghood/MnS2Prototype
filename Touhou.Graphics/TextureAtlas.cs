@@ -23,9 +23,11 @@ public class TextureAtlas {
         var data = File.ReadAllText(dataPath);
         JsonConvert.PopulateObject(data, this);
 
-        foreach (var item in sprites) {
-            Log.Info($"{item.Key}, {item.Value.Left}");
-        }
+        // foreach (var item in sprites) {
+        //     Log.Info($"{item.Key}, {item.Value.Left}");
+        // }
+
+        Log.Info("Loaded textures");
     }
 
     public Box2 GetUV(string name) {

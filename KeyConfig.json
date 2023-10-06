@@ -12,15 +12,11 @@
         "Bomb": "Space"
     },
     "Gamepad": {
-        "Right": "DPadRight",
-        "Left": "DPadLeft",
-        "Down": "DPadDown",
-        "Up": "DPadUp",
-        "Focus": "LeftShoulder",
-        "Primary": "X",
-        "Secondary": "A",
-        "SpecialA": "B",
-        "SpecialB": "RightShoulder",
-        "Bomb": "Y"
+        "Focus": 4,
+        "Primary": 2,
+        "Secondary": 0,
+        "SpecialA": 1,
+        "SpecialB": 5,
+        "Bomb": 3
     }
 }

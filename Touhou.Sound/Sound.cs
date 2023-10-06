@@ -15,7 +15,7 @@ public class Sound {
     public Sound(string path, int resampleQuality = 1) {
         using var reader = new AudioFileReader(path);
 
-        Log.Info($"{reader.FileName}: {reader.WaveFormat}");
+        //Log.Info($"{reader.FileName}: {reader.WaveFormat}");
 
         WaveFormat = new WaveFormat(SampleRate, BitsPerSample, Channels);
 
