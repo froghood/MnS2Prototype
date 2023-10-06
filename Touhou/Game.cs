@@ -17,6 +17,7 @@ using Vector2i = OpenTK.Mathematics.Vector2i;
 using Touhou.Graphics;
 using Touhou.Sound;
 using Steamworks;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Touhou;
 
@@ -122,9 +123,9 @@ internal static class Game {
         };
 
         window.JoystickConnected += (e) => {
-            Log.Info($"Controller connected: {e.JoystickId}, {e.IsConnected}");
+            if (e.IsConnected) Log.Info($"Controller {e.JoystickId} connected");
+            else Log.Warn($"Controller {e.JoystickId} disconnected");
         };
-        //inputManager.AttachEvents(Window);
 
         var keyboardState = window.KeyboardState;
 

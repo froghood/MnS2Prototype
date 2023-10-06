@@ -1,20 +1,21 @@
+using System.Net;
 using OpenTK.Mathematics;
 using Touhou.Graphics;
+using Touhou.Networking;
+using Touhou.Objects;
 
 namespace Touhou.Objects.Characters;
 
-public class PlayerMarisa : Player {
-    public PlayerMarisa(bool isP1) : base(isP1) {
+public class OpponentMarisa : Opponent {
 
-        Speed = 350f;
-        FocusedSpeed = 125f;
+    public OpponentMarisa(bool isP1) : base(isP1) {
 
         AddAttack(PlayerActions.Primary, new ReimuPrimary());
         AddAttack(PlayerActions.Secondary, new ReimuSecondary());
         AddAttack(PlayerActions.SpecialA, new MarisaSpecialA());
         AddAttack(PlayerActions.SpecialB, new ReimuSpecialB());
 
-        AddBomb(PlayerActions.Bomb, new ReimuBomb());
+        AddBomb(new ReimuBomb());
     }
 
     public override void Render() {
@@ -24,12 +25,12 @@ public class PlayerMarisa : Player {
         var sprite = new Sprite("marisa") {
             Origin = new Vector2(0.45f, 0.35f),
             Position = Position,
-            Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.2f,
+            Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.2f,
             Color = Color,
             UseColorSwapping = false,
         };
 
-        Game.Draw(sprite, Layers.Player);
+        Game.Draw(sprite, Layers.Opponent);
 
         base.Render();
     }

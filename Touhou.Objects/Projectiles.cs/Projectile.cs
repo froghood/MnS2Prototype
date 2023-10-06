@@ -153,4 +153,11 @@ public abstract class Projectile : Entity, IReceivable {
 
 
     public void Graze() => Grazed = true;
+
+    public virtual void NetworkDestroy() {
+        Destroy();
+
+        var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000);
+        Game.Network.Send(packet);
+    }
 }

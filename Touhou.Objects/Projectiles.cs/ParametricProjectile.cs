@@ -14,15 +14,15 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     public Vector2 Origin { get; private set; }
     public float Orientation { get; private set; }
     public Time SpawnDelay { get; init; }
+    public Time TimeOffset { get => timeOffset; }
+    public float FuncTime { get => funcTime; }
 
 
 
     private Time timeOffset;
     private Time interpolationOffset;
     private float interpolationTime;
-
-
-
+    private float funcTime;
     private Matrix2 orientationMatrix;
 
 
@@ -51,7 +51,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
         interpolationTime = MathF.Max(interpolationTime - Game.Delta.AsSeconds(), 0f);
 
 
-        float funcTime = Time.Max(LifeTime + timeOffset + interpolationOffset * easingFactor - SpawnDelay, 0L).AsSeconds();
+        funcTime = Time.Max(LifeTime + timeOffset + interpolationOffset * easingFactor - SpawnDelay, 0L).AsSeconds();
 
 
         Position = SecondaryPositionFunction(funcTime, Origin + PositionFunction(funcTime) * orientationMatrix);

@@ -1,5 +1,5 @@
 {
-  "Width": 2770,
+  "Width": 3016,
   "Height": 500,
   "Sprites": {
     "yinyang": {
@@ -44,105 +44,111 @@
       "Width": 255,
       "Height": 255
     },
+    "star": {
+      "Left": 2772,
+      "Top": 0,
+      "Width": 244,
+      "Height": 244
+    },
     "aimarrow2": {
-      "Left": 2213,
-      "Top": 302,
+      "Left": 2515,
+      "Top": 257,
       "Width": 269,
       "Height": 87
     },
     "butterfly": {
-      "Left": 2515,
-      "Top": 257,
+      "Left": 2786,
+      "Top": 246,
       "Width": 137,
       "Height": 170
     },
     "hitboxfocused": {
-      "Left": 1823,
-      "Top": 306,
+      "Left": 2213,
+      "Top": 302,
       "Width": 151,
       "Height": 150
     },
     "fade": {
-      "Left": 2654,
-      "Top": 257,
+      "Left": 2366,
+      "Top": 302,
       "Width": 100,
       "Height": 100
     },
     "largeknife": {
-      "Left": 1976,
+      "Left": 1823,
       "Top": 306,
       "Width": 150,
       "Height": 50
     },
     "ball": {
-      "Left": 2128,
-      "Top": 306,
+      "Left": 2925,
+      "Top": 246,
       "Width": 80,
       "Height": 80
     },
     "ball2": {
-      "Left": 1976,
-      "Top": 358,
+      "Left": 1975,
+      "Top": 306,
       "Width": 80,
       "Height": 80
     },
     "heart": {
-      "Left": 2654,
-      "Top": 359,
+      "Left": 2057,
+      "Top": 306,
       "Width": 80,
       "Height": 80
     },
     "spinningamulet": {
-      "Left": 1423,
-      "Top": 370,
+      "Left": 2139,
+      "Top": 306,
       "Width": 72,
       "Height": 84
     },
     "smallknife": {
-      "Left": 1497,
-      "Top": 370,
+      "Left": 2468,
+      "Top": 346,
       "Width": 148,
       "Height": 40
     },
     "arrowhead": {
-      "Left": 1647,
-      "Top": 370,
+      "Left": 2925,
+      "Top": 328,
       "Width": 73,
       "Height": 58
     },
     "aimarrow": {
-      "Left": 1005,
-      "Top": 373,
+      "Left": 2618,
+      "Top": 346,
       "Width": 160,
       "Height": 20
     },
     "amulet": {
-      "Left": 1722,
-      "Top": 370,
+      "Left": 1823,
+      "Top": 358,
       "Width": 70,
       "Height": 46
     },
     "bullet": {
-      "Left": 1167,
-      "Top": 373,
+      "Left": 2618,
+      "Top": 368,
       "Width": 80,
       "Height": 40
     },
     "kunai": {
-      "Left": 1249,
-      "Top": 373,
+      "Left": 2700,
+      "Top": 368,
       "Width": 80,
       "Height": 40
     },
     "rice": {
-      "Left": 1331,
-      "Top": 373,
+      "Left": 1895,
+      "Top": 358,
       "Width": 70,
       "Height": 40
     },
     "pellet": {
-      "Left": 2058,
-      "Top": 358,
+      "Left": 2468,
+      "Top": 302,
       "Width": 41,
       "Height": 41
     }

@@ -359,11 +359,7 @@ public abstract class Player : Entity, IReceivable {
 
             if (Game.Time < InvulnerabilityTime + InvulnerabilityDuration || isDead) return;
 
-            projectile.Destroy();
-
-            // must toggle the last bit because the opponents' projectile ids are opposite
-            var destroyProjectilePacket = new Packet(PacketType.DestroyProjectile).In(projectile.Id ^ 0x80000000);
-            Game.Network.Send(destroyProjectilePacket);
+            projectile.NetworkDestroy();
 
             ApplyInvulnerability(Time.InSeconds(2.5f));
             ApplyHit(Time.InMilliseconds(133.333)); // 8 frames
