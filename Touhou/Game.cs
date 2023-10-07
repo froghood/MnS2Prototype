@@ -113,7 +113,8 @@ internal static class Game {
 
     public static void Init(string[] args) {
 
-        SteamClient.Init(480);
+        SteamClient.Init(1456390);
+        // SteamClient.Init(480);
 
         window.Title = "MNS2 OPENGL";
 
@@ -122,11 +123,13 @@ internal static class Game {
         };
 
         window.JoystickConnected += (e) => {
-            Log.Info($"Controller connected: {e.JoystickId}, {e.IsConnected}");
+            if (e.IsConnected) {
+                Log.Info($"Controller {e.JoystickId} connected");
+            } else {
+                Log.Warn($"Controller {e.JoystickId} disconnected");
+            }
         };
-        //inputManager.AttachEvents(Window);
 
-        var keyboardState = window.KeyboardState;
 
         inputManager.ActionPressed += (actionData) => sceneManager.Current.Press(actionData);
         inputManager.ActionReleased += (action) => sceneManager.Current.Release(action);
@@ -183,12 +186,14 @@ internal static class Game {
             FrameCount++;
         }
 
-        SteamClient.Shutdown();
+        //SteamClient.Shutdown();
     }
 
     public static void Draw(Renderable renderable, Layers layer) => renderer.Queue(renderable, layer);
 
     private static void Update() {
+
+
 
         SteamClient.RunCallbacks();
 
