@@ -10,43 +10,43 @@ public abstract class Scene {
 
     private CollisionGrid collisionGrid = new(16, 9);
 
-    private static readonly Dictionary<CollisionGroups, HashSet<CollisionGroups>> collisionGroupConfig = new() {
-        {CollisionGroups.Default,
-            Enum.GetValues<CollisionGroups>().ToHashSet() // all other collision groups
+    private static readonly Dictionary<CollisionGroup, HashSet<CollisionGroup>> collisionGroupConfig = new() {
+        {CollisionGroup.Default,
+            Enum.GetValues<CollisionGroup>().ToHashSet() // all other collision groups
         },
 
-        {CollisionGroups.Player, new() {
-            CollisionGroups.Default,
-            CollisionGroups.OpponentProjectileMinor,
-            CollisionGroups.OpponentProjectileMajor
+        {CollisionGroup.Player, new() {
+            CollisionGroup.Default,
+            CollisionGroup.OpponentProjectileMinor,
+            CollisionGroup.OpponentProjectileMajor
         }},
 
-        {CollisionGroups.PlayerProjectile, new() {
-            CollisionGroups.Default,
+        {CollisionGroup.PlayerProjectile, new() {
+            CollisionGroup.Default,
         }},
 
-        {CollisionGroups.PlayerBomb, new() {
-            CollisionGroups.Default,
-            CollisionGroups.OpponentProjectileMinor
+        {CollisionGroup.PlayerBomb, new() {
+            CollisionGroup.Default,
+            CollisionGroup.OpponentProjectileMinor
         }},
 
-        {CollisionGroups.Opponent, new() {
-            CollisionGroups.Default,
+        {CollisionGroup.Opponent, new() {
+            CollisionGroup.Default,
         }},
 
-        {CollisionGroups.OpponentProjectileMinor, new() {
-            CollisionGroups.Default,
-            CollisionGroups.Player,
-            CollisionGroups.PlayerBomb
+        {CollisionGroup.OpponentProjectileMinor, new() {
+            CollisionGroup.Default,
+            CollisionGroup.Player,
+            CollisionGroup.PlayerBomb
         }},
 
-        {CollisionGroups.OpponentProjectileMajor, new() {
-            CollisionGroups.Default,
-            CollisionGroups.Player,
+        {CollisionGroup.OpponentProjectileMajor, new() {
+            CollisionGroup.Default,
+            CollisionGroup.Player,
         }},
 
-        {CollisionGroups.OpponentBomb, new() {
-            CollisionGroups.Default,
+        {CollisionGroup.OpponentBomb, new() {
+            CollisionGroup.Default,
         }},
     };
 
@@ -151,8 +151,8 @@ public abstract class Scene {
                             })).Invoke();
 
                             if (collided) {
-                                hitbox.Collide(otherHitbox.Entity);
-                                otherHitbox.Collide(entity);
+                                hitbox.OnCollide(otherHitbox.Entity, otherHitbox);
+                                otherHitbox.OnCollide(entity, hitbox);
                                 numCollisions++;
                             }
                         }

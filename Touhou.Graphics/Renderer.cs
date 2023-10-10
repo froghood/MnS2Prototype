@@ -76,7 +76,7 @@ public class Renderer {
         fontLibrary = new FontLibrary();
         fontLibrary.Load("./assets/fonts/consolas.png", "./assets/fonts/consolas.json");
 
-        renderableLayers = Enum.GetNames<Layers>().Select(_ => new Queue<Renderable>()).ToArray();
+        renderableLayers = Enum.GetNames<Layer>().Select(_ => new Queue<Renderable>()).ToArray();
 
         GL.Enable(EnableCap.Blend);
         GL.BlendEquation(BlendEquationMode.FuncAdd);
@@ -111,7 +111,7 @@ public class Renderer {
         context.SwapBuffers();
     }
 
-    public void Queue(Renderable renderable, Layers layer) {
+    public void Queue(Renderable renderable, Layer layer) {
 
         renderableLayers[(int)layer].Enqueue(renderable);
 

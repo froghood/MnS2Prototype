@@ -143,6 +143,6 @@ public class ReimuSecondary : Attack {
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layers.Player);
+        Game.Draw(aimArrowSprite, Layer.Player);
     }
 }

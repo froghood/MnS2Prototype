@@ -9,10 +9,10 @@ public class PlayerMarisa : Player {
         Speed = 350f;
         FocusedSpeed = 125f;
 
-        AddAttack(PlayerActions.Primary, new ReimuPrimary());
-        AddAttack(PlayerActions.Secondary, new ReimuSecondary());
+        AddAttack(PlayerActions.Primary, new MarisaPrimary());
+        AddAttack(PlayerActions.Secondary, new MarisaSecondary());
         AddAttack(PlayerActions.SpecialA, new MarisaSpecialA());
-        AddAttack(PlayerActions.SpecialB, new ReimuSpecialB());
+        AddAttack(PlayerActions.SpecialB, new MarisaSpecialB());
 
         AddBomb(PlayerActions.Bomb, new ReimuBomb());
     }
@@ -22,14 +22,14 @@ public class PlayerMarisa : Player {
         if (IsDead) return;
 
         var sprite = new Sprite("marisa") {
-            Origin = new Vector2(0.45f, 0.35f),
+            Origin = new Vector2(0.45f, 0.2f),
             Position = Position,
-            Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.2f,
+            Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.26f,
             Color = Color,
             UseColorSwapping = false,
         };
 
-        Game.Draw(sprite, Layers.Player);
+        Game.Draw(sprite, Layer.Player);
 
         base.Render();
     }

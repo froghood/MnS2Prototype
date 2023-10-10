@@ -26,7 +26,7 @@ public class ReimuBomb : Bomb {
                 DestroyedOnScreenExit = true,
                 Color = (i % 2 == 0) ? new Color4(0.5f, 1f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
-            projectile.IncreaseTime(cooldownOverflow, false);
+            projectile.ForwardTime(cooldownOverflow, false);
 
             player.Scene.AddEntity(projectile);
 

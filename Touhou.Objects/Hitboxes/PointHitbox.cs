@@ -3,7 +3,7 @@ using OpenTK.Mathematics;
 
 namespace Touhou.Objects {
     public class PointHitbox : Hitbox {
-        public PointHitbox(Entity entity, Vector2 offset, CollisionGroups collisionGroup, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionGroup, collisionCallback) { }
+        public PointHitbox(Entity entity, Vector2 offset, CollisionGroup collisionGroup, Action<Entity, Hitbox> collisionCallback = default) : base(entity, offset, collisionGroup, collisionCallback) { }
 
 
 

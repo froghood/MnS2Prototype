@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace Touhou;
 
 [Flags]
-public enum PlayerActions : int {
+public enum PlayerActions : uint {
     None = 0,
     Right = 1,
     Left = 2,

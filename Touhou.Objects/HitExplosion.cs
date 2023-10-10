@@ -31,7 +31,7 @@ namespace Touhou.Objects {
                 FillColor = new Color4(color.R, color.G, color.B, color.A * transparency)
             };
 
-            Game.Draw(circle, Layers.Foreground1);
+            Game.Draw(circle, Layer.Foreground1);
 
             // var states = new CircleStates() {
             //     Origin = new Vector2(0.5f, 0.5f),

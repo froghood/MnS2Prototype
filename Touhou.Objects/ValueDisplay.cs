@@ -40,7 +40,7 @@ public class ValueDisplay<T> : Entity {
         text.Position = Position;
         text.DisplayedText = value.ToString();
 
-        Game.Draw(text, Layers.UI1);
+        Game.Draw(text, Layer.UI1);
     }
 
     public override void PostRender() { }

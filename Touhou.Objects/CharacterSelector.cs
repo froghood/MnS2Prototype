@@ -116,7 +116,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
                 IsUI = true
             };
 
-            Game.Draw(text, Layers.UI1);
+            Game.Draw(text, Layer.UI1);
         }
 
         var playerText = new Text() {
@@ -145,8 +145,8 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             IsUI = true
         };
 
-        Game.Draw(playerText, Layers.UI1);
-        Game.Draw(opponentText, Layers.UI1);
+        Game.Draw(playerText, Layer.UI1);
+        Game.Draw(opponentText, Layer.UI1);
 
         if (playerSelected) {
             var selectedFade = new Sprite("fade") {
@@ -161,7 +161,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
                 BlendMode = BlendMode.Additive
             };
 
-            Game.Draw(selectedFade, Layers.UI1);
+            Game.Draw(selectedFade, Layer.UI1);
         }
 
         if (opponentSelected) {
@@ -177,7 +177,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
                 BlendMode = BlendMode.Additive
             };
 
-            Game.Draw(selectedFade, Layers.UI1);
+            Game.Draw(selectedFade, Layer.UI1);
         }
 
     }

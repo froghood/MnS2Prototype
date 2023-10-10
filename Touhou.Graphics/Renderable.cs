@@ -16,6 +16,7 @@ public abstract class Renderable {
         Scale = copy.Scale;
         IsUI = copy.IsUI;
         Alignment = copy.Alignment;
+        BlendMode = copy.BlendMode;
     }
 
     public float Depth { get; set; }

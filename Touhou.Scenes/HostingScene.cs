@@ -35,7 +35,7 @@ public class HostingScene : Scene {
         AddEntity(new ReceiveCallback(ReceiverCallback));
 
         AddEntity(new RenderCallback(() => {
-            Game.Draw(text, Layers.UI1);
+            Game.Draw(text, Layer.UI1);
         }));
     }
 

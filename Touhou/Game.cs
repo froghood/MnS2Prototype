@@ -190,7 +190,7 @@ internal static class Game {
         //SteamClient.Shutdown();
     }
 
-    public static void Draw(Renderable renderable, Layers layer) => renderer.Queue(renderable, layer);
+    public static void Draw(Renderable renderable, Layer layer) => renderer.Queue(renderable, layer);
 
     private static void Update() {
 

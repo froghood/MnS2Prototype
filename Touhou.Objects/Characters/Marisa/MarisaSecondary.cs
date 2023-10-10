@@ -5,27 +5,19 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class SakuyaSecondary : Attack {
+public class MarisaSecondary : Attack {
 
-    private readonly int numShots = 5;
-    private readonly float spreadAngle = 0.2f;
-
-    private readonly float deadzone = 40f;
-    private readonly float velocity = 400f;
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
-
-    private readonly Time cooldown = Time.InSeconds(0.75f);
-    private readonly Time otherCooldown = Time.InSeconds(0.25f);
-
-    private readonly int grazeAmount = 4;
-
+    private readonly int grazeAmount = 6;
+    private readonly int explosionGrazeAmount = 3;
     private float aimAngle;
     private bool isAiming;
 
 
-    public SakuyaSecondary() {
+    public MarisaSecondary() {
         Holdable = true;
     }
+
 
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
@@ -52,7 +44,7 @@ public class SakuyaSecondary : Attack {
 
         if (isMoving) {
             aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds())));
-            aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 4.5f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
+            aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 3f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
         } else {
             aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.001f, Game.Delta.AsSeconds())));
 
@@ -64,38 +56,24 @@ public class SakuyaSecondary : Attack {
 
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
 
-        bool isTimestopped = player.GetEffect<Timestop>(out var timestop);
+        var explodingStar = new ExplodingStar(250f, 150f, player.Position, aimAngle, true, false) {
+            SpawnDelay = Time.InSeconds(0.25f),
+            DestroyedOnScreenExit = false,
+            CanCollide = false,
+            Color = new Color4(0f, 1f, 0f, 0.4f)
+        };
 
+        player.Scene.AddEntity(explodingStar);
+        explodingStar.ForwardTime(cooldownOverflow, false);
 
-        for (int i = 0; i < numShots; i++) {
+        var refundTime = Time.Min(heldTime, Time.InSeconds(0.3f));
 
-            var angle = aimAngle + spreadAngle * i - spreadAngle * (numShots - 1) / 2f;
-
-            var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
-            var offset = angleVector * deadzone;
-
-            var projectile = new Kunai(player.Position + offset, angle, velocity, isTimestopped, true, false) {
-                SpawnDelay = Time.InSeconds(0.25f),
-
-                CanCollide = false,
-                Color = new Color4(0f, 1f, 0f, 0.4f),
-            };
-            projectile.IncreaseTime(cooldownOverflow, false);
-
-            player.Scene.AddEntity(projectile);
-
-            timestop?.AddProjectile(projectile);
-        }
-
-
-
-
-        isAiming = false;
-
-        player.ApplyAttackCooldowns(otherCooldown - cooldownOverflow, PlayerActions.Primary);
-        player.ApplyAttackCooldowns(Math.Max(cooldown - heldTime, Time.InSeconds(0.25f)) - cooldownOverflow, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(otherCooldown - cooldownOverflow, PlayerActions.SpecialA);
-
+        player.ApplyAttackCooldowns(Time.InSeconds(0.6f) - refundTime - cooldownOverflow, PlayerActions.Primary);
+        player.ApplyAttackCooldowns(Time.InSeconds(1f) - refundTime - cooldownOverflow, PlayerActions.Secondary);
+        player.ApplyAttackCooldowns(Time.InSeconds(0.2f),
+            PlayerActions.SpecialA,
+            PlayerActions.SpecialB
+        );
 
         player.EnableAttacks(
             PlayerActions.Primary,
@@ -110,6 +88,9 @@ public class SakuyaSecondary : Attack {
         .In(aimAngle);
 
         Game.Network.Send(packet);
+
+        isAiming = false;
+
     }
 
 
@@ -123,28 +104,18 @@ public class SakuyaSecondary : Attack {
 
         var latency = Game.Network.Time - theirTime;
 
-        var isTimestopped = opponent.GetEffect<Timestop>(out var timestop);
+        var explodingStar = new ExplodingStar(250f, 150f, theirPosition, theirAngle, false, true) {
+            SpawnDelay = Time.InSeconds(0.25f),
+            DestroyedOnScreenExit = false,
+            Color = new Color4(1f, 0f, 0f, 1f),
+            GrazeAmount = grazeAmount,
+            ExplosionGrazeAmount = explosionGrazeAmount,
+        };
 
-        for (int i = 0; i < numShots; i++) {
+        opponent.Scene.AddEntity(explodingStar);
 
-            var angle = theirAngle + spreadAngle * i - spreadAngle * (numShots - 1) / 2f;
+        explodingStar.ForwardTime(latency, true);
 
-            var angleVector = new Vector2(MathF.Cos(angle), MathF.Sin(angle));
-            var offset = angleVector * deadzone;
-
-            var projectile = new Kunai(theirPosition + offset, angle, velocity, isTimestopped, false, true) {
-                SpawnDelay = Time.InSeconds(0.25f),
-                Color = new Color4(1f, 0f, 0f, 1f),
-                GrazeAmount = grazeAmount
-            };
-            if (!isTimestopped) projectile.IncreaseTime(latency, true);
-
-            timestop?.AddProjectile(projectile);
-
-            opponent.Scene.AddEntity(projectile);
-
-
-        }
     }
 
     public override void PlayerRender(Player player) {

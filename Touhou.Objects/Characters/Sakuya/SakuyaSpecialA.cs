@@ -175,7 +175,7 @@ public class SakuyaSpecialA : Attack {
             Color = new Color4(1f, 1f, 1f, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layers.Player);
+        Game.Draw(aimArrowSprite, Layer.Player);
 
         base.PlayerRender(player);
 

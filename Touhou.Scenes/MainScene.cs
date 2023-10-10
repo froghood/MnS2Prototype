@@ -39,7 +39,7 @@ public class MainScene : Scene {
 
         AddEntity(new RenderCallback(() => {
 
-            Game.Draw(text, Layers.UI1);
+            Game.Draw(text, Layer.UI1);
 
         }));
 

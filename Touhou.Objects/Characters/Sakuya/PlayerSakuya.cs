@@ -32,7 +32,7 @@ public class PlayerSakuya : Player {
             UseColorSwapping = false,
         };
 
-        Game.Draw(sprite, Layers.Player);
+        Game.Draw(sprite, Layer.Player);
 
         base.Render();
     }

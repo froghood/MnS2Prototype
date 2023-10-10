@@ -62,41 +62,35 @@ public class OpenGLTestScene : Scene {
     public override void OnInitialize() {
         AddEntity(new Touhou.Objects.Generics.RenderCallback(() => {
 
-            var bg = new Sprite("star") {
+            var bg = new Sprite("box") {
                 Origin = new Vector2(0.5f, 0.333f),
-                Scale = new Vector2(1f),
+                Scale = new Vector2(3f),
                 Rotation = Game.Time.AsSeconds(),
                 Color = new Color4(1f, 0f, 0f, 1f),
                 IsUI = true,
-                UseColorSwapping = true,
-                BlendMode = BlendMode.Additive
             };
 
-            Game.Draw(bg, Layers.Background1);
+            Game.Draw(bg, Layer.Background1);
 
-            var bg2 = new Sprite("star") {
+            var bg2 = new Sprite("box") {
                 Origin = new Vector2(0.5f, 0.667f),
-                Scale = new Vector2(1f),
+                Scale = new Vector2(3f),
                 Rotation = Game.Time.AsSeconds() / 2f,
                 Color = new Color4(0f, 1f, 0f, 1f),
                 IsUI = true,
-                UseColorSwapping = true,
-                BlendMode = BlendMode.Additive
             };
 
-            Game.Draw(bg2, Layers.Background1);
+            Game.Draw(bg2, Layer.Background1);
 
-            var bg3 = new Sprite("star") {
+            var bg3 = new Sprite("box") {
                 Origin = new Vector2(0.5f, 1f),
-                Scale = new Vector2(1f),
+                Scale = new Vector2(3f),
                 Rotation = Game.Time.AsSeconds() / 4f,
                 Color = new Color4(0f, 0f, 1f, 1f),
                 IsUI = true,
-                UseColorSwapping = true,
-                BlendMode = BlendMode.Additive
             };
 
-            Game.Draw(bg3, Layers.Background1);
+            Game.Draw(bg3, Layer.Background1);
 
             // var sprite = new Sprite("blendtest") {
             //     Origin = new Vector2(0.5f),

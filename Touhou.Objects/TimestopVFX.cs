@@ -6,13 +6,13 @@ namespace Touhou.Objects;
 public class TimestopVFX : Entity {
 
     private Func<Vector2> positionFunction;
-    private Layers layer;
+    private Layer layer;
     private bool destroyed;
     private Time destroyedTime;
 
 
 
-    public TimestopVFX(Func<Vector2> positionFunction, Layers layer) {
+    public TimestopVFX(Func<Vector2> positionFunction, Layer layer) {
         this.positionFunction = positionFunction;
         this.layer = layer;
     }

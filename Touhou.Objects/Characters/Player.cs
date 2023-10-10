@@ -16,6 +16,8 @@ public abstract class Player : Entity, IReceivable {
     public float FocusedSpeed { get; protected init; }
 
     public Vector2 Velocity { get; private set; }
+    public Vector2 MovementAngleVector { get => movementAngleVector; }
+
 
 
     public bool Focused { get => Game.IsActionPressed(PlayerActions.Focus); }
@@ -89,6 +91,10 @@ public abstract class Player : Entity, IReceivable {
     private Time hitTime;
     private Time hitDuration;
     private Dictionary<Type, Effect> effects = new();
+    private Vector2 movementAngleVector;
+    private Time movespeedModifierTime;
+    private Time movespeedModifierDuration;
+    private float movespeedModifier;
 
     public Color4 Color { get; set; } = new Color4(0.7f, 1f, 0.7f, 1f);
 
@@ -99,6 +105,8 @@ public abstract class Player : Entity, IReceivable {
             return MathF.Atan2(positionDifference.Y, positionDifference.X);
         }
     }
+
+    public Vector2 OpponentPosition => Opponent.Position;
 
 
     public float MovespeedModifier { get; set; } = 1f;
@@ -111,8 +119,8 @@ public abstract class Player : Entity, IReceivable {
         Position = new Vector2(isP1 ? -200 : 200, 0f);
 
         CanCollide = true;
-        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 0.5f, CollisionGroups.Player, Hit));
-        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 50f, CollisionGroups.Player, Graze));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 0.5f, CollisionGroup.Player, Hit));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 50f, CollisionGroup.Player, Graze));
 
         //cooldownShader = new Shader(null, null, "assets/shaders/cooldown.frag");
         characterSprite = new Sprite("sakuya") {
@@ -232,10 +240,18 @@ public abstract class Player : Entity, IReceivable {
 
         float movementAngle = MathF.Atan2(movementVector.Y, movementVector.X);
 
+        movementAngleVector = new Vector2(
+            MathF.Cos(movementAngle),
+            MathF.Sin(movementAngle)
+        );
+
+
+        var modifier = Game.Time - movespeedModifierTime >= movespeedModifierDuration ? 1f : movespeedModifier;
+
         var velocityVector = CanMove ? (new Vector2(
-            MathF.Abs(MathF.Cos(movementAngle)) * movementVector.X,
-            MathF.Abs(MathF.Sin(movementAngle)) * movementVector.Y)
-            * (Focused ? FocusedSpeed : Speed) * MovespeedModifier)
+            MathF.Abs(movementAngleVector.X) * movementVector.X,
+            MathF.Abs(movementAngleVector.Y) * movementVector.Y)
+            * (Focused ? FocusedSpeed : Speed) * modifier)
             : Vector2.Zero;
 
 
@@ -344,7 +360,7 @@ public abstract class Player : Entity, IReceivable {
             hitboxSprite.Color = Color;
             hitboxSprite.Depth = 1;
 
-            Game.Draw(hitboxSprite, Layers.Foreground1);
+            Game.Draw(hitboxSprite, Layer.Foreground1);
         }
 
         foreach (var attack in attacks.Values) {
@@ -352,14 +368,14 @@ public abstract class Player : Entity, IReceivable {
         }
     }
 
-    public void Hit(Entity entity) {
+    public void Hit(Entity entity, Hitbox hitbox) {
 
 
         if (entity is Projectile projectile) {
 
             if (Game.Time < InvulnerabilityTime + InvulnerabilityDuration || isDead) return;
 
-            projectile.NetworkDestroy();
+            if (hitbox.CollisionGroup == CollisionGroup.OpponentProjectileMinor) projectile.NetworkDestroy();
 
             ApplyInvulnerability(Time.InSeconds(2.5f));
             ApplyHit(Time.InMilliseconds(133.333)); // 8 frames
@@ -399,7 +415,7 @@ public abstract class Player : Entity, IReceivable {
         Game.Network.Send(packet);
     }
 
-    public void Graze(Entity entity) {
+    public void Graze(Entity entity, Hitbox hitbox) {
         if (entity is Projectile projectile) {
             if (isDead || projectile.Grazed) return;
             powerGainedFromGrazing += projectile.GrazeAmount;
@@ -528,5 +544,13 @@ public abstract class Player : Entity, IReceivable {
     protected void AddAttack(PlayerActions action, Attack attack) => attacks[action] = attack;
     protected void AddBomb(PlayerActions action, Bomb bomb) => Bomb = (action, bomb);
 
+    public void ApplyMovespeedModifier(float modifier) {
+        ApplyMovespeedModifier(modifier, long.MaxValue);
+    }
 
+    public void ApplyMovespeedModifier(float modifier, Time duration) {
+        movespeedModifier = modifier;
+        movespeedModifierDuration = duration;
+        movespeedModifierTime = Game.Time;
+    }
 }

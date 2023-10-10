@@ -15,7 +15,7 @@ public class Amulet : ParametricProjectile {
 
     public Amulet(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote) : base(origin, direction, isPlayerOwned, isRemote) {
 
-        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
 
         sprite = new Sprite("amulet") {
             Origin = new Vector2(0.5f, 0.5f),
@@ -48,9 +48,7 @@ public class Amulet : ParametricProjectile {
            Color.B,
            Color.A * spawnTime);
 
-        Game.Draw(sprite, IsPlayerOwned ? Layers.PlayerProjectiles1 : Layers.OpponentProjectiles1);
-
-        base.Render();
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
     }
 
     public override void PostRender() { }

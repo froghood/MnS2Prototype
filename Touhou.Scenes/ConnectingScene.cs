@@ -38,7 +38,7 @@ public class ConnectingScene : Scene {
         }));
 
         AddEntity(new RenderCallback(() => {
-            Game.Draw(text, Layers.UI1);
+            Game.Draw(text, Layer.UI1);
         }));
     }
 

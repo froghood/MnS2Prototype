@@ -15,14 +15,17 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     public float Orientation { get; private set; }
     public Time SpawnDelay { get; init; }
     public Time TimeOffset { get => timeOffset; }
-    public float FuncTime { get => funcTime; }
 
 
+    public Time FuncTime { get => LifeTime + timeOffset + interpolationOffset * Easing.In(1f - interpolationTime.AsSeconds(), 2f); }
+    public Time FuncTimeWithSpawnDelay { get => Time.Max(FuncTime - SpawnDelay, 0L); }
+
+
+    private Time interpolationTime { get => Time.Min(Game.Time - interpolationStartTime, Time.InSeconds(1f)); }
 
     private Time timeOffset;
     private Time interpolationOffset;
-    private float interpolationTime;
-    private float funcTime;
+    private Time interpolationStartTime;
     private Matrix2 orientationMatrix;
 
 
@@ -47,15 +50,10 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     public override void Update() {
 
-        var easingFactor = Easing.In(interpolationTime, 2f);
-        interpolationTime = MathF.Max(interpolationTime - Game.Delta.AsSeconds(), 0f);
+        var t = FuncTimeWithSpawnDelay.AsSeconds();
 
-
-        funcTime = Time.Max(LifeTime + timeOffset + interpolationOffset * easingFactor - SpawnDelay, 0L).AsSeconds();
-
-
-        Position = SecondaryPositionFunction(funcTime, Origin + PositionFunction(funcTime) * orientationMatrix);
-        Tick(funcTime);
+        Position = SecondaryPositionFunction(t, Origin + PositionFunction(t) * orientationMatrix);
+        Tick(t);
 
         base.Update();
 
@@ -63,40 +61,42 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     public float GetTangent(float t) => AngleFunction(t) + Orientation;
 
-    public void SetTime(Time amount, bool interpolate) {
+    public virtual void SetTime(Time amount, bool interpolate) {
         if (interpolate) {
-            var easingFactor = Easing.In(interpolationTime, 2f);
-            var currentTime = LifeTime + timeOffset + interpolationOffset * easingFactor;
+
+            var currentTime = FuncTime;
 
             timeOffset = -LifeTime + amount;
 
             var newTime = LifeTime + timeOffset;
 
-            interpolationOffset = newTime - currentTime;
-            interpolationTime = 1f;
+            interpolationOffset = currentTime - newTime;
+            interpolationStartTime = Game.Time;
+
         } else {
             timeOffset = -LifeTime + amount;
             interpolationOffset = 0L;
-            interpolationTime = 0f;
+            interpolationStartTime = 0L;
         }
 
     }
 
-    public void IncreaseTime(Time amount, bool interpolate) {
+    public virtual void ForwardTime(Time amount, bool interpolate) {
         if (interpolate) {
-            var easingFactor = Easing.In(interpolationTime, 2f);
-            var currentTime = LifeTime + timeOffset + interpolationOffset * easingFactor;
+
+            var currentTime = FuncTime;
 
             timeOffset += amount;
 
             var newTime = LifeTime + timeOffset;
 
             interpolationOffset = currentTime - newTime;
-            interpolationTime = 1f;
+            interpolationStartTime = Game.Time;
+
         } else {
             timeOffset += amount;
             interpolationOffset = 0L;
-            interpolationTime = 0f;
+            interpolationStartTime = 0L;
         }
     }
 

@@ -19,7 +19,7 @@ public class YinYang : ParametricProjectile {
         this.radius = radius;
         this.visualRadius = radius + 8f;
 
-        Hitboxes.Add(new CircleHitbox(this, -new Vector2(0f, 0f), this.radius, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMajor));
+        Hitboxes.Add(new CircleHitbox(this, -new Vector2(0f, 0f), this.radius, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMajor));
 
         sprite = new Sprite("yinyang") {
             Origin = new Vector2(0.5f),
@@ -44,7 +44,7 @@ public class YinYang : ParametricProjectile {
            Color.B,
            Color.A * Easing.Out(spawnRatio, 3f));
 
-        Game.Draw(sprite, IsPlayerOwned ? Layers.PlayerProjectiles1 : Layers.OpponentProjectiles1);
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
 
         // Game.Draw(new Circle {
         //     Origin = new Vector2(0.5f),

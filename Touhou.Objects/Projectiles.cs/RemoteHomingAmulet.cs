@@ -40,7 +40,7 @@ public class RemoteHomingAmulet : Homing {
             Y = turnRadius * MathF.Sin(angle + MathF.PI / 2f)
         };
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, CollisionGroups.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, CollisionGroup.OpponentProjectileMinor));
 
         sprite = new Sprite("spinningamulet") {
             Origin = new Vector2(0.5f),
@@ -192,33 +192,7 @@ public class RemoteHomingAmulet : Homing {
             Color.B,
             Color.A * spawnRatio);
 
-        Game.Draw(sprite, Layers.OpponentProjectiles1);
+        Game.Draw(sprite, Layer.OpponentProjectiles1);
 
-        base.Render();
-
-        // var states = new SpriteStates() {
-        //     Origin = new Vector2(0.5f, 0.5f),
-        //     Position = Position,
-        //     Rotation = rotation,
-        //     Scale = new Vector2(1f, 1f) * 0.4f
-        // };
-
-        //var Color4 = isHoming ? Color4 : new Color4(170, 0, 200);
-
-        //var shader = new TShader("projectileColor4");
-        //shader.SetUniform("Color4", Color4);
-
-        //Game.DrawSprite("spinningamulet", states, shader, Layers.Projectiles2);
-
-
-        // if (side == 0 || !isHoming) return;
-
-        // circle.Radius = turnRadius;
-        // circle.Position = turnPosition;
-        // circle.Origin = new Vector2(1f, 1f) * circle.Radius;
-        // circle.FillColor4 = Color4.Transparent;
-        // circle.OutlineColor4 = new Color4(255, 255, 255, 30);
-        // circle.OutlineThickness = 1f;
-        // Game.Draw(circle, 0);
     }
 }
