@@ -7,7 +7,7 @@ public class PlayerMarisa : Player {
     public PlayerMarisa(bool isP1) : base(isP1) {
 
         Speed = 350f;
-        FocusedSpeed = 125f;
+        FocusedSpeed = 150f;
 
         AddAttack(PlayerActions.Primary, new MarisaPrimary());
         AddAttack(PlayerActions.Secondary, new MarisaSecondary());

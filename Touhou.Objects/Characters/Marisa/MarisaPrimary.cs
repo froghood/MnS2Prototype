@@ -8,14 +8,14 @@ namespace Touhou.Objects.Characters;
 public class MarisaPrimary : Attack {
 
 
-    private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
+    private static readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
+    private static readonly float laserWidth = 75f;
+    private static readonly Time startupTime = Time.InSeconds(0.6f);
+    private static readonly Time activeTime = Time.InSeconds(0.1f);
+    private static readonly int grazeAmount = 8;
 
 
 
-    private readonly float laserWidth = 75f;
-    private readonly Time startupTime = Time.InSeconds(0.6f);
-    private readonly Time activeTime = Time.InSeconds(0.1f);
-    private readonly int grazeAmount = 8;
     private float aimAngle;
     private Vector2 aimAngleVector;
     private Vector2 unfocusedLaserPosition;
@@ -23,6 +23,8 @@ public class MarisaPrimary : Attack {
     private bool isAiming;
     private bool isUnfocusedAiming;
     private bool isFocusedAiming;
+
+
 
     public MarisaPrimary() {
         Holdable = true;
