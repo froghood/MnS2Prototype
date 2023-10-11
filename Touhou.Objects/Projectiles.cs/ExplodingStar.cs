@@ -16,7 +16,7 @@ public class ExplodingStar : ParametricProjectile {
         this.velocity = velocity;
         this.explosionVelocity = explosionVelocity;
 
-        this.explosionStars = new AuxiliaryStar[28];
+        this.explosionStars = new AuxiliaryStar[24];
 
         Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 30f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
     }

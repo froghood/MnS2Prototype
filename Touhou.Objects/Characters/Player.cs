@@ -446,7 +446,7 @@ public abstract class Player : Entity, IReceivable {
         Game.Network.Send(packet);
     }
 
-    private void ApplyInvulnerability(Time duration) {
+    public void ApplyInvulnerability(Time duration) {
         InvulnerabilityTime = Game.Time;
         InvulnerabilityDuration = duration;
     }

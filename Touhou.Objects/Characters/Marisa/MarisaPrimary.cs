@@ -10,7 +10,7 @@ public class MarisaPrimary : Attack {
 
     private static readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
     private static readonly float laserWidth = 75f;
-    private static readonly Time startupTime = Time.InSeconds(0.6f);
+    private static readonly Time startupTime = Time.InSeconds(0.7f);
     private static readonly Time activeTime = Time.InSeconds(0.1f);
     private static readonly int grazeAmount = 8;
 

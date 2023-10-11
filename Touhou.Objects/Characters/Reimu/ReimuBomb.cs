@@ -32,12 +32,16 @@ public class ReimuBomb : Bomb {
 
         }
 
+
+
         Cooldown = Time.InSeconds(1.5f) - cooldownOverflow;
 
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.Primary);
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.Secondary);
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpecialA);
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpecialB);
+
+        player.ApplyInvulnerability(Cooldown);
 
         var packet = new Packet(PacketType.BombPressed)
         .In(Game.Network.Time - cooldownOverflow)

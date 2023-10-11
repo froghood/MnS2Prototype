@@ -9,8 +9,8 @@ public class MarisaSpecialB : Attack {
     private readonly int cost = 80;
     private readonly Time aimHoldTimeThreshhold;
     private readonly float laserWidth = 300f;
-    private readonly Time startupTime = Time.InSeconds(1f);
-    private readonly Time activeTime = Time.InSeconds(1f);
+    private readonly Time startupTime = Time.InSeconds(1.1f);
+    private readonly Time activeTime = Time.InSeconds(0.9f);
     private readonly int grazeAmount = 24;
     private bool isAiming;
     private float aimAngle;
