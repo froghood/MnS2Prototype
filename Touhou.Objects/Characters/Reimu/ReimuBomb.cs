@@ -26,11 +26,13 @@ public class ReimuBomb : Bomb {
                 DestroyedOnScreenExit = true,
                 Color = (i % 2 == 0) ? new Color4(0.5f, 1f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
-            projectile.IncreaseTime(cooldownOverflow, false);
+            projectile.ForwardTime(cooldownOverflow, false);
 
             player.Scene.AddEntity(projectile);
 
         }
+
+
 
         Cooldown = Time.InSeconds(1.5f) - cooldownOverflow;
 
@@ -38,6 +40,8 @@ public class ReimuBomb : Bomb {
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.Secondary);
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpecialA);
         player.ApplyAttackCooldowns(Cooldown, PlayerActions.SpecialB);
+
+        player.ApplyInvulnerability(Cooldown);
 
         var packet = new Packet(PacketType.BombPressed)
         .In(Game.Network.Time - cooldownOverflow)

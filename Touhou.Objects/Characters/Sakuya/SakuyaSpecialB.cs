@@ -15,7 +15,7 @@ public class SakuyaSpecialB : Attack {
             player.CancelEffect<Timestop>();
 
         } else {
-            var vfx = new TimestopVFX(() => player.Position, Graphics.Layers.Background1);
+            var vfx = new TimestopVFX(() => player.Position, Graphics.Layer.Background1);
 
             player.ApplyEffect(new Timestop(true, long.MaxValue, vfx.Destroy));
 
@@ -52,7 +52,7 @@ public class SakuyaSpecialB : Attack {
 
         if (opponent.HasEffect<Timestop>()) return;
 
-        var vfx = new TimestopVFX(() => opponent.Position, Graphics.Layers.Background2);
+        var vfx = new TimestopVFX(() => opponent.Position, Graphics.Layer.Background2);
 
         opponent.ApplyEffect(new Timestop(false, long.MaxValue, vfx.Destroy));
 

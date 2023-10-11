@@ -30,6 +30,10 @@ public abstract class Entity {
     public virtual void DebugRender() { }
 
     public virtual void Destroy() {
+
+        //Log.Info($"Destroying {this.GetType().Name}");
+
+
         IsDestroyed = true;
         Destroyed?.Invoke();
     }

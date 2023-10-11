@@ -16,8 +16,9 @@ public class Sprite : Renderable {
     }
 
     public Sprite(Sprite copy) : base(copy) {
-        SpriteName = copy.SpriteName;
+        SpriteName = $"{copy.SpriteName}";
         Color = copy.Color;
+        UseColorSwapping = copy.UseColorSwapping;
     }
 
 

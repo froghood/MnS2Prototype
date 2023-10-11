@@ -1,5 +1,6 @@
 
 using OpenTK.Mathematics;
+using Touhou.Graphics;
 
 namespace Touhou.Objects {
     public class RectangleHitbox : Hitbox {
@@ -10,7 +11,7 @@ namespace Touhou.Objects {
         public float Sin { get; }
         public Matrix2 RotationMatrix { get; }
 
-        public RectangleHitbox(Entity entity, Vector2 offset, Vector2 size, float rotation, CollisionGroups collisionGroup, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionGroup, collisionCallback) {
+        public RectangleHitbox(Entity entity, Vector2 offset, Vector2 size, float rotation, CollisionGroup collisionGroup, Action<Entity, Hitbox> collisionCallback = default) : base(entity, offset, collisionGroup, collisionCallback) {
             Size = size;
             Rotation = rotation;
 
@@ -38,11 +39,34 @@ namespace Touhou.Objects {
         }
 
         public override Box2 GetBounds() {
-            var boundsSize = new Vector2(Size.X * Cos + Size.Y * Sin, Size.X * Sin + Size.Y * Cos);
+            var boundsSize = new Vector2(Size.X * MathF.Abs(Cos) + Size.Y * MathF.Abs(Sin), Size.X * MathF.Abs(Sin) + Size.Y * MathF.Abs(Cos));
 
             //Log.Info(boundsSize);
 
             return new Box2(Position - boundsSize / 2f, Position + boundsSize / 2f);
+        }
+
+        public override void Render() {
+            Game.Draw(new Rectangle {
+                Origin = new Vector2(0.5f),
+                Position = Position,
+                Size = Size,
+                Rotation = Rotation,
+                StrokeWidth = 1f,
+                StrokeColor = Entity.CanCollide ? Color4.Red : Color4.White,
+                FillColor = Color4.Transparent
+            }, Layer.Foreground2);
+
+            // var bounds = GetBounds();
+
+            // Game.Draw(new Rectangle {
+            //     Origin = new Vector2(0.5f),
+            //     Position = bounds.Center,
+            //     Size = bounds.Size,
+            //     StrokeWidth = 1f,
+            //     StrokeColor = Color4.SkyBlue,
+            //     FillColor = Color4.Transparent,
+            // }, Layers.Foreground2);
         }
     }
 }

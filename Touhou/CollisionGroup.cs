@@ -1,6 +1,6 @@
 namespace Touhou;
 
-public enum CollisionGroups {
+public enum CollisionGroup {
     Default = 0,
     Player,
     PlayerProjectile,

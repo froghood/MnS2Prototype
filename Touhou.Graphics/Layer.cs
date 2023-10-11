@@ -1,6 +1,6 @@
 namespace Touhou.Graphics;
 
-public enum Layers {
+public enum Layer {
     Background1 = 0,
     Background2,
     BackgroundProjectiles1,

@@ -68,7 +68,7 @@ public class YukariSpecialA : Attack {
                     GoalVelocity = velocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.IncreaseTime(cooldownOverflow + timeOffset, false);
+                projectile.ForwardTime(cooldownOverflow + timeOffset, false);
 
                 player.Scene.AddEntity(projectile);
 
@@ -113,7 +113,7 @@ public class YukariSpecialA : Attack {
                 GoalVelocity = velocity,
                 VelocityFalloff = velocityFalloff,
             };
-            projectile.IncreaseTime(latency, true);
+            projectile.ForwardTime(latency, true);
 
             opponent.Scene.AddEntity(projectile);
         }

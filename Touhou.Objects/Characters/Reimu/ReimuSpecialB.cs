@@ -46,7 +46,7 @@ public class ReimuSpecialB : Attack {
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
         player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialA);
 
-        player.MovespeedModifier = 0.1f;
+        player.ApplyMovespeedModifier(0.1f);
 
 
     }
@@ -100,7 +100,7 @@ public class ReimuSpecialB : Attack {
             Velocity = velocity,
             SpawnDelay = Time.InSeconds(0.5f),
         };
-        projectile.IncreaseTime(cooldownOverflow, false);
+        projectile.ForwardTime(cooldownOverflow, false);
 
         player.Scene.AddEntity(projectile);
 
@@ -113,7 +113,7 @@ public class ReimuSpecialB : Attack {
 
         player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialA);
 
-        player.MovespeedModifier = 1f;
+        player.ApplyMovespeedModifier(1f);
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.SpecialB)
@@ -143,7 +143,7 @@ public class ReimuSpecialB : Attack {
             Velocity = velocity,
             SpawnDelay = Time.InSeconds(0.5f),
         };
-        projectile.IncreaseTime(delta, true);
+        projectile.ForwardTime(delta, true);
 
         opponent.Scene.AddEntity(projectile);
     }
@@ -161,7 +161,7 @@ public class ReimuSpecialB : Attack {
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layers.Player);
+        Game.Draw(aimArrowSprite, Layer.Player);
 
         var sizeIndicator = new Circle() {
             Origin = new Vector2(0.5f),
@@ -173,6 +173,6 @@ public class ReimuSpecialB : Attack {
 
         };
 
-        Game.Draw(sizeIndicator, Layers.Player);
+        Game.Draw(sizeIndicator, Layer.Player);
     }
 }

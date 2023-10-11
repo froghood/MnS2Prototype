@@ -37,6 +37,8 @@ public abstract class Projectile : Entity, IReceivable {
 
     public int GrazeAmount { get; set; }
 
+    public float DestroyedFactor { get => isDelayDestroyed ? Time.Max(Game.Time - destroyedTime, 0L).AsSeconds() / destroyDelayTime.AsSeconds() : 0f; }
+
     protected Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
     private Match match;
 
@@ -46,6 +48,9 @@ public abstract class Projectile : Entity, IReceivable {
     private static List<(uint, ProjectileType, bool, bool, Color4)> currentRemoteProjectileGroup;
     public static Queue<List<(uint, ProjectileType, bool, bool, Color4)>> LocalProjectileHistory = new();
     public static Queue<List<(uint, ProjectileType, bool, bool, Color4)>> RemoteProjectileHistory = new();
+    private bool isDelayDestroyed;
+    private Time destroyedTime = long.MaxValue;
+    private Time destroyDelayTime;
 
     public Projectile(bool isPlayerOwned, bool isRemote) {
         IsPlayerOwned = isPlayerOwned;
@@ -61,6 +66,8 @@ public abstract class Projectile : Entity, IReceivable {
     }
 
     public override void Init() {
+
+        //Log.Info(DestroyedFactor);
 
         var type = this switch {
             SpecialAmulet => ProjectileType.SpecialAmulet,
@@ -114,11 +121,16 @@ public abstract class Projectile : Entity, IReceivable {
 
     public override void Update() {
         DestroyIfOutOfBounds();
+
+        if (Game.Time - destroyedTime >= destroyDelayTime) {
+            Destroy();
+        }
+
     }
 
     private void DestroyIfOutOfBounds() {
         if (Hitboxes.Count == 0) return;
-        if (DestroyedOnScreenExit && Game.Time >= CreationTime + Time.InSeconds(1f)) {
+        if (DestroyedOnScreenExit && Hitboxes.Count > 0) {
             foreach (var hitbox in Hitboxes) {
                 var bounds = hitbox.GetBounds();
                 if ((bounds.Min.X < Match.Bounds.X && bounds.Max.X > -Match.Bounds.X) &&
@@ -126,7 +138,7 @@ public abstract class Projectile : Entity, IReceivable {
                     return;
                 }
             }
-            Destroy();
+            Destroy(Time.InSeconds(0.25f));
         }
     }
 
@@ -138,19 +150,34 @@ public abstract class Projectile : Entity, IReceivable {
         if (id == Id) Destroy();
     }
 
-    public override void Render() {
-        // var idText = new Text() {
-        //     DisplayedText = Id.ToString(),
-        //     CharacterSize = 12f,
-        //     Font = "consolas",
-        //     Color = Color4.White,
-        //     Position = Position,
-        // };
 
-        // Game.Draw(idText);
+
+    public override void Render() {
+        foreach (var hitbox in Hitboxes) {
+            hitbox.Render();
+        }
     }
 
 
 
     public void Graze() => Grazed = true;
+
+    public virtual void Destroy(Time delay) {
+
+        if (isDelayDestroyed) return;
+
+        isDelayDestroyed = true;
+
+        destroyedTime = Game.Time;
+        destroyDelayTime = delay;
+
+        //Log.Info($"Destroying {this.GetType().Name} in {destroyDelayTime.AsSeconds()}s");
+    }
+
+    public virtual void NetworkDestroy() {
+        Destroy();
+
+        var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000);
+        Game.Network.Send(packet);
+    }
 }

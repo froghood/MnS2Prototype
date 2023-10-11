@@ -1,150 +1,210 @@
 {
-  "Width": 2770,
-  "Height": 500,
+  "Width": 1510,
+  "Height": 2213,
   "Sprites": {
-    "yinyang": {
+    "laser_start": {
       "Left": 0,
+      "Top": 0,
+      "Width": 533,
+      "Height": 1084
+    },
+    "yinyang": {
+      "Left": 535,
       "Top": 0,
       "Width": 501,
       "Height": 500
     },
     "timestop": {
-      "Left": 503,
-      "Top": 0,
+      "Left": 535,
+      "Top": 502,
       "Width": 500,
       "Height": 500
     },
+    "laser_indicator_progress_start": {
+      "Left": 535,
+      "Top": 1004,
+      "Width": 300,
+      "Height": 600
+    },
+    "laser_indicator_start": {
+      "Left": 0,
+      "Top": 1086,
+      "Width": 300,
+      "Height": 600
+    },
     "reimu": {
-      "Left": 1005,
-      "Top": 0,
+      "Left": 837,
+      "Top": 1004,
       "Width": 416,
       "Height": 371
     },
     "sakuya": {
-      "Left": 1423,
-      "Top": 0,
+      "Left": 1037,
+      "Top": 502,
       "Width": 398,
       "Height": 368
     },
     "marisa": {
-      "Left": 1823,
+      "Left": 1038,
       "Top": 0,
       "Width": 388,
       "Height": 304
     },
+    "sigil": {
+      "Left": 837,
+      "Top": 1377,
+      "Width": 326,
+      "Height": 327
+    },
+    "vortex": {
+      "Left": 302,
+      "Top": 1606,
+      "Width": 303,
+      "Height": 306
+    },
     "aimindicator": {
-      "Left": 2213,
-      "Top": 0,
+      "Left": 1165,
+      "Top": 1377,
       "Width": 300,
       "Height": 300
     },
     "reimubombwave": {
-      "Left": 2515,
-      "Top": 0,
+      "Left": 1255,
+      "Top": 872,
       "Width": 255,
       "Height": 255
     },
+    "star": {
+      "Left": 1255,
+      "Top": 1129,
+      "Width": 244,
+      "Height": 244
+    },
     "aimarrow2": {
-      "Left": 2213,
-      "Top": 302,
+      "Left": 1038,
+      "Top": 306,
       "Width": 269,
       "Height": 87
     },
     "butterfly": {
-      "Left": 2515,
-      "Top": 257,
+      "Left": 1309,
+      "Top": 306,
       "Width": 137,
       "Height": 170
     },
     "hitboxfocused": {
-      "Left": 1823,
-      "Top": 306,
+      "Left": 302,
+      "Top": 1086,
       "Width": 151,
       "Height": 150
     },
     "fade": {
-      "Left": 2654,
-      "Top": 257,
+      "Left": 1038,
+      "Top": 395,
       "Width": 100,
       "Height": 100
     },
     "largeknife": {
-      "Left": 1976,
-      "Top": 306,
+      "Left": 1140,
+      "Top": 395,
       "Width": 150,
       "Height": 50
     },
     "ball": {
-      "Left": 2128,
-      "Top": 306,
+      "Left": 1428,
+      "Top": 0,
       "Width": 80,
       "Height": 80
     },
     "ball2": {
-      "Left": 1976,
-      "Top": 358,
+      "Left": 1428,
+      "Top": 82,
       "Width": 80,
       "Height": 80
     },
     "heart": {
-      "Left": 2654,
-      "Top": 359,
+      "Left": 1428,
+      "Top": 164,
       "Width": 80,
       "Height": 80
     },
     "spinningamulet": {
-      "Left": 1423,
-      "Top": 370,
+      "Left": 1437,
+      "Top": 478,
       "Width": 72,
       "Height": 84
     },
     "smallknife": {
-      "Left": 1497,
-      "Top": 370,
+      "Left": 1140,
+      "Top": 447,
       "Width": 148,
       "Height": 40
     },
     "arrowhead": {
-      "Left": 1647,
-      "Top": 370,
+      "Left": 1428,
+      "Top": 246,
       "Width": 73,
       "Height": 58
     },
     "aimarrow": {
-      "Left": 1005,
-      "Top": 373,
+      "Left": 1037,
+      "Top": 872,
       "Width": 160,
       "Height": 20
     },
     "amulet": {
-      "Left": 1722,
-      "Top": 370,
+      "Left": 1437,
+      "Top": 564,
       "Width": 70,
       "Height": 46
     },
     "bullet": {
-      "Left": 1167,
-      "Top": 373,
+      "Left": 1037,
+      "Top": 894,
       "Width": 80,
       "Height": 40
     },
     "kunai": {
-      "Left": 1249,
-      "Top": 373,
+      "Left": 1119,
+      "Top": 894,
       "Width": 80,
       "Height": 40
     },
+    "laser": {
+      "Left": 1501,
+      "Top": 1129,
+      "Width": 1,
+      "Height": 1084
+    },
     "rice": {
-      "Left": 1331,
-      "Top": 373,
+      "Left": 1437,
+      "Top": 612,
       "Width": 70,
       "Height": 40
     },
+    "box": {
+      "Left": 1448,
+      "Top": 306,
+      "Width": 50,
+      "Height": 50
+    },
     "pellet": {
-      "Left": 2058,
+      "Left": 1448,
       "Top": 358,
       "Width": 41,
       "Height": 41
+    },
+    "laser_indicator": {
+      "Left": 1504,
+      "Top": 1129,
+      "Width": 1,
+      "Height": 600
+    },
+    "laser_indicator_progress": {
+      "Left": 1507,
+      "Top": 1129,
+      "Width": 1,
+      "Height": 600
     }
   }
 }

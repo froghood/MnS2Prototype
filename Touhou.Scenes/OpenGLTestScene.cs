@@ -62,23 +62,45 @@ public class OpenGLTestScene : Scene {
     public override void OnInitialize() {
         AddEntity(new Touhou.Objects.Generics.RenderCallback(() => {
 
-            var bg = new Sprite("starrynight") {
-                Origin = new Vector2(0.5f),
-                Scale = new Vector2(6f),
+            var bg = new Sprite("box") {
+                Origin = new Vector2(0.5f, 0.333f),
+                Scale = new Vector2(3f),
+                Rotation = Game.Time.AsSeconds(),
+                Color = new Color4(1f, 0f, 0f, 1f),
                 IsUI = true,
             };
 
-            Game.Draw(bg, Layers.Background1);
+            Game.Draw(bg, Layer.Background1);
 
-            var sprite = new Sprite("blendtest") {
-                Origin = new Vector2(0.5f),
-                //Position = new Vector2(100f * Game.Time.AsSeconds()),
-                Scale = new Vector2(6f),
+            var bg2 = new Sprite("box") {
+                Origin = new Vector2(0.5f, 0.667f),
+                Scale = new Vector2(3f),
+                Rotation = Game.Time.AsSeconds() / 2f,
+                Color = new Color4(0f, 1f, 0f, 1f),
                 IsUI = true,
-                BlendMode = BlendMode.Additive,
             };
 
-            Game.Draw(sprite, Layers.Background1);
+            Game.Draw(bg2, Layer.Background1);
+
+            var bg3 = new Sprite("box") {
+                Origin = new Vector2(0.5f, 1f),
+                Scale = new Vector2(3f),
+                Rotation = Game.Time.AsSeconds() / 4f,
+                Color = new Color4(0f, 0f, 1f, 1f),
+                IsUI = true,
+            };
+
+            Game.Draw(bg3, Layer.Background1);
+
+            // var sprite = new Sprite("blendtest") {
+            //     Origin = new Vector2(0.5f),
+            //     //Position = new Vector2(100f * Game.Time.AsSeconds()),
+            //     Scale = new Vector2(6f),
+            //     IsUI = true,
+            //     BlendMode = BlendMode.Additive,
+            // };
+
+            //Game.Draw(sprite, Layers.Background1);
 
             //Game.Draw(rect, Layers.Foreground1);
 

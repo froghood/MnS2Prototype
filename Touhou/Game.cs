@@ -17,6 +17,7 @@ using Vector2i = OpenTK.Mathematics.Vector2i;
 using Touhou.Graphics;
 using Touhou.Sound;
 using Steamworks;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Touhou;
 
@@ -189,7 +190,7 @@ internal static class Game {
         //SteamClient.Shutdown();
     }
 
-    public static void Draw(Renderable renderable, Layers layer) => renderer.Queue(renderable, layer);
+    public static void Draw(Renderable renderable, Layer layer) => renderer.Queue(renderable, layer);
 
     private static void Update() {
 

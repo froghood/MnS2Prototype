@@ -48,7 +48,7 @@ public class TextureAtlas {
                 //Log.Info($"{new Vector2(bounds.Left, size.Y - (bounds.Top + bounds.Height))} | {new Vector2(bounds.Width, bounds.Height)}");
             }
 
-            return new Box2(new Vector2(bounds.Left, size.Y - bounds.Top) / size, new Vector2(bounds.Left + bounds.Width, size.Y - (bounds.Top + bounds.Height)) / size);
+            return new Box2(new Vector2(bounds.Left + 0.5f, size.Y - bounds.Top - 0.5f) / size, new Vector2(bounds.Left + bounds.Width - 0.5f, size.Y - (bounds.Top + bounds.Height) + 0.5f) / size);
 
 
 

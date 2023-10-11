@@ -36,7 +36,7 @@ public class ReimuSpecialA : Attack {
                 CanCollide = false,
                 Color = new Color4(0f, 1f, 0, 0.4f),
             };
-            projectile.IncreaseTime(cooldownOverflow, false);
+            projectile.ForwardTime(cooldownOverflow, false);
 
             localGroup.Add(projectile);
             player.Scene.AddEntity(projectile);
@@ -86,7 +86,7 @@ public class ReimuSpecialA : Attack {
                 Color = new Color4(1f, 0, 0, 1f),
                 GrazeAmount = grazeAmount
             };
-            projectile.IncreaseTime(latency, true);
+            projectile.ForwardTime(latency, true);
 
             remoteGroup.Add(projectile);
             opponent.Scene.AddEntity(projectile);

@@ -1,12 +1,13 @@
 
 using OpenTK.Mathematics;
+using Touhou.Graphics;
 
 namespace Touhou.Objects {
     public class CircleHitbox : Hitbox {
 
         public float Radius { get; private set; }
 
-        public CircleHitbox(Entity entity, Vector2 offset, float radius, CollisionGroups collisionGroup, Action<Entity> collisionCallback = default(Action<Entity>)) : base(entity, offset, collisionGroup, collisionCallback) {
+        public CircleHitbox(Entity entity, Vector2 offset, float radius, CollisionGroup collisionGroup, Action<Entity, Hitbox> collisionCallback = default) : base(entity, offset, collisionGroup, collisionCallback) {
             Radius = radius;
         }
 
@@ -36,6 +37,17 @@ namespace Touhou.Objects {
         public override Box2 GetBounds() {
             var halfSize = Vector2.One * Radius;
             return new Box2(Position - halfSize, Position + halfSize);
+        }
+
+        public override void Render() {
+            Game.Draw(new Circle {
+                Origin = new Vector2(0.5f),
+                Position = Position,
+                Radius = Radius,
+                StrokeWidth = 1f,
+                StrokeColor = Entity.CanCollide ? Color4.Red : Color4.White,
+                FillColor = Color4.Transparent,
+            }, Layer.Foreground2);
         }
     }
 }

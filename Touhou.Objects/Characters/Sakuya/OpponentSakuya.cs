@@ -26,7 +26,7 @@ public class OpponentSakuya : Opponent {
             UseColorSwapping = false,
         };
 
-        Game.Draw(sprite, Layers.Opponent);
+        Game.Draw(sprite, Layer.Opponent);
 
         base.Render();
     }

@@ -10,7 +10,7 @@ public class LargeKnife : TimestopProjectile {
 
         this.velocity = velocity;
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 6f, isPlayerOwned ? CollisionGroups.PlayerProjectile : CollisionGroups.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 6f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
 
     }
 
@@ -98,18 +98,7 @@ public class LargeKnife : TimestopProjectile {
             UseColorSwapping = true,
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layers.PlayerProjectiles1 : Layers.OpponentProjectiles1);
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
 
-        // Game.Draw(new Circle {
-        //     Origin = new Vector2(0.5f),
-        //     Position = Position,
-        //     Radius = ((CircleHitbox)Hitboxes[0]).Radius,
-        //     StrokeWidth = 1f,
-        //     StrokeColor = new Color4(1f, 1f, 1f, 1f),
-        //     FillColor = Color4.Transparent,
-
-        // }, Layers.Foreground2);
-
-        base.Render();
     }
 }

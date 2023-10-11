@@ -85,7 +85,7 @@ public class ReimuPrimary : Attack {
                     GoalVelocity = focusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.IncreaseTime(cooldownOverflow, false);
+                projectile.ForwardTime(cooldownOverflow, false);
 
                 player.Scene.AddEntity(projectile);
             }
@@ -99,7 +99,7 @@ public class ReimuPrimary : Attack {
                     GoalVelocity = unfocusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.IncreaseTime(cooldownOverflow, false);
+                projectile.ForwardTime(cooldownOverflow, false);
 
                 player.Scene.AddEntity(projectile);
             }
@@ -144,7 +144,7 @@ public class ReimuPrimary : Attack {
                     GoalVelocity = focusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.IncreaseTime(delta, true);
+                projectile.ForwardTime(delta, true);
                 opponent.Scene.AddEntity(projectile);
             }
         } else {
@@ -157,7 +157,7 @@ public class ReimuPrimary : Attack {
                     GoalVelocity = unfocusedVelocity,
                     VelocityFalloff = velocityFalloff,
                 };
-                projectile.IncreaseTime(delta, true);
+                projectile.ForwardTime(delta, true);
                 opponent.Scene.AddEntity(projectile);
             }
         }
@@ -177,7 +177,7 @@ public class ReimuPrimary : Attack {
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layers.Player);
+        Game.Draw(aimArrowSprite, Layer.Player);
     }
 
 

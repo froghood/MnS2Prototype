@@ -180,7 +180,7 @@ public class SakuyaPrimary : Attack {
 
 
 
-        Game.Draw(aimArrowSprite, Layers.Player);
+        Game.Draw(aimArrowSprite, Layer.Player);
 
         base.PlayerRender(player);
     }

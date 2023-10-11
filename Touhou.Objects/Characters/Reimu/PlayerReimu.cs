@@ -25,14 +25,14 @@ public class PlayerReimu : Player {
         if (IsDead) return;
 
         var sprite = new Sprite("reimu") {
-            Origin = new Vector2(0.45f, 0.35f),
+            Origin = new Vector2(0.42f, 0.28f),
             Position = Position,
             Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.2f,
             Color = Color,
             UseColorSwapping = false,
         };
 
-        Game.Draw(sprite, Layers.Player);
+        Game.Draw(sprite, Layer.Player);
 
         base.Render();
     }

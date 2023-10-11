@@ -11,6 +11,7 @@ using OpenTK.Mathematics;
 
 using Vortice.XInput;
 using Steamworks;
+using static OpenTK.Windowing.GraphicsLibraryFramework.GLFWCallbacks;
 
 namespace Touhou;
 public class InputManager {
@@ -80,7 +81,12 @@ public class InputManager {
 
     public void Process(NativeWindow window) {
 
+        //NativeWindow.ProcessWindowEvents(true);
         window.ProcessEvents(0);
+
+
+
+
 
         previousActionState = actionState;
         actionState = PlayerActions.None;
@@ -99,6 +105,7 @@ public class InputManager {
 
         if (window.IsFocused) {
 
+            // controller
             foreach (var state in window.JoystickStates.Where(e => e != null)) {
 
                 // buttons
@@ -142,7 +149,7 @@ public class InputManager {
                 }
             }
 
-            // controller
+            // // controller
             // for (int i = 0; i < 4; i++) {
             //     if (!XInput.GetState(0, out var state)) continue;
 

@@ -57,7 +57,7 @@ public class MatchUI : Entity {
                 IsUI = true,
             };
 
-            Game.Draw(rectangle, Layers.UI1);
+            Game.Draw(rectangle, Layer.UI1);
 
             i += isP1 ? 1 : -1;
         }
@@ -80,7 +80,7 @@ public class MatchUI : Entity {
                 Alignment = new Vector2(0f, attack.Disabled | attack.Cooldown.AsSeconds() > 0f ? -1.01f : -1f),
             };
 
-            Game.Draw(rectangle, Layers.UI1);
+            Game.Draw(rectangle, Layer.UI1);
 
             i++;
         }
@@ -132,9 +132,9 @@ public class MatchUI : Entity {
             Alignment = new Vector2(isP1 ? -1 : 1, -1),
         };
 
-        Game.Draw(bgRect, Layers.UI1);
-        Game.Draw(rect, Layers.UI1);
-        Game.Draw(sRect, Layers.UI1);
+        Game.Draw(bgRect, Layer.UI1);
+        Game.Draw(rect, Layer.UI1);
+        Game.Draw(sRect, Layer.UI1);
 
     }
 
@@ -150,7 +150,7 @@ public class MatchUI : Entity {
                 IsUI = true,
             };
 
-            Game.Draw(sprite, Layers.UI1);
+            Game.Draw(sprite, Layer.UI1);
         }
 
     }
@@ -168,7 +168,7 @@ public class MatchUI : Entity {
             Boldness = 0.25f,
         };
 
-        Game.Draw(timerText, Layers.UI1);
+        Game.Draw(timerText, Layer.UI1);
 
         var ppsText = new Text() {
             Origin = new Vector2(0.5f, 1f),
@@ -183,7 +183,7 @@ public class MatchUI : Entity {
 
         };
 
-        Game.Draw(ppsText, Layers.UI1);
+        Game.Draw(ppsText, Layer.UI1);
     }
 
 }

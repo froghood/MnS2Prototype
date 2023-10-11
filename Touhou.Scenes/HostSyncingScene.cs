@@ -27,7 +27,7 @@ public class HostSyncingScene : Scene {
 
         AddEntity(new ReceiveCallback(ReceiveCallback));
 
-        AddEntity(new RenderCallback(() => Game.Draw(text, Layers.UI1)));
+        AddEntity(new RenderCallback(() => Game.Draw(text, Layer.UI1)));
     }
 
     private void ReceiveCallback(Packet packet, IPEndPoint endPoint) {

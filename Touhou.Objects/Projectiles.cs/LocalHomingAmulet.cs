@@ -31,7 +31,7 @@ public class LocalHomingAmulet : Homing {
         this.turnRadius = turnRadius;
         this.velocity = velocity;
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, CollisionGroups.PlayerProjectile));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, CollisionGroup.PlayerProjectile));
 
         sprite = new Sprite("spinningamulet") {
             Origin = new Vector2(0.5f),
@@ -149,9 +149,7 @@ public class LocalHomingAmulet : Homing {
              Color.B,
              Color.A * spawnRatio);
 
-        Game.Draw(sprite, Layers.PlayerProjectiles1);
-
-        base.Render();
+        Game.Draw(sprite, Layer.PlayerProjectiles1);
     }
 
     public override void PostRender() {

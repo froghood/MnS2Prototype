@@ -159,8 +159,6 @@ public class SakuyaSecondary : Attack {
             Color = new Color4(1f, 1f, 1f, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layers.Player);
-
-        base.PlayerRender(player);
+        Game.Draw(aimArrowSprite, Layer.Player);
     }
 }

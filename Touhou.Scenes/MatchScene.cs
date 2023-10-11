@@ -77,7 +77,7 @@ public class MatchScene : Scene {
                 StrokeWidth = 1f,
             };
 
-            Game.Draw(matchBoundsRectangle, Layers.Background2);
+            Game.Draw(matchBoundsRectangle, Layer.Background2);
 
 
 

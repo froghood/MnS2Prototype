@@ -19,7 +19,7 @@ public abstract class Opponent : Entity, IReceivable {
     public bool IsDead { get => isDead; }
 
     protected Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
-    private Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
+    public Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
 
 
     private bool isP1;

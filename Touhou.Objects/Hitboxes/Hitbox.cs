@@ -8,14 +8,14 @@ public abstract class Hitbox {
     public Entity Entity { get; }
 
     public Vector2 Offset { get; }
-    public CollisionGroups CollisionGroup { get; }
+    public CollisionGroup CollisionGroup { get; }
     public Vector2 Position { get => Entity.Position + Offset; }
 
 
 
-    private Action<Entity> collisionCallback;
+    private Action<Entity, Hitbox> collisionCallback;
 
-    public Hitbox(Entity entity, Vector2 offset, CollisionGroups collisionGroup, Action<Entity> collisionCallback = default(Action<Entity>)) {
+    public Hitbox(Entity entity, Vector2 offset, CollisionGroup collisionGroup, Action<Entity, Hitbox> collisionCallback = default) {
         Entity = entity;
         Offset = offset;
         CollisionGroup = collisionGroup;
@@ -26,7 +26,9 @@ public abstract class Hitbox {
     public abstract bool Check(CircleHitbox other);
     public abstract bool Check(RectangleHitbox other);
 
-    public void Collide(Entity entity) => collisionCallback?.Invoke(entity);
+    public void OnCollide(Entity entity, Hitbox hitbox) => collisionCallback?.Invoke(entity, hitbox);
 
     public abstract Box2 GetBounds();
+
+    public virtual void Render() { }
 }
