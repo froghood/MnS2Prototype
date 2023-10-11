@@ -24,15 +24,13 @@ public abstract class Player : Entity, IReceivable {
 
     public bool CanMove { get; private set; } = true;
     public bool CanAttack { get; private set; } = true;
-    public Time InvulnerabilityTime { get; private set; }
-    public Time InvulnerabilityDuration { get; private set; }
+
 
     public bool IsDead { get => isDead; }
     public Time DeathTime { get => deathTime; }
 
     private bool isKnockbacked;
-    private Time knockbackTime;
-    private Time knockbackDuration;
+    private Timer knockbackTimer;
     private Vector2 knockbackStartPosition;
     private Vector2 knockbackEndPosition;
 
@@ -46,14 +44,11 @@ public abstract class Player : Entity, IReceivable {
     public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     private int powerGainedFromGrazing;
     private int powerSpent;
-
-    public float SmoothPower => smoothPower;
+    public float SmoothPower { get => smoothPower; }
     private float smoothPower;
 
-    // heartss
-
+    // hearts
     public int HeartCount { get; private set; } = 5;
-
     private bool isDead;
     private Time deathTime;
 
@@ -72,7 +67,7 @@ public abstract class Player : Entity, IReceivable {
 
 
 
-    protected Opponent Opponent => opponent is null ? opponent = Scene.GetFirstEntity<Opponent>() : opponent;
+    protected Opponent Opponent => opponent ??= Scene.GetFirstEntity<Opponent>();
     private Opponent opponent;
 
 
@@ -88,13 +83,16 @@ public abstract class Player : Entity, IReceivable {
 
 
     private bool isHit;
-    private Time hitTime;
-    private Time hitDuration;
+    private Timer hitTimer;
     private Dictionary<Type, Effect> effects = new();
     private Vector2 movementAngleVector;
-    private Time movespeedModifierTime;
-    private Time movespeedModifierDuration;
+
+
+    private Timer movespeedModifierTimer;
     private float movespeedModifier;
+
+
+    private Timer invulnerabilityTimer;
 
     public Color4 Color { get; set; } = new Color4(0.7f, 1f, 0.7f, 1f);
 
@@ -194,7 +192,7 @@ public abstract class Player : Entity, IReceivable {
     private void UpdateHit() {
         if (!isHit) return;
 
-        if (Game.Time >= hitTime + hitDuration) {
+        if (hitTimer.IsFinished) {
 
             isHit = false;
 
@@ -214,20 +212,23 @@ public abstract class Player : Entity, IReceivable {
 
 
     private void UpdateKnockback() {
+
         if (!isKnockbacked) return;
 
-        if (Game.Time - knockbackTime >= knockbackDuration) {
+        if (knockbackTimer.IsFinished) {
             isKnockbacked = false;
 
             CanMove = true;
             CanAttack = true;
             CanBomb = true;
-            return;
+
+        } else {
+
+            var t = 1f - knockbackTimer.Remaining.AsSeconds() / knockbackTimer.Amount.AsSeconds();
+            Position = knockbackStartPosition + (knockbackEndPosition - knockbackStartPosition) * Easing.Out(t, 5f);
+
         }
 
-        var t = MathF.Min((Game.Time - knockbackTime) / (float)knockbackDuration, 1f);
-
-        Position = (knockbackEndPosition - knockbackStartPosition) * Easing.Out(t, 5f) + knockbackStartPosition;
     }
 
 
@@ -246,7 +247,7 @@ public abstract class Player : Entity, IReceivable {
         );
 
 
-        var modifier = Game.Time - movespeedModifierTime >= movespeedModifierDuration ? 1f : movespeedModifier;
+        var modifier = movespeedModifierTimer.IsFinished ? 1f : movespeedModifier;
 
         var velocityVector = CanMove ? (new Vector2(
             MathF.Abs(movementAngleVector.X) * movementVector.X,
@@ -373,7 +374,7 @@ public abstract class Player : Entity, IReceivable {
 
         if (entity is Projectile projectile) {
 
-            if (Game.Time < InvulnerabilityTime + InvulnerabilityDuration || isDead) return;
+            if (!invulnerabilityTimer.IsFinished || isDead) return;
 
             if (hitbox.CollisionGroup == CollisionGroup.OpponentProjectileMinor) projectile.NetworkDestroy();
 
@@ -387,19 +388,19 @@ public abstract class Player : Entity, IReceivable {
     private void ApplyHit(Time duration) {
 
         isHit = true;
+        hitTimer = new Timer(duration);
 
         CanMove = false;
         CanAttack = false;
 
-        hitTime = Game.Time;
-        hitDuration = duration;
-
         Scene.AddEntity(new HitExplosion(Position, 0.5f, 100f, Color));
+
+        Game.Sounds.Play("hit");
 
         var hitPacket = new Packet(PacketType.Hit).In(Position);
         Game.Network.Send(hitPacket);
 
-        Game.Sounds.Play("hit");
+
     }
 
     private void Die() {
@@ -431,24 +432,22 @@ public abstract class Player : Entity, IReceivable {
 
     private void ApplyKnockback(float angle, float strength, Time duration) {
         isKnockbacked = true;
+        knockbackTimer = new Timer(duration);
+        knockbackStartPosition = Position;
+        knockbackEndPosition = Position + new Vector2(strength * MathF.Cos(angle), strength * MathF.Sin(angle));
 
         CanMove = false;
         CanAttack = false;
         CanBomb = false;
 
         Velocity = new Vector2(0f, 0f);
-        knockbackTime = Game.Time;
-        knockbackStartPosition = Position;
-        knockbackEndPosition = Position + new Vector2(strength * MathF.Cos(angle), strength * MathF.Sin(angle));
-        knockbackDuration = duration;
 
         var packet = new Packet(PacketType.Knockback).In(Game.Network.Time).In(Position).In(angle);
         Game.Network.Send(packet);
     }
 
     public void ApplyInvulnerability(Time duration) {
-        InvulnerabilityTime = Game.Time;
-        InvulnerabilityDuration = duration;
+        invulnerabilityTimer = new Timer(duration);
     }
 
     public void ApplyAttackCooldowns(Time duration, params PlayerActions[] actions) {
@@ -550,7 +549,6 @@ public abstract class Player : Entity, IReceivable {
 
     public void ApplyMovespeedModifier(float modifier, Time duration) {
         movespeedModifier = modifier;
-        movespeedModifierDuration = duration;
-        movespeedModifierTime = Game.Time;
+        movespeedModifierTimer = new Timer(duration);
     }
 }

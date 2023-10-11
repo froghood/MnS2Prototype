@@ -2,25 +2,23 @@ namespace Touhou.Objects.Characters;
 
 public abstract class Effect {
 
-    public Time LifeTime { get => Game.Time - creationTime; }
-    public bool HasTimedOut { get => LifeTime >= duration; }
+    public Time LifeTime { get => timer.TotalElapsed; }
+    public bool HasTimedOut { get => timer.IsFinished; }
     public bool IsCanceled { get => isCanceled; }
 
 
 
-    private Time duration;
-    private Time creationTime;
+    private Timer timer;
     private bool isCanceled;
 
     public Effect(Time duration) {
-        this.duration = duration;
-        this.creationTime = Game.Time;
+        this.timer = new Timer(duration);
     }
 
     public abstract void PlayerUpdate(Player player);
     public abstract void OpponentUpdate(Opponent opponent);
 
-    public virtual void Cancel(Time timeOverride = default) {
+    public virtual void Cancel(Time time = default) {
         isCanceled = true;
     }
 }

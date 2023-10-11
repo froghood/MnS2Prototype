@@ -1,21 +1,18 @@
-using System.Diagnostics;
-
 namespace Touhou;
 
-public class Clock {
+public struct Timer {
 
+    public Time StartTime { get => startTime; }
+    public Time Amount { get => amount; }
+    public Time TotalElapsed { get => Game.Time - startTime; }
+    public Time Remaining { get => Time.Max(startTime + amount - Game.Time, 0L); }
+    public bool IsFinished { get => Remaining == 0L; }
 
-    public Time Elapsed { get => (long)internalTimer.Elapsed.TotalMicroseconds; }
+    private Time startTime;
+    private Time amount;
 
-    private Stopwatch internalTimer = new();
-
-
-
-
-    public void Start() => internalTimer.Start();
-    public void Stop() => internalTimer.Stop();
-    public void Restart() => internalTimer.Restart();
-    public void Reset() => internalTimer.Reset();
-
-
+    public Timer(Time amount) {
+        startTime = Game.Time;
+        this.amount = amount;
+    }
 }
