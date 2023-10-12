@@ -398,7 +398,7 @@ public abstract class Player : Entity, IReceivable {
     public override void Render() {
 
         var opponentArrow = new Sprite("opponentarrow") {
-            Origin = new Vector2(-2f, 0.5f),
+            Origin = new Vector2(-2.5f, 0.5f),
             Position = Position,
             Scale = new Vector2(0.2f),
             Rotation = AngleToOpponent,
