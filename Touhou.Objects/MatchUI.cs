@@ -153,17 +153,20 @@ public class MatchUI : Entity {
 
         var barWidth = 50f;
 
+        int power = (isPlayer ? Player.Power : Opponent.Power);
+        var position = (isPlayer ? Player.Position : Opponent.Position);
+
         var powerBarBG = new Rectangle {
             Size = new Vector2(barWidth, 6f),
             FillColor = new Color4(1f, 1f, 1f, 0.1f),
             StrokeColor = new Color4(1f, 1f, 1f, 0.2f),
             StrokeWidth = 1f,
             Origin = new Vector2(0f, 0.5f),
-            Position = (isPlayer ? Player.Position : Opponent.Position) + new Vector2(barWidth / -2f, -30f),
+            Position = position + new Vector2(barWidth / -2f, -30f),
         };
 
         var powerBar = new Rectangle(powerBarBG) {
-            Size = new Vector2((isPlayer ? Player.Power : Opponent.Power) / 400f * barWidth, 5f),
+            Size = new Vector2(power / 400f * barWidth, 5f),
             FillColor = new Color4(1f, 1f, 1f, 0.3f),
             StrokeWidth = 0f,
         };
