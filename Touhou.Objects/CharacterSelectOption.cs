@@ -4,4 +4,5 @@ public enum CharacterSelectOption : byte {
     Reimu,
     Marisa,
     Sakuya,
+    Nazrin,
 }

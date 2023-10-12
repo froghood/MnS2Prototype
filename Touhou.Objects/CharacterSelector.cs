@@ -215,6 +215,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             CharacterSelectOption.Reimu => typeof(PlayerReimu),
             CharacterSelectOption.Marisa => typeof(PlayerMarisa),
             CharacterSelectOption.Sakuya => typeof(PlayerSakuya),
+            CharacterSelectOption.Nazrin => typeof(PlayerNazrin),
             _ => throw new Exception("Character type does not exist")
         };
     }
@@ -224,6 +225,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             CharacterSelectOption.Reimu => typeof(OpponentReimu),
             CharacterSelectOption.Marisa => typeof(OpponentMarisa),
             CharacterSelectOption.Sakuya => typeof(OpponentSakuya),
+            CharacterSelectOption.Nazrin => typeof(OpponentNazrin),
             _ => throw new Exception("Character type does not exist")
         };
     }
