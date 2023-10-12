@@ -7,9 +7,9 @@ public class PlayerNazrin : Player {
         FocusedSpeed = 125f;
 
         AddAttack(PlayerActions.Primary, new NazrinPrimary());
-        AddAttack(PlayerActions.Primary, new NazrinSecondary());
-        AddAttack(PlayerActions.Primary, new NazrinSpecialA());
-        AddAttack(PlayerActions.Primary, new NazrinSpecialB());
+        AddAttack(PlayerActions.Secondary, new NazrinSecondary());
+        AddAttack(PlayerActions.SpecialA, new NazrinSpecialA());
+        AddAttack(PlayerActions.SpecialB, new NazrinSpecialB());
 
         AddBomb(new ReimuBomb());
     }
