@@ -1,6 +1,10 @@
 namespace Touhou.Objects.Characters;
 
 public class PlayerNazrin : Player {
+
+    private LinkedList<Mouse> mice = new();
+
+
     public PlayerNazrin(bool isP1) : base(isP1) {
 
         Speed = 325f;
@@ -19,5 +23,9 @@ public class PlayerNazrin : Player {
         if (IsDead) return;
 
         base.Render();
+    }
+
+    public void AddMouse() {
+        Scene.AddEntity(new Mouse(this, mice));
     }
 }

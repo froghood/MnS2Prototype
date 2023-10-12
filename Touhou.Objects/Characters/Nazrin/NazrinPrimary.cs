@@ -11,6 +11,7 @@ public class NazrinPrimary : Attack {
     }
 
 
+
     public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
         throw new NotImplementedException();
     }

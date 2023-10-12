@@ -7,7 +7,15 @@ public class NazrinSpecialB : Attack {
 
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        throw new NotImplementedException();
+
+
+        if (player is not PlayerNazrin nazrin) return;
+
+        nazrin.AddMouse();
+
+        var packet = new Packet(PacketType.AttackReleased).In(PlayerActions.SpecialB);
+
+        Game.Network.Send(packet);
     }
 
 
@@ -24,6 +32,12 @@ public class NazrinSpecialB : Attack {
 
 
     public override void OpponentReleased(Opponent opponent, Packet packet) {
-        throw new NotImplementedException();
+
+        if (opponent is not OpponentNazrin nazrin) return;
+
+
+
+        nazrin.AddMouse();
+
     }
 }
