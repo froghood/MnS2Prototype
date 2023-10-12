@@ -32,6 +32,12 @@ public class MatchUI : Entity {
         RenderPower(isP1, true);
         RenderPower(!isP1, false);
 
+        RenderSmallPower(true);
+        RenderSmallPower(false);
+
+        RenderSmallBombs(true);
+        RenderSmallBombs(false);
+
         RenderHearts(isP1, true);
         RenderHearts(!isP1, false);
 
@@ -136,6 +142,49 @@ public class MatchUI : Entity {
         Game.Draw(rect, Layer.UI1);
         Game.Draw(sRect, Layer.UI1);
 
+    }
+
+
+    private void RenderSmallPower(bool isPlayer) {
+
+        var barWidth = 50f;
+
+        var powerBarBG = new Rectangle {
+            Size = new Vector2(barWidth, 6f),
+            FillColor = new Color4(1f, 1f, 1f, 0.1f),
+            StrokeColor = new Color4(1f, 1f, 1f, 0.2f),
+            StrokeWidth = 1f,
+            Origin = new Vector2(0f, 0.5f),
+            Position = (isPlayer ? Player.Position : Opponent.Position) + new Vector2(barWidth / -2f, -30f),
+        };
+
+        var powerBar = new Rectangle(powerBarBG) {
+            Size = new Vector2((isPlayer ? Player.Power : Opponent.Power) / 400f * barWidth, 5f),
+            FillColor = new Color4(1f, 1f, 1f, 0.3f),
+            StrokeWidth = 0f,
+        };
+
+        Game.Draw(powerBarBG, Layer.UI1);
+        Game.Draw(powerBar, Layer.UI1);
+    }
+
+
+
+    private void RenderSmallBombs(bool isPlayer) {
+        float spacing = 8f;
+        int bombCount = isPlayer ? Player.BombCount : Opponent.BombCount;
+        var position = isPlayer ? Player.Position : Opponent.Position;
+
+        for (int i = 0; i < bombCount; i++) {
+            var circle = new Circle {
+                Radius = 2f,
+                FillColor = new Color4(1f, 1f, 1f, 0.5f),
+                Origin = new Vector2(0.5f),
+                Position = position + new Vector2(spacing * i - (bombCount - 1) * spacing / 2f, -38f),
+            };
+
+            Game.Draw(circle, Layer.UI1);
+        }
     }
 
 

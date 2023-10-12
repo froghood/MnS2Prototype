@@ -7,7 +7,7 @@ public class Circle : Renderable {
 
     public float Radius { get; set; }
     public int SideCount { get; set; } = 32;
-    public float StrokeWidth { get; set; } = 1f;
+    public float StrokeWidth { get; set; } = 0f;
 
     public Color4 StrokeColor { get; set; } = Color4.Transparent;
     public Color4 FillColor { get; set; } = Color4.White;

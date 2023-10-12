@@ -416,34 +416,8 @@ public abstract class Player : Entity, IReceivable {
             UseColorSwapping = true,
         };
 
-
-
-        float barWidth = 50f;
-
-        var powerBarBG = new Rectangle {
-            Size = new Vector2(barWidth, 6f),
-            FillColor = new Color4(1f, 1f, 1f, 0.1f),
-            StrokeColor = new Color4(1f, 1f, 1f, 0.2f),
-            StrokeWidth = 1f,
-            Origin = new Vector2(0f, 0.5f),
-            Position = Position + new Vector2(barWidth / -2f, -30f),
-        };
-
-        var powerBar = new Rectangle(powerBarBG) {
-            Size = new Vector2(Power / 400f * barWidth, 5f),
-            FillColor = new Color4(1f, 1f, 1f, 0.3f),
-            StrokeWidth = 0f,
-        };
-
-        Game.Draw(powerBarBG, Layer.Player);
-        Game.Draw(powerBar, Layer.Player);
-
-
-
         Game.Draw(opponentArrow, Layer.Player);
         Game.Draw(hitbox, Layer.Player);
-
-
 
         foreach (var attack in attacks.Values) {
             attack.PlayerRender(this);

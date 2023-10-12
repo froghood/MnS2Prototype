@@ -12,7 +12,7 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     public int HeartCount { get; private set; } = 5;
-    public float BombCount { get; private set; } = 3;
+    public int BombCount { get; private set; } = 3;
     public int Power { get => Math.Min(Match.TotalPowerGenerated + powerGainedFromGrazing - powerSpent, 400); }
     public IEnumerable<KeyValuePair<PlayerActions, Attack>> Attacks { get => attacks.AsEnumerable(); }
     public Color4 Color { get; set; } = new Color4(1f, 0.7f, 0.7f, 1f);
