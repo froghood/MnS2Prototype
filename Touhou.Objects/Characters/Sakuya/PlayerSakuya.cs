@@ -25,9 +25,9 @@ public class PlayerSakuya : Player {
         if (IsDead) return;
 
         var sprite = new Sprite("sakuya") {
-            Origin = new Vector2(0.45f, 0.35f),
+            Origin = new Vector2(0.45f, 0.32f),
             Position = Position,
-            Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.22f,
+            Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.2f,
             Color = Color,
             UseColorSwapping = false,
         };

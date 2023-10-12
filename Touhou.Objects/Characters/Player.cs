@@ -390,14 +390,53 @@ public abstract class Player : Entity, IReceivable {
 
     public override void Render() {
 
-        if (Focused) {
+        var opponentArrow = new Sprite("opponentarrow") {
+            Origin = new Vector2(-2f, 0.5f),
+            Position = Position,
+            Scale = new Vector2(0.2f),
+            Rotation = AngleToOpponent,
+            Color = new Color4(Color.R, Color.G, Color.B, 0.5f),
+            UseColorSwapping = true,
+        };
 
-            hitboxSprite.Position = Position;
-            hitboxSprite.Color = Color;
-            hitboxSprite.Depth = 1;
 
-            Game.Draw(hitboxSprite, Layer.Foreground1);
-        }
+
+        var hitbox = new Sprite(Focused ? "hitboxfocused" : "hitboxunfocused") {
+            Origin = new Vector2(0.5f),
+            Position = Position,
+            Scale = new Vector2(Focused ? 0.15f : 0.18f),
+            Color = new Color4(Color.R, Color.G, Color.B, Focused ? 1f : 0.8f),
+            UseColorSwapping = true,
+        };
+
+
+
+        float barWidth = 50f;
+
+        var powerBarBG = new Rectangle {
+            Size = new Vector2(barWidth, 6f),
+            FillColor = new Color4(1f, 1f, 1f, 0.1f),
+            StrokeColor = new Color4(1f, 1f, 1f, 0.2f),
+            StrokeWidth = 1f,
+            Origin = new Vector2(0f, 0.5f),
+            Position = Position + new Vector2(barWidth / -2f, -30f),
+        };
+
+        var powerBar = new Rectangle(powerBarBG) {
+            Size = new Vector2(Power / 400f * barWidth, 5f),
+            FillColor = new Color4(1f, 1f, 1f, 0.3f),
+            StrokeWidth = 0f,
+        };
+
+        Game.Draw(powerBarBG, Layer.Player);
+        Game.Draw(powerBar, Layer.Player);
+
+
+
+        Game.Draw(opponentArrow, Layer.Player);
+        Game.Draw(hitbox, Layer.Player);
+
+
 
         foreach (var attack in attacks.Values) {
             attack.PlayerRender(this);

@@ -132,16 +132,26 @@ public class MarisaSpecialA : Attack {
 
         if (!isHeld) return;
 
-        var aimArrowSprite = new Sprite("aimarrow2") {
-            Origin = new Vector2(-0.0625f, 0.5f),
+        var preview = new Sprite("fade") {
+            Origin = new Vector2(0f, 0.5f),
             Position = new Vector2(spawnPositionX, player.Match.Bounds.Y),
             Rotation = spawnAngle,
-            Scale = new Vector2(0.3f),
-            Color = new Color4(1f, 1f, 1f, 0.5f),
+            Scale = new Vector2(6f, 0.08f),
+            Color = new Color4(1f, 1f, 1f, 0.2f),
+        };
+
+        var positionPreview = new Circle() {
+            Origin = new Vector2(0.5f),
+            Position = new Vector2(spawnPositionX, player.Match.Bounds.Y),
+            Radius = 10f,
+            StrokeWidth = 4f,
+            StrokeColor = new Color4(1f, 1f, 1f, 0.5f),
+            FillColor = Color4.Transparent,
         };
 
 
 
-        Game.Draw(aimArrowSprite, Layer.Player);
+        Game.Draw(preview, Layer.Player);
+        Game.Draw(positionPreview, Layer.Player);
     }
 }

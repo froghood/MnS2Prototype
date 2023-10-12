@@ -23,7 +23,7 @@ public class OpponentReimu : Opponent {
         if (IsDead) return;
 
         var sprite = new Sprite("reimu") {
-            Origin = new Vector2(0.45f, 0.35f),
+            Origin = new Vector2(0.42f, 0.26f),
             Position = Position,
             Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.2f,
             Color = Color,

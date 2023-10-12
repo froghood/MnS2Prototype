@@ -22,7 +22,7 @@ public class PlayerMarisa : Player {
         if (IsDead) return;
 
         var sprite = new Sprite("marisa") {
-            Origin = new Vector2(0.45f, 0.2f),
+            Origin = new Vector2(0.45f, 0.18f),
             Position = Position,
             Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.26f,
             Color = Color,
