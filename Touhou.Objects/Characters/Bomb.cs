@@ -3,7 +3,7 @@ using Touhou.Networking;
 namespace Touhou.Objects.Characters;
 
 public abstract class Bomb {
-    public Time Cooldown { get; set; }
+    public Timer CooldownTimer { get; set; }
 
     public abstract void PlayerPress(Player player, Time cooldownOverflow, bool focused);
 

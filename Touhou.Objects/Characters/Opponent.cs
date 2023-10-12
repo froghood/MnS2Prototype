@@ -34,10 +34,10 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     private bool isKnockbacked;
-    private Time knockbackTime;
+    private Timer knockbackTimer;
     private Vector2 knockbackStartPosition;
     private Vector2 knockbackEndPosition;
-    private Time knockbackDuration;
+
     private bool isDead;
 
 
@@ -193,54 +193,13 @@ public abstract class Opponent : Entity, IReceivable {
     }
 
     private void UpdateKnockback() {
-        var t = MathF.Min((Game.Time - knockbackTime).AsSeconds() / knockbackDuration.AsSeconds(), 1f);
+        var t = 1f - knockbackTimer.Remaining.AsSeconds() / knockbackTimer.Duration.AsSeconds();
 
         Position = (knockbackEndPosition - knockbackStartPosition) * Easing.Out(t, 5f) + knockbackStartPosition;
-        //if (t == 1f) isHit = false;
-    }
-
-    public override void Render() {
-        // if (isDead) return;
-
-        // characterSprite.Position = Position;
-        // characterSprite.Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.22f;
-
-        // Game.Draw(characterSprite, Layers.Opponent);
-
-        // var states = new SpriteStates() {
-        //     Origin = new Vector2(0.4f, 0.7f),
-        //     Position = Position,
-        //     Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.15f,
-        //     Color4 = Color
-        // };
-
-        //Game.DrawSprite("reimu", states, Layers.Opponent);
-
-        // var rect = new RectangleShape(new Vector2(20f, 20f));
-        // rect.Origin = rect.Size / 2f;
-        // rect.Position = Position;
-        // rect.FillColor4 = Color4;
-        // Game.Draw(rect, 0);
-    }
-
-    public override void DebugRender() {
-        // var circle = new CircleShape(5);
-        // circle.Origin = new Vector2(circle.Radius, circle.Radius);
-
-        // circle.FillColor4 = new Color4(0, 200, 255);
-        // circle.Position = basePosition;
-        //Game.Draw(circle, 0);
-
-        // circle.FillColor4 = new Color4(255, 100, 0);
-        // circle.Position = predictedOffset;
-        //Game.Draw(circle, 0);
-
-        // circle.FillColor4 = new Color4(0, 255, 0);
-        // circle.Position = interpolatedPosition;
-        //Game.Draw(circle, 0);
-
 
     }
+
+
 
     public override void PostRender() {
         predictedOffsetInterpolationTime = MathF.Min(predictedOffsetInterpolationTime + Game.Delta.AsSeconds() * 0.5f, 1f);
@@ -346,10 +305,9 @@ public abstract class Opponent : Entity, IReceivable {
         var latency = Game.Network.Time - theirTime;
 
         isKnockbacked = true;
-        knockbackTime = Game.Time;
+        knockbackTimer = new Timer(Time.InSeconds(1f));
         knockbackStartPosition = theirPosition;
         knockbackEndPosition = theirPosition + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * 100f;
-        knockbackDuration = Time.InSeconds(1);
 
         HeartCount--;
     }

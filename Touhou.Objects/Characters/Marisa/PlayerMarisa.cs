@@ -14,7 +14,7 @@ public class PlayerMarisa : Player {
         AddAttack(PlayerActions.SpecialA, new MarisaSpecialA());
         AddAttack(PlayerActions.SpecialB, new MarisaSpecialB());
 
-        AddBomb(PlayerActions.Bomb, new ReimuBomb());
+        AddBomb(new ReimuBomb());
     }
 
     public override void Render() {

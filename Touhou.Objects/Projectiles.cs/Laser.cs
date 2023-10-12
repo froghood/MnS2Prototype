@@ -124,12 +124,14 @@ public class Laser : Projectile {
 
         } else {
 
+            var scaleEasing = 1f - Easing.In(DestroyedFactor, 3f);
+
             var laser = new Sprite("laser") {
                 Origin = new Vector2(0f, 0.5f),
                 Position = Position + directionVector * width / 2f,
-                Scale = new Vector2(10000f, visualScale * (1f - Easing.In(DestroyedFactor, 3f))),
+                Scale = new Vector2(10000f, visualScale * scaleEasing),
                 Rotation = direction,
-                Color = Color,
+                Color = new Color4(Color.R, Color.G, Color.B, Color.A * (1f - Easing.In(DestroyedFactor, 4f))),
                 UseColorSwapping = true,
                 BlendMode = BlendMode.Additive,
             };
@@ -137,7 +139,7 @@ public class Laser : Projectile {
             var laserStart = new Sprite(laser) {
                 SpriteName = "laser_start",
                 Origin = new Vector2(1f, 0.5f),
-                Scale = new Vector2(visualScale, visualScale * (1f - Easing.In(DestroyedFactor, 3f))),
+                Scale = new Vector2(visualScale, visualScale * scaleEasing),
             };
 
             Game.Draw(laserStart, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);

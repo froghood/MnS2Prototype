@@ -34,6 +34,8 @@ public class MarisaPrimary : Attack {
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
 
+        //Log.Info($"{this.GetType().Name} press: {cooldownOverflow.AsSeconds()}");
+
         aimAngle = player.AngleToOpponent;
         aimAngleVector = new Vector2(MathF.Cos(aimAngle), MathF.Sin(aimAngle));
 
@@ -51,6 +53,9 @@ public class MarisaPrimary : Attack {
 
 
     public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
+
+        //Log.Info($"{this.GetType().Name} hold: {cooldownOverflow.AsSeconds()}, {holdTime.AsSeconds()}");
+
         if (holdTime < aimHoldTimeThreshhold) return;
 
         isAiming = true;
@@ -93,6 +98,10 @@ public class MarisaPrimary : Attack {
 
 
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
+
+        //Log.Info($"{this.GetType().Name} release: {cooldownOverflow.AsSeconds()}, {heldTime.AsSeconds()}");
+
+
         Laser laser;
 
         if (focused) {
@@ -129,8 +138,10 @@ public class MarisaPrimary : Attack {
 
         var refundTime = Time.Min(heldTime, Time.InSeconds(0.3f));
 
-        player.ApplyAttackCooldowns(Time.InSeconds(0.6f) - refundTime - cooldownOverflow, PlayerActions.Primary);
-        player.ApplyAttackCooldowns(Time.InSeconds(0.6f) - refundTime - cooldownOverflow, PlayerActions.Secondary);
+        Log.Info(refundTime.AsSeconds());
+
+        player.ApplyAttackCooldowns(Time.InSeconds(0.6f) - cooldownOverflow - refundTime, PlayerActions.Secondary);
+        player.ApplyAttackCooldowns(Time.InSeconds(0.6f) - cooldownOverflow - refundTime, PlayerActions.Primary);
 
         player.ApplyAttackCooldowns(Time.InSeconds(0.2f) - cooldownOverflow,
             PlayerActions.SpecialA,

@@ -68,7 +68,7 @@ public class MatchUI : Entity {
         int i = 0;
         foreach (var (name, attack) in Player.Attacks) {
 
-            var fillColor = Player.Power < attack.Cost ? new Color4(230, 180, 190, 255) : (attack.Disabled | attack.Cooldown.AsSeconds() > 0f ? Color4.Gray : Color4.White);
+            var fillColor = Player.Power < attack.Cost ? new Color4(230, 180, 190, 255) : (attack.Disabled | !attack.CooldownTimer.HasFinished ? Color4.Gray : Color4.White);
 
             var rectangle = new Rectangle {
                 Origin = new Vector2((0.5f - 1.15f * i) + 1.15f * (Player.Attacks.Count() - 1) / 2f, -0.30f),
@@ -77,7 +77,7 @@ public class MatchUI : Entity {
                 StrokeWidth = 1f,
                 FillColor = fillColor,
                 IsUI = true,
-                Alignment = new Vector2(0f, attack.Disabled | attack.Cooldown.AsSeconds() > 0f ? -1.01f : -1f),
+                Alignment = new Vector2(0f, attack.Disabled | !attack.CooldownTimer.HasFinished ? -1.01f : -1f),
             };
 
             Game.Draw(rectangle, Layer.UI1);

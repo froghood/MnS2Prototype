@@ -6,8 +6,8 @@ public abstract class Attack {
 
 
     public bool Disabled { get; private set; }
-    public Time CooldownDuration { get; set; }
-    public Time Cooldown { get; set; }
+
+    public Timer CooldownTimer { get; set; }
 
     public bool Focusable { get; protected init; }
     public bool Holdable { get; protected init; }

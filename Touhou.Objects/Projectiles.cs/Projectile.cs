@@ -37,7 +37,7 @@ public abstract class Projectile : Entity, IReceivable {
 
     public int GrazeAmount { get; set; }
 
-    public float DestroyedFactor { get => isDelayDestroyed ? Time.Max(Game.Time - destroyedTime, 0L).AsSeconds() / destroyDelayTime.AsSeconds() : 0f; }
+    public float DestroyedFactor { get => isDelayDestroyed ? 1f - destroyTimer.Remaining.AsSeconds() / destroyTimer.Duration.AsSeconds() : 0f; }
 
     protected Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
     private Match match;
@@ -49,8 +49,8 @@ public abstract class Projectile : Entity, IReceivable {
     public static Queue<List<(uint, ProjectileType, bool, bool, Color4)>> LocalProjectileHistory = new();
     public static Queue<List<(uint, ProjectileType, bool, bool, Color4)>> RemoteProjectileHistory = new();
     private bool isDelayDestroyed;
-    private Time destroyedTime = long.MaxValue;
-    private Time destroyDelayTime;
+
+    private Timer destroyTimer = Timer.Max();
 
     public Projectile(bool isPlayerOwned, bool isRemote) {
         IsPlayerOwned = isPlayerOwned;
@@ -122,7 +122,7 @@ public abstract class Projectile : Entity, IReceivable {
     public override void Update() {
         DestroyIfOutOfBounds();
 
-        if (Game.Time - destroyedTime >= destroyDelayTime) {
+        if (destroyTimer.HasFinished) {
             Destroy();
         }
 
@@ -167,9 +167,7 @@ public abstract class Projectile : Entity, IReceivable {
         if (isDelayDestroyed) return;
 
         isDelayDestroyed = true;
-
-        destroyedTime = Game.Time;
-        destroyDelayTime = delay;
+        destroyTimer = new Timer(delay);
 
         //Log.Info($"Destroying {this.GetType().Name} in {destroyDelayTime.AsSeconds()}s");
     }

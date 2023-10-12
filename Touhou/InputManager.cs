@@ -36,6 +36,9 @@ public class InputManager {
     private Dictionary<PlayerActions, (Time Time, PlayerActions StateSnapshot)> actionPressBuffer = new();
     private Dictionary<PlayerActions, Time> actionReleaseBuffer = new();
 
+    private Dictionary<PlayerActions, Time> lastPressTimes = new();
+    private Dictionary<PlayerActions, Time> lastReleaseTimes = new();
+
 
 
 
@@ -49,6 +52,9 @@ public class InputManager {
 
         playerActions = Enum.GetValues<PlayerActions>().Skip(1).ToArray();
         actionPressOrder = Enum.GetValues<PlayerActions>().Skip(1).ToList();
+
+        lastPressTimes = Enum.GetValues<PlayerActions>().ToDictionary(e => e, _ => default(Time));
+        lastReleaseTimes = Enum.GetValues<PlayerActions>().ToDictionary(e => e, _ => default(Time));
 
 
         // XInput.SetReporting(true);
@@ -69,12 +75,35 @@ public class InputManager {
             state = data.StateSnapshot;
             return true;
         }
-        time = Time.InSeconds(0f);
+        time = default(Time);
         state = PlayerActions.None;
         return false;
     }
 
-    public bool IsActionReleaseBuffered(PlayerActions action) => actionReleaseBuffer.ContainsKey(action);
+    public Time GetLastPressTime(PlayerActions action) {
+        if (lastPressTimes.TryGetValue(action, out var time)) {
+            return time;
+        } else {
+            return default(Time);
+        }
+    }
+
+    public Time GetLastReleaseTime(PlayerActions action) {
+        if (lastReleaseTimes.TryGetValue(action, out var time)) {
+            return time;
+        } else {
+            return default(Time);
+        }
+    }
+
+    public bool IsActionReleaseBuffered(PlayerActions action, out Time time) {
+        if (actionReleaseBuffer.TryGetValue(action, out var _time)) {
+            time = _time;
+            return true;
+        }
+        time = default(Time);
+        return false;
+    }
     public List<PlayerActions> GetActionOrder() => actionPressOrder;
 
 
@@ -195,8 +224,8 @@ public class InputManager {
 
 
         foreach (var action in playerActions) {
-            if (actionState.HasFlag(action) && !previousActionState.HasFlag(action)) BufferActionPress(action);
-            if (!actionState.HasFlag(action) && !previousActionState.HasFlag(action)) BufferActionRelease(action);
+            if (actionState.HasFlag(action) && !previousActionState.HasFlag(action)) OnActionPressed(action);
+            if (!actionState.HasFlag(action) && previousActionState.HasFlag(action)) OnActionReleased(action);
         }
 
 
@@ -215,7 +244,9 @@ public class InputManager {
 
 
 
-    private void BufferActionPress(PlayerActions action) {
+    private void OnActionPressed(PlayerActions action) {
+
+        lastPressTimes[action] = Game.Time;
 
         actionPressBuffer[action] = (Game.Time, actionState);
         actionReleaseBuffer.Remove(action);
@@ -226,7 +257,9 @@ public class InputManager {
         actionPressOrder.Insert(0, action);
     }
 
-    private void BufferActionRelease(PlayerActions action) {
+    private void OnActionReleased(PlayerActions action) {
+
+        lastReleaseTimes[action] = Game.Time;
 
         actionReleaseBuffer[action] = Game.Time;
         ActionReleased.Invoke(action);

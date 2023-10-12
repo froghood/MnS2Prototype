@@ -14,7 +14,7 @@ public class PlayerSakuya : Player {
         AddAttack(PlayerActions.SpecialA, new SakuyaSpecialA());
         AddAttack(PlayerActions.SpecialB, new SakuyaSpecialB());
 
-        AddBomb(PlayerActions.Bomb, new ReimuBomb());
+        AddBomb(new ReimuBomb());
 
 
 

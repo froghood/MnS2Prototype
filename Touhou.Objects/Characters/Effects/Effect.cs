@@ -3,7 +3,7 @@ namespace Touhou.Objects.Characters;
 public abstract class Effect {
 
     public Time LifeTime { get => timer.TotalElapsed; }
-    public bool HasTimedOut { get => timer.IsFinished; }
+    public bool HasTimedOut { get => timer.HasFinished; }
     public bool IsCanceled { get => isCanceled; }
 
 

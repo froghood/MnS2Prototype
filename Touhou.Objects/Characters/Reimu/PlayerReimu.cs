@@ -17,7 +17,7 @@ public class PlayerReimu : Player {
         AddAttack(PlayerActions.SpecialA, new ReimuSpecialA());
         AddAttack(PlayerActions.SpecialB, new ReimuSpecialB());
 
-        AddBomb(PlayerActions.Bomb, new ReimuBomb());
+        AddBomb(new ReimuBomb());
     }
 
     public override void Render() {
