@@ -11,9 +11,14 @@ public class ReimuBombWave : ParametricProjectile {
 
     public override void Init() {
 
-        float width = (Match.Bounds.Y * MathF.Abs(MathF.Cos(Orientation)) + Match.Bounds.X * MathF.Abs(MathF.Sin(Orientation))) * 2f;
+        float cos = MathF.Cos(Orientation);
+        float sin = MathF.Sin(Orientation);
 
-        Hitboxes.Add(new RectangleHitbox(this, Vector2.Zero, new Vector2(250f, width), Orientation, IsPlayerOwned ? CollisionGroup.PlayerBomb : CollisionGroup.OpponentBomb, Hit));
+        float width = (Match.Bounds.Y * MathF.Abs(cos) + Match.Bounds.X * MathF.Abs(sin)) * 2f;
+
+        var offset = new Vector2(cos, sin) * 80f;
+
+        Hitboxes.Add(new RectangleHitbox(this, offset, new Vector2(160f, width), Orientation, IsPlayerOwned ? CollisionGroup.PlayerBomb : CollisionGroup.OpponentBomb, Hit));
 
         base.Init();
     }
@@ -54,6 +59,8 @@ public class ReimuBombWave : ParametricProjectile {
             StrokeWidth = 1f,
             StrokeColor = new Color4(0f, 1f, 0f, 1f),
         };
+
+        base.Render();
     }
 
     private void Hit(Entity other, Hitbox hitbox) {
