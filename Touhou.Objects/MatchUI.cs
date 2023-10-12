@@ -147,6 +147,10 @@ public class MatchUI : Entity {
 
     private void RenderSmallPower(bool isPlayer) {
 
+        bool isDead = isPlayer ? Player.IsDead : Opponent.IsDead;
+
+        if (isDead) return;
+
         var barWidth = 50f;
 
         var powerBarBG = new Rectangle {
@@ -171,7 +175,13 @@ public class MatchUI : Entity {
 
 
     private void RenderSmallBombs(bool isPlayer) {
+
+        bool isDead = isPlayer ? Player.IsDead : Opponent.IsDead;
+
+        if (isDead) return;
+
         float spacing = 8f;
+
         int bombCount = isPlayer ? Player.BombCount : Opponent.BombCount;
         var position = isPlayer ? Player.Position : Opponent.Position;
 
