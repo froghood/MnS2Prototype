@@ -17,12 +17,11 @@ public class SakuyaSpecialB : Attack {
         } else {
             var vfx = new TimestopVFX(() => player.Position, Graphics.Layer.Background1);
 
-            player.ApplyEffect(new Timestop(true, long.MaxValue, vfx.Destroy));
+            player.ApplyEffect(new Timestop(true, vfx.Destroy));
 
             player.Scene.AddEntity(vfx);
 
-            var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.SpecialB);
+            var packet = new Packet(PacketType.AttackReleased).In(PlayerActions.SpecialB);
 
             Game.Network.Send(packet);
         }
@@ -54,7 +53,7 @@ public class SakuyaSpecialB : Attack {
 
         var vfx = new TimestopVFX(() => opponent.Position, Graphics.Layer.Background2);
 
-        opponent.ApplyEffect(new Timestop(false, long.MaxValue, vfx.Destroy));
+        opponent.ApplyEffect(new Timestop(false, vfx.Destroy));
 
         opponent.Scene.AddEntity(vfx);
     }

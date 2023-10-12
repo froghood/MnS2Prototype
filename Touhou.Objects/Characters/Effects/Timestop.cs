@@ -11,7 +11,7 @@ public class Timestop : Effect {
     private bool isPlayerOwned;
     private Action cancelCallback;
 
-    public Timestop(bool isPlayerOwned, Time duration, Action cancelCallback = null) : base(duration) {
+    public Timestop(bool isPlayerOwned, Action cancelCallback = null) {
         this.isPlayerOwned = isPlayerOwned;
         this.cancelCallback = cancelCallback;
     }

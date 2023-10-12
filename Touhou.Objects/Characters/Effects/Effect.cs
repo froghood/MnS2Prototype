@@ -15,6 +15,10 @@ public abstract class Effect {
         this.timer = new Timer(duration);
     }
 
+    public Effect() {
+        this.timer = Timer.Max();
+    }
+
     public abstract void PlayerUpdate(Player player);
     public abstract void OpponentUpdate(Opponent opponent);
 
