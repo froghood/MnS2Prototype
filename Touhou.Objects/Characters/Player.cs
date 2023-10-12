@@ -284,51 +284,58 @@ public abstract class Player : Entity, IReceivable {
 
         void ProcessHoldable(Attack attack) {
 
-            if (Game.IsActionPressed(action)) {
+            if (Game.Input.IsActionPressBuffered(action, out var pressBufferTime, out var bufferState)) {
+                Game.Input.ConsumePressBuffer(action);
+
+                bool focused = bufferState.HasFlag(PlayerActions.Focus);
+
+                var cooldownOverflow = default(Time);
+                var heldTime = default(Time);
+
+                if (Game.IsActionPressed(action)) {
+
+                    heldTime = pressBufferTime < attack.CooldownTimer.FinishTime ? attack.CooldownTimer.FinishTime : Game.Time;
+
+                } else {
+
+                    var releaseTime = Game.Input.GetLastReleaseTime(action);
+
+                    heldTime = releaseTime >= attack.CooldownTimer.FinishTime ? attack.CooldownTimer.FinishTime : Game.Time;
+                    cooldownOverflow = releaseTime < attack.CooldownTimer.FinishTime ? Game.Time - attack.CooldownTimer.FinishTime : (Time)0L;
+
+                }
+
+                Log.Info($"Buffered action {action} | cooldown overflow: {cooldownOverflow}μs | held time offset: {Game.Time - heldTime}");
+
+                attack.PlayerPress(this, cooldownOverflow, focused);
+                currentlyHeldAttacks.TryAdd(attack, (cooldownOverflow, heldTime, focused));
+
+            } else {
 
                 bool focused = Game.IsActionPressed(PlayerActions.Focus);
 
-                var pressTime = Game.Input.GetLastPressTime(action);
+                var heldTime = attack.CooldownTimer.FinishTime;
 
-                var heldTime = pressTime < attack.CooldownTimer.FinishTime ? attack.CooldownTimer.FinishTime : Game.Time;
+                if (Game.IsActionPressed(action)) {
 
-                Log.Info($"Pressed action {action} | cooldown overflow: {0L}μs | held time offset: {Game.Time - heldTime}");
+                    Log.Info($"Held action {action} | cooldown overflow: {0L}μs | held time offset: {Game.Time - heldTime}");
+
+                } else {
+
+                    var releaseTime = Game.Input.GetLastReleaseTime(action);
+
+                    // niche case for when a release happens on the next available frame after the attack's cooldown ends
+                    // must check if the cooldown finish time happened inbetween the current and previous frame times;
+                    // required in order to stop unintended activations before the attack's cooldown timer has been set for the first time
+                    if (releaseTime < attack.CooldownTimer.FinishTime || (Game.Time - Game.Delta) > attack.CooldownTimer.FinishTime) return;
+
+                    Log.Warn($"Released action {action} | cooldown overflow: {0L}μs | held time offset: {Game.Time - heldTime}");
+
+                }
 
                 attack.PlayerPress(this, 0L, focused);
                 currentlyHeldAttacks.TryAdd(attack, (0L, heldTime, focused));
 
-            } else {
-
-                var releaseTime = Game.Input.GetLastReleaseTime(action);
-
-                // niche case for when a release happens on the next available frame after the attack's cooldown ends
-
-                // must check if the cooldown finish time happened inbetween the current and previous frame times;
-                // required in order to stop unintended activations before the attack's cooldown timer has been set for the first time
-                if (releaseTime >= attack.CooldownTimer.FinishTime && (Game.Time - Game.Delta) <= attack.CooldownTimer.FinishTime) {
-
-                    bool focused = Game.IsActionPressed(PlayerActions.Focus);
-
-                    var heldTime = attack.CooldownTimer.FinishTime;
-
-                    Log.Warn($"Released action {action} | cooldown overflow: {0L}μs | held time offset: {Game.Time - heldTime}");
-
-                    attack.PlayerPress(this, 0L, focused);
-                    currentlyHeldAttacks.TryAdd(attack, (0L, heldTime, focused));
-
-                } else {
-
-                    if (!Game.Input.IsActionPressBuffered(action, out var bufferPressTime, out var bufferState)) return;
-
-                    Game.Input.ConsumePressBuffer(action);
-
-                    var cooldownOverflow = Game.Time - attack.CooldownTimer.FinishTime;
-
-                    Log.Info($"Buffered action {action} | cooldown overflow: {cooldownOverflow}μs");
-
-                    attack.PlayerPress(this, cooldownOverflow, bufferState.HasFlag(PlayerActions.Focus));
-                    currentlyHeldAttacks.TryAdd(attack, (cooldownOverflow, Game.Time, bufferState.HasFlag(PlayerActions.Focus)));
-                }
             }
         }
 
