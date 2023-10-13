@@ -187,7 +187,7 @@ internal static class Game {
             FrameCount++;
         }
 
-        //SteamClient.Shutdown();
+        SteamClient.Shutdown();
     }
 
     public static void Draw(Renderable renderable, Layer layer) => renderer.Queue(renderable, layer);

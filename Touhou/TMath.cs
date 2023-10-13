@@ -13,11 +13,11 @@ public static class TMathF {
         return n - d * MathF.Floor(n / d);
     }
 
-    public static float NormalizeAngle(float a) {
-        return Mod(a + MathF.PI, MathF.Tau) - MathF.PI;
+    public static float NormalizeAngle(float radians) {
+        return Mod(radians + MathF.PI, MathF.Tau) - MathF.PI;
     }
 
-    public static float NormalizeAngleZeroToTwoPi(float a) {
+    public static float NormalizeAngleZeroToTau(float a) {
         return Mod(a, MathF.Tau);
     }
 

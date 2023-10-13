@@ -1,3 +1,6 @@
+using OpenTK.Mathematics;
+using Touhou.Networking;
+
 namespace Touhou.Objects.Characters;
 
 public class PlayerNazrin : Player {
@@ -25,7 +28,31 @@ public class PlayerNazrin : Player {
         base.Render();
     }
 
+
     public void AddMouse() {
-        Scene.AddEntity(new Mouse(this, mice));
+        Scene.AddEntity(new Mouse(() => Position, mice));
     }
+
+    protected override void ChangeVelocity(Vector2 newVelocity) {
+        if (newVelocity == Velocity) return;
+        Velocity = newVelocity;
+
+        var angles = mice.Select(e => e.CompressedLineAngle).ToArray();
+
+        foreach (var mouse in mice) {
+            mouse.RecaluclateSmoothPosition(Position, mouse.CompressedLineAngle / 256f * MathF.Tau);
+        }
+
+        Log.Info($"mice angles: {string.Join(", ", angles)}");
+
+        var packet = new Packet(PacketType.VelocityChanged)
+        .In(Game.Network.Time)
+        .In(Position)
+        .In(Velocity)
+        .In(Focused)
+        .In(angles);
+
+        Game.Network.Send(packet);
+    }
+
 }

@@ -8,6 +8,7 @@ public class Packet {
     public PacketType Type { get => type; }
     public byte[] Data { get => stream.ToArray(); }
     public int Size { get => (int)stream.Length; }
+    public int Remaining { get => Size - (int)readPosition; }
 
     private PacketType type;
     private MemoryStream stream;
@@ -50,6 +51,11 @@ public class Packet {
         stream.Position = writePosition;
         stream.Write(buffer, 0, size);
         writePosition = stream.Position;
+        return this;
+    }
+
+    public Packet In<T>(T[] data) where T : struct {
+        foreach (var e in data) In(e);
         return this;
     }
 

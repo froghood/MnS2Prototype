@@ -1,3 +1,5 @@
+using Touhou.Networking;
+
 namespace Touhou.Objects.Characters;
 
 public class OpponentNazrin : Opponent {
@@ -22,6 +24,26 @@ public class OpponentNazrin : Opponent {
     }
 
     public void AddMouse() {
-        Scene.AddEntity(new Mouse(this, mice));
+        Scene.AddEntity(new Mouse(() => basePosition + predictedOffset, mice));
+    }
+
+    protected override void VelocityChanged(Packet packet) {
+        base.VelocityChanged(packet);
+
+        var angles = new Queue<byte>();
+
+        Log.Info($"remaining: {packet.Remaining}");
+
+        while (packet.Remaining > 0) {
+            packet.Out(out byte angle);
+            angles.Enqueue(angle);
+        }
+
+        //Log.Info($"mice angles: {string.Join(", ", angles)}");
+
+
+        foreach (var mouse in mice) {
+            mouse.RecaluclateSmoothPosition(basePosition, angles.Dequeue() / 256f * MathF.Tau);
+        }
     }
 }

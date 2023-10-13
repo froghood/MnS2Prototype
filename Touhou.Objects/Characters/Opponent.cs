@@ -23,8 +23,8 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     private bool isP1;
-    private Vector2 basePosition;
-    private Vector2 predictedOffset;
+    protected Vector2 basePosition;
+    protected Vector2 predictedOffset;
     private Vector2 interpolatedPosition;
     private float predictedOffsetInterpolationTime;
     private Vector2 velocity;
@@ -216,8 +216,8 @@ public abstract class Opponent : Entity, IReceivable {
 
 
     // packets
-    private void VelocityChanged(Packet packet) {
-        packet.Out(out Time theirTime, true).Out(out Vector2 theirPosition).Out(out Vector2 theirVelocity);
+    protected virtual void VelocityChanged(Packet packet) {
+        packet.Out(out Time theirTime, true).Out(out Vector2 theirPosition).Out(out Vector2 theirVelocity).Out(out bool focused);
 
         var latency = Game.Network.Time - theirTime;
 

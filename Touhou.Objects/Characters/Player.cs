@@ -15,15 +15,15 @@ public abstract class Player : Entity, IReceivable {
     public float Speed { get; protected init; }
     public float FocusedSpeed { get; protected init; }
 
-    public Vector2 Velocity { get; private set; }
+    public Vector2 Velocity { get; protected set; }
     public Vector2 MovementAngleVector { get => movementAngleVector; }
 
 
 
     public bool Focused { get => Game.IsActionPressed(PlayerActions.Focus); }
 
-    public bool CanMove { get; private set; } = true;
-    public bool CanAttack { get; private set; } = true;
+    public bool CanMove { get; protected set; } = true;
+    public bool CanAttack { get; protected set; } = true;
 
 
     public bool IsDead { get => isDead; }
@@ -581,7 +581,7 @@ public abstract class Player : Entity, IReceivable {
 
 
 
-    private void ChangeVelocity(Vector2 newVelocity) {
+    protected virtual void ChangeVelocity(Vector2 newVelocity) {
         if (newVelocity == Velocity) return;
         Velocity = newVelocity;
         var packet = new Packet(PacketType.VelocityChanged);
