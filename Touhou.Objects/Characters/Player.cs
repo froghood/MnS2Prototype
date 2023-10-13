@@ -581,7 +581,7 @@ public abstract class Player : Entity, IReceivable {
 
 
 
-    private void ChangeVelocity(Vector2 newVelocity) {
+    protected virtual void ChangeVelocity(Vector2 newVelocity) {
         if (newVelocity == Velocity) return;
         Velocity = newVelocity;
         var packet = new Packet(PacketType.VelocityChanged);
