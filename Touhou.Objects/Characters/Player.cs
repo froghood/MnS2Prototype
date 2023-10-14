@@ -157,10 +157,7 @@ public abstract class Player : Entity, IReceivable {
         UpdateKnockback();
         UpdateMovement();
 
-        Position = new Vector2(
-            Math.Clamp(Position.X, -Match.Bounds.X, Match.Bounds.X),
-            Math.Clamp(Position.Y, -Match.Bounds.Y, Match.Bounds.Y)
-        );
+
 
         var order = Game.Input.GetActionOrder();
         foreach (var action in order) ProcessActionPresses(action);
@@ -233,7 +230,7 @@ public abstract class Player : Entity, IReceivable {
 
 
 
-    private void UpdateMovement() {
+    protected virtual void UpdateMovement() {
         var movementVector = CanMove ? new Vector2(
             (Game.IsActionPressed(PlayerActions.Right) ? 1f : 0f) - (Game.IsActionPressed(PlayerActions.Left) ? 1f : 0f),
             (Game.IsActionPressed(PlayerActions.Up) ? 1f : 0f) - (Game.IsActionPressed(PlayerActions.Down) ? 1f : 0f)
@@ -259,6 +256,11 @@ public abstract class Player : Entity, IReceivable {
         ChangeVelocity(velocityVector);
 
         Position += Velocity * Game.Delta.AsSeconds();
+
+        Position = new Vector2(
+            Math.Clamp(Position.X, -Match.Bounds.X, Match.Bounds.X),
+            Math.Clamp(Position.Y, -Match.Bounds.Y, Match.Bounds.Y)
+        );
     }
 
     private void ProcessActionPresses(PlayerActions action) {
