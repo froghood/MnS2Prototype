@@ -5,11 +5,14 @@ namespace Touhou.Objects.Characters;
 
 public class Mouse : Entity {
 
-
+    public float Tangent { get => tangent; }
+    private float tangent;
 
     public void SetPosition(Vector2 newPosition, bool interpolate = false) {
         Position = newPosition;
     }
+
+    public void SetTangent(float newTangent) => tangent = newTangent;
 
     public override void Render() {
         var circle = new Circle() {

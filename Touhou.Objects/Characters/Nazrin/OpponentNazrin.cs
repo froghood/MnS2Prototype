@@ -5,6 +5,8 @@ namespace Touhou.Objects.Characters;
 
 public class OpponentNazrin : Opponent {
 
+    public ReadOnlySpan<Mouse> Mice { get => mice.ToArray(); }
+
     private List<Vector2> pathHistory = new();
 
     private List<Mouse> mice = new();
@@ -51,7 +53,7 @@ public class OpponentNazrin : Opponent {
         for (int i = 0; i < mice.Count; i++) {
             Mouse mouse = mice[i];
 
-            mouse.SetPosition(spline.Sample((i + 1) * 40f));
+            mouse.SetPosition(spline.SamplePosition((i + 1) * 40f));
 
         }
     }
