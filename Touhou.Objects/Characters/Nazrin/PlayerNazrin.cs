@@ -44,7 +44,6 @@ public class PlayerNazrin : Player {
     protected override void UpdateMovement() {
         base.UpdateMovement();
 
-
         var controlPoints = GetControlPoints();
 
         var spline = new Spline(controlPoints, c => {
@@ -61,18 +60,12 @@ public class PlayerNazrin : Player {
             return points.ToArray();
         });
 
-        if (spline.Length > mice.Count * 40f * 3) {
-            pathHistory.RemoveAt(0);
-        }
-
-
         for (int i = 0; i < mice.Count; i++) {
             Mouse mouse = mice[i];
 
             mouse.SetPosition(spline.Sample((i + 1) * 40f));
 
         }
-
     }
 
 

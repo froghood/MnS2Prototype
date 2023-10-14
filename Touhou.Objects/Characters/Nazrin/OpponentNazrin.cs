@@ -48,11 +48,6 @@ public class OpponentNazrin : Opponent {
             return points.ToArray();
         });
 
-        if (spline.Length > mice.Count * 40f * 3) {
-            pathHistory.RemoveAt(0);
-        }
-
-
         for (int i = 0; i < mice.Count; i++) {
             Mouse mouse = mice[i];
 
