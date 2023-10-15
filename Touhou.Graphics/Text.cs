@@ -42,27 +42,41 @@ public class Text : Renderable {
 
 
             var rotationMatrix = Matrix2.CreateRotation(Rotation);
-            float cameraScale = Game.Camera.GetCameraScale(IsUI);
+            var cameraPosition = IsUI ? Vector2.Zero : Game.Camera.Position;
+
+            var modelMatrix = Matrix4.Identity;
+            modelMatrix *= Matrix4.CreateScale(Scale.X, Scale.Y, 0f);
+            modelMatrix *= Matrix4.CreateRotationZ(Rotation);
+            modelMatrix *= Matrix4.CreateTranslation(Position.X, Position.Y, 0f);
+            modelMatrix *= Matrix4.CreateTranslation(-cameraPosition.X, -cameraPosition.Y, 0f);
+
+            var cameraScale = Game.Camera.GetCameraScale(IsUI);
+
+            var projectionMatrix = Matrix4.CreateOrthographicOffCenter(
+            Game.WindowSize.X * -cameraScale / 2f,
+            Game.WindowSize.X * cameraScale / 2f,
+            Game.WindowSize.Y * -cameraScale / 2f,
+            Game.WindowSize.Y * cameraScale / 2f,
+             -1f, 1f);
 
             float[] vertices = new float[DisplayedText.Length * 4 * 4];
             int[] indices = new int[DisplayedText.Length * 6];
 
-
-            var glpyhs = DisplayedText.Select(e => {
+            var glyphs = DisplayedText.Select(e => {
                 int unicode = Convert.ToInt32(e);
                 return data.Glyphs.ContainsKey(unicode) ? data.Glyphs[unicode] : data.Glyphs.Values.First();
             }).ToArray();
 
-            float textWidth = ComputeTextWidth(glpyhs, Padding);
+            float textWidth = CalculateTextWidth(glyphs, Padding);
             float textHeight = data.Ascender - data.Descender;
             Vector2 originOffset = new Vector2(textWidth, textHeight) * Origin;
 
             float advance = 0f;
 
-            float firstGlpyhOffset = glpyhs[0].PlaneBounds.Min.X;
+            float firstGlpyhOffset = glyphs[0].PlaneBounds.Min.X;
 
-            for (int i = 0; i < glpyhs.Length; i++) {
-                var glyph = glpyhs[i];
+            for (int i = 0; i < glyphs.Length; i++) {
+                var glyph = glyphs[i];
 
                 int charVerticesOffset = i * 16;
                 int charIndicesOffset = i * 6;
@@ -115,15 +129,10 @@ public class Text : Renderable {
 
             Game.Renderer.ShaderLibrary.UseShader("text");
 
-            Game.Renderer.ShaderLibrary.Uniform("position", Position);
-            Game.Renderer.ShaderLibrary.Uniform("scale", Scale);
-            Game.Renderer.ShaderLibrary.Uniform("rotation", rotationMatrix);
-
-            Game.Renderer.ShaderLibrary.Uniform("isUI", IsUI);
-            Game.Renderer.ShaderLibrary.Uniform("uiAlignment", Alignment);
-            Game.Renderer.ShaderLibrary.Uniform("windowSize", (Vector2)Game.WindowSize);
-            Game.Renderer.ShaderLibrary.Uniform("cameraPosition", Game.Camera.Position);
-            Game.Renderer.ShaderLibrary.Uniform("cameraScale", cameraScale);
+            Game.Renderer.ShaderLibrary.Uniform("cameraPosition", cameraPosition);
+            Game.Renderer.ShaderLibrary.Uniform("modelMatrix", modelMatrix);
+            Game.Renderer.ShaderLibrary.Uniform("projectionMatrix", projectionMatrix);
+            Game.Renderer.ShaderLibrary.Uniform("alignment", Alignment);
 
             Game.Renderer.ShaderLibrary.Uniform("screenPxRange", data.SDFSize / (CharacterSize / cameraScale) / 80f);
             Game.Renderer.ShaderLibrary.Uniform("textColor", Color);
@@ -134,7 +143,7 @@ public class Text : Renderable {
         }
     }
 
-    private static float ComputeTextWidth(Glyph[] glpyhs, float padding) {
+    private static float CalculateTextWidth(Glyph[] glpyhs, float padding) {
 
         float advance = 0f;
 
