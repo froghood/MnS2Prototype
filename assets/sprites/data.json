@@ -92,15 +92,21 @@
       "Width": 137,
       "Height": 170
     },
-    "hitboxfocused": {
+    "mouse": {
       "Left": 302,
       "Top": 1086,
+      "Width": 137,
+      "Height": 150
+    },
+    "hitboxfocused": {
+      "Left": 302,
+      "Top": 1238,
       "Width": 132,
       "Height": 132
     },
     "hitboxunfocused": {
       "Left": 302,
-      "Top": 1220,
+      "Top": 1372,
       "Width": 132,
       "Height": 132
     },
@@ -171,13 +177,13 @@
       "Height": 46
     },
     "bullet": {
-      "Left": 436,
+      "Left": 441,
       "Top": 1086,
       "Width": 80,
       "Height": 40
     },
     "kunai": {
-      "Left": 436,
+      "Left": 441,
       "Top": 1128,
       "Width": 80,
       "Height": 40

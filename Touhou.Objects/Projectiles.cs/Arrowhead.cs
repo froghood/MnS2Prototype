@@ -3,10 +3,10 @@ using Touhou.Graphics;
 
 namespace Touhou.Objects.Projectiles;
 
-public class Ball : ParametricProjectile {
+public class Arrowhead : ParametricProjectile {
     private readonly float velocity;
 
-    public Ball(Vector2 origin, float orientation, float velocity, bool isPlayerOwned, bool isRemote) : base(origin, orientation, isPlayerOwned, isRemote) {
+    public Arrowhead(Vector2 origin, float orientation, float velocity, bool isPlayerOwned, bool isRemote) : base(origin, orientation, isPlayerOwned, isRemote) {
         this.velocity = velocity;
 
         Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 10f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
@@ -22,9 +22,10 @@ public class Ball : ParametricProjectile {
 
         float spawnRatio = MathF.Min(LifeTime.AsSeconds() / SpawnDelay.AsSeconds(), 1f);
 
-        var sprite = new Sprite("ball") {
+        var sprite = new Sprite("arrowhead") {
             Origin = new Vector2(0.5f),
             Position = Position,
+            Rotation = Orientation,
             Scale = new Vector2(0.45f) * (1f + 3f * (1f - spawnRatio)),
             Color = new Color4(Color.R, Color.G, Color.B, Color.A * spawnRatio),
             UseColorSwapping = true,
