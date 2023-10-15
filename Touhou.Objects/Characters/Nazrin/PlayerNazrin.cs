@@ -35,11 +35,7 @@ public class PlayerNazrin : Player {
 
         base.Init();
 
-        for (int i = 0; i < 20; i++) {
-            var mouse = new Mouse();
-            mice.Add(mouse);
-            Scene.AddEntity(mouse);
-        }
+        SpawnMouse(1);
 
         positionHistory.Add(Position);
 
@@ -103,6 +99,18 @@ public class PlayerNazrin : Player {
 
         base.Render();
     }
+
+
+
+    public void SpawnMouse(int count = 1) {
+
+        for (int i = 0; i < count; i++) {
+            var mouse = new Mouse();
+            mice.Add(mouse);
+            Scene.AddEntity(mouse);
+        }
+    }
+
 
     protected override void ChangeVelocity(Vector2 newVelocity) {
 
@@ -208,4 +216,6 @@ public class PlayerNazrin : Player {
             Game.Draw(line, layer);
         }
     }
+
+
 }

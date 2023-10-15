@@ -110,21 +110,27 @@
       "Width": 132,
       "Height": 132
     },
-    "fade": {
+    "circle_fade": {
       "Left": 1038,
       "Top": 395,
       "Width": 100,
       "Height": 100
     },
-    "opponentarrow": {
+    "fade": {
       "Left": 1140,
       "Top": 395,
+      "Width": 100,
+      "Height": 100
+    },
+    "opponentarrow": {
+      "Left": 1037,
+      "Top": 872,
       "Width": 110,
       "Height": 70
     },
     "largeknife": {
       "Left": 1037,
-      "Top": 872,
+      "Top": 944,
       "Width": 150,
       "Height": 50
     },
@@ -153,8 +159,8 @@
       "Height": 84
     },
     "smallknife": {
-      "Left": 1037,
-      "Top": 924,
+      "Left": 302,
+      "Top": 1506,
       "Width": 148,
       "Height": 40
     },
@@ -165,8 +171,8 @@
       "Height": 58
     },
     "aimarrow": {
-      "Left": 1140,
-      "Top": 467,
+      "Left": 1242,
+      "Top": 478,
       "Width": 160,
       "Height": 20
     },
@@ -177,14 +183,14 @@
       "Height": 46
     },
     "bullet": {
-      "Left": 441,
-      "Top": 1086,
+      "Left": 1149,
+      "Top": 872,
       "Width": 80,
       "Height": 40
     },
     "kunai": {
       "Left": 441,
-      "Top": 1128,
+      "Top": 1086,
       "Width": 80,
       "Height": 40
     },

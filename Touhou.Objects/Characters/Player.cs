@@ -63,7 +63,7 @@ public abstract class Player : Entity, IReceivable {
     private Bomb bomb;
 
 
-    private Dictionary<Attack, (Time CooldownOverflow, Time HeldTime, bool Focused)> currentlyHeldAttacks = new();
+    private Dictionary<PlayerActions, (Time CooldownOverflow, Time HeldTime, bool Focused)> currentlyHeldAttacks = new();
 
 
 
@@ -268,7 +268,7 @@ public abstract class Player : Entity, IReceivable {
         // attacks
         if (CanAttack && attacks.TryGetValue(action, out var attack) && Power >= attack.Cost && attack.CooldownTimer.HasFinished && !attack.Disabled) {
 
-            if (attack.Holdable && !currentlyHeldAttacks.ContainsKey(attack)) { // holdable
+            if (attack.Holdable && !currentlyHeldAttacks.ContainsKey(action)) { // holdable
                 ProcessHoldable(attack);
             }
 
@@ -310,13 +310,13 @@ public abstract class Player : Entity, IReceivable {
                 Log.Info($"Buffered action {action} | cooldown overflow: {cooldownOverflow}μs | held time offset: {Game.Time - heldTime}");
 
                 attack.PlayerPress(this, cooldownOverflow, focused);
-                currentlyHeldAttacks.TryAdd(attack, (cooldownOverflow, heldTime, focused));
+                currentlyHeldAttacks.TryAdd(action, (cooldownOverflow, heldTime, focused));
 
             } else {
 
                 bool focused = Game.IsActionPressed(PlayerActions.Focus);
 
-                var heldTime = attack.CooldownTimer.FinishTime;
+                var heldTime = (Game.Time - Game.Delta) > attack.CooldownTimer.FinishTime ? Game.Time : attack.CooldownTimer.FinishTime;
 
                 if (Game.IsActionPressed(action)) {
 
@@ -336,7 +336,7 @@ public abstract class Player : Entity, IReceivable {
                 }
 
                 attack.PlayerPress(this, 0L, focused);
-                currentlyHeldAttacks.TryAdd(attack, (0L, heldTime, focused));
+                currentlyHeldAttacks.TryAdd(action, (0L, heldTime, focused));
 
             }
         }
@@ -375,19 +375,17 @@ public abstract class Player : Entity, IReceivable {
     }
 
     private void ProcessActionHolds(PlayerActions action) {
-        if (attacks.TryGetValue(action, out var attack)) {
-            if (currentlyHeldAttacks.TryGetValue(attack, out var heldState)) {
 
+        if (!currentlyHeldAttacks.TryGetValue(action, out var heldState)) return;
+        if (!attacks.TryGetValue(action, out var attack)) return;
 
+        if (attack.CooldownTimer.HasFinished) attack.PlayerHold(this, heldState.CooldownOverflow, Game.Time - heldState.HeldTime, heldState.Focused);
 
-                if (attack.CooldownTimer.HasFinished) attack.PlayerHold(this, heldState.CooldownOverflow, Game.Time - heldState.HeldTime, heldState.Focused);
+        if ((!Game.IsActionPressed(action) || Power < attack.Cost) && currentlyHeldAttacks.ContainsKey(action)) {
 
-                if (!Game.IsActionPressed(action) || Power < attack.Cost) {
+            attack.PlayerRelease(this, heldState.CooldownOverflow, Game.Time - heldState.HeldTime, heldState.Focused);
+            currentlyHeldAttacks.Remove(action);
 
-                    attack.PlayerRelease(this, heldState.CooldownOverflow, Game.Time - heldState.HeldTime, heldState.Focused);
-                    currentlyHeldAttacks.Remove(attack);
-                }
-            }
         }
     }
 
@@ -605,11 +603,22 @@ public abstract class Player : Entity, IReceivable {
     protected void AddBomb(Bomb bomb) => this.bomb = bomb;
 
     public void ApplyMovespeedModifier(float modifier) {
-        ApplyMovespeedModifier(modifier, long.MaxValue);
+        movespeedModifier = modifier;
+        movespeedModifierTimer = Timer.Max();
     }
 
     public void ApplyMovespeedModifier(float modifier, Time duration) {
         movespeedModifier = modifier;
         movespeedModifierTimer = new Timer(duration);
+    }
+
+    internal void ReleaseHeldAttack(PlayerActions action) {
+
+        if (!currentlyHeldAttacks.TryGetValue(action, out var heldState)) return;
+        if (!attacks.TryGetValue(action, out var attack)) return;
+
+        attack.PlayerRelease(this, heldState.CooldownOverflow, Game.Time - heldState.HeldTime, heldState.Focused);
+        currentlyHeldAttacks.Remove(action);
+
     }
 }

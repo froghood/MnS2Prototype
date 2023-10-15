@@ -29,11 +29,7 @@ public class OpponentNazrin : Opponent {
     public override void Init() {
         base.Init();
 
-        for (int i = 0; i < 20; i++) {
-            var mouse = new Mouse();
-            mice.Add(mouse);
-            Scene.AddEntity(mouse);
-        }
+        SpawnMouse(1);
 
         positionHistory.Add(basePosition);
     }
@@ -80,6 +76,18 @@ public class OpponentNazrin : Opponent {
 
         base.Render();
     }
+
+
+
+    public void SpawnMouse(int count) {
+        for (int i = 0; i < count; i++) {
+            var mouse = new Mouse();
+            mice.Add(mouse);
+            Scene.AddEntity(mouse);
+        }
+    }
+
+
 
     protected override void VelocityChanged(Packet packet) {
 
@@ -179,4 +187,6 @@ public class OpponentNazrin : Opponent {
         }
     }
 }
+
+
 
