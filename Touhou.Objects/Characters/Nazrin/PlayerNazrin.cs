@@ -41,6 +41,60 @@ public class PlayerNazrin : Player {
 
     }
 
+
+
+
+
+    public override void Render() {
+
+        if (IsDead) return;
+
+        //RenderPoints(controlPoints, new Color4(1f, 1f, 1f, 0.2f), Layer.UI1);
+        //RenderPoints(smoothControlPoints, new Color4(0f, 1f, 0f, 0.2f), Layer.UI1);
+        //RenderPoints(spline.Points.ToArray(), new Color4(0f, 1f, 1f, 0.2f), Layer.UI1);
+
+        base.Render();
+    }
+
+
+
+    public void SpawnMouse(int count = 1) {
+
+        for (int i = 0; i < count; i++) {
+            var mouse = new Mouse();
+            mice.Add(mouse);
+            Scene.AddEntity(mouse);
+
+
+            var angle = Game.Random.NextSingle() * MathF.Tau;
+            var offset = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * 500f;
+
+            mouse.Interpolate(offset, Time.InSeconds(1f));
+        }
+    }
+
+
+
+    protected override void ChangeVelocity(Vector2 newVelocity) {
+
+        if (newVelocity == Velocity) return;
+
+        base.ChangeVelocity(newVelocity);
+
+        var previous = positionHistory[positionHistory.Count - 1];
+
+        var distance = (Position - previous).LengthFast;
+
+        totalDistanceTraveled += distance;
+
+        if (totalDistanceTraveled >= 40f) {
+            positionHistory.Add(Position);
+            totalDistanceTraveled = 0;
+        }
+    }
+
+
+
     protected override void UpdateMovement() {
         base.UpdateMovement();
 
@@ -86,50 +140,6 @@ public class PlayerNazrin : Player {
 
         }
     }
-
-
-
-    public override void Render() {
-
-        if (IsDead) return;
-
-        //RenderPoints(controlPoints, new Color4(1f, 1f, 1f, 0.2f), Layer.UI1);
-        //RenderPoints(smoothControlPoints, new Color4(0f, 1f, 0f, 0.2f), Layer.UI1);
-        //RenderPoints(spline.Points.ToArray(), new Color4(0f, 1f, 1f, 0.2f), Layer.UI1);
-
-        base.Render();
-    }
-
-
-
-    public void SpawnMouse(int count = 1) {
-
-        for (int i = 0; i < count; i++) {
-            var mouse = new Mouse();
-            mice.Add(mouse);
-            Scene.AddEntity(mouse);
-        }
-    }
-
-
-    protected override void ChangeVelocity(Vector2 newVelocity) {
-
-        if (newVelocity == Velocity) return;
-
-        base.ChangeVelocity(newVelocity);
-
-        var previous = positionHistory[positionHistory.Count - 1];
-
-        var distance = (Position - previous).LengthFast;
-
-        totalDistanceTraveled += distance;
-
-        if (totalDistanceTraveled >= 40f) {
-            positionHistory.Add(Position);
-            totalDistanceTraveled = 0;
-        }
-    }
-
 
 
 

@@ -5,12 +5,23 @@ namespace Touhou.Objects.Characters;
 
 public class Mouse : Entity {
 
+    public Vector2 BasePosition { get => basePosition; }
+
     public float Tangent { get => tangent; }
+
+
+    private Vector2 basePosition;
     private float tangent;
     private Queue<(Action<Mouse, Time> Attack, Time Time)> queuedAttacks = new();
-
+    private Vector2 interpolationOffset;
+    private Timer interpolationTimer;
 
     public override void Update() {
+
+
+        Position = basePosition + interpolationOffset * Easing.In(interpolationTimer.RemainingRatio, 3f);
+
+
 
         while (queuedAttacks.Count > 0) {
 
@@ -55,13 +66,18 @@ public class Mouse : Entity {
     }
 
     public void SetPosition(Vector2 newPosition, bool interpolate = false) {
-        Position = newPosition;
+        basePosition = newPosition;
     }
 
     public void SetTangent(float newTangent) => tangent = newTangent;
 
     public void PlayerAttack(Action<Mouse, Time> attack, Time time) {
         queuedAttacks.Enqueue((attack, time));
+    }
+
+    public void Interpolate(Vector2 offset, Time duration) {
+        interpolationOffset = offset;
+        interpolationTimer = new Timer(duration);
     }
 
 
