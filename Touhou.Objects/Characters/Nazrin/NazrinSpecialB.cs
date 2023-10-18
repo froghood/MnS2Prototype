@@ -69,7 +69,7 @@ public class NazrinSpecialB : Attack {
 
         Log.Info($"Spawning {currentCount} {(currentCount == 1 ? "mouse" : "mice")}");
 
-        player.ApplyAttackCooldowns(Time.InSeconds(3F) - cooldownOverflow, PlayerActions.SpecialB);
+        player.ApplyAttackCooldowns(Time.InSeconds(currentCount > 0 ? 3F : 0.25f) - cooldownOverflow, PlayerActions.SpecialB);
 
 
         var packet = new Packet(PacketType.AttackReleased)

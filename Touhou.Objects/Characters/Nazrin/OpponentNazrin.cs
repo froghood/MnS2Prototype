@@ -15,6 +15,8 @@ public class OpponentNazrin : Opponent {
     private float spacing = 50f;
     private Vector2[] controlPoints = { };
     private Vector2[] smoothControlPoints = { };
+    private Spline spline;
+    private float totalSplineLength;
 
     public OpponentNazrin(bool isP1) : base(isP1) {
 
@@ -35,20 +37,26 @@ public class OpponentNazrin : Opponent {
     }
 
     public override void Update() {
+
+        mice = mice.Where(e => !e.IsDestroyed).ToList();
+
         base.Update();
 
         controlPoints = GetControlPoints();
         smoothControlPoints = GetSmoothControlPoints(controlPoints);
 
+        var previousLength = spline.Length;
 
-
-        var spline = new Spline(smoothControlPoints, c => {
+        spline = new Spline(smoothControlPoints, c => {
 
             var points = new List<Vector2>();
             points.Add(c[0]);
 
             for (int i = 1; i < c.Length - 1; i++) {
-                points.AddRange(GenerateSmoothTurn(c[i - 1], c[i], c[i + 1]));
+
+                bool ignoreEnd = i < c.Length - 2;
+
+                points.AddRange(GenerateSmoothTurn(c[i - 1], c[i], c[i + 1], ignoreEnd));
             }
 
             points.Add(c[c.Length - 1]);
@@ -57,12 +65,21 @@ public class OpponentNazrin : Opponent {
             return points.ToArray();
         });
 
+        var lengthDelta = spline.Length - previousLength;
+        totalSplineLength += lengthDelta;
+
 
 
         for (int i = 0; i < mice.Count; i++) {
-            Mouse mouse = mice[i];
 
-            mouse.SetPosition(spline.SamplePosition((i + 1) * spacing));
+            Mouse mouse = mice[i];
+            var targetSpacing = totalSplineLength - (i + 1) * (false ? 20f : 50f);
+            mouse.SetTargetSpacing(targetSpacing, true);
+
+
+            mouse.SetBasePosition(spline.SamplePosition(totalSplineLength - mouse.Spacing));
+            mouse.SetSmoothPosition(spline.SamplePosition(totalSplineLength - mouse.Spacing));
+            mouse.SetTangent(spline.SampleTangent(totalSplineLength - mouse.Spacing));
 
         }
     }
@@ -71,19 +88,33 @@ public class OpponentNazrin : Opponent {
 
         if (IsDead) return;
 
-        //RenderPoints(controlPoints, new Color4(1f, 1f, 1f, 0.2f), Layer.UI1);
-        //RenderPoints(smoothControlPoints, new Color4(0f, 1f, 0f, 0.2f), Layer.UI1);
+        RenderPoints(controlPoints, new Color4(1f, 1f, 1f, 0.2f), Layer.UI1);
+        RenderPoints(smoothControlPoints, new Color4(0f, 1f, 0f, 0.2f), Layer.UI1);
+        RenderPoints(spline.Points.ToArray(), new Color4(0f, 1f, 1f, 0.2f), Layer.UI1);
+
 
         base.Render();
     }
 
 
 
-    public void SpawnMouse(int count) {
+    public void SpawnMouse(int count = 1) {
         for (int i = 0; i < count; i++) {
-            var mouse = new Mouse();
+            var mouse = new Mouse(true);
             mice.Add(mouse);
             Scene.AddEntity(mouse);
+
+
+            var spacing = totalSplineLength - (mice.Count * 50);
+            mouse.SetTargetSpacing(spacing, false);
+
+
+            var angle = Game.Random.NextSingle() * MathF.Tau;
+            var offset = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * 500f;
+
+            mouse.Interpolate(offset, Time.InSeconds(1f));
+
+
         }
     }
 
@@ -105,20 +136,21 @@ public class OpponentNazrin : Opponent {
         }
     }
 
+
+
     private Vector2[] GetControlPoints() {
 
-        var points = new Vector2[positionHistory.Count + 1];
-        positionHistory.CopyTo(points);
-        points[positionHistory.Count] = Position;
+        var points = new List<Vector2>(positionHistory);
+        points.Add(Position);
 
-        return points;
+        return points.ToArray();
     }
+
+
 
     private static Vector2[] GetSmoothControlPoints(Vector2[] c) {
 
-        var smooth = new List<Vector2>();
-
-        smooth.Add(c[0]);
+        var smooth = new List<Vector2> { c[0] };
 
         for (int i = 0; i < c.Length; i++) {
 
@@ -129,8 +161,8 @@ public class OpponentNazrin : Opponent {
             var startLength = (start - middle).LengthFast;
             var endLength = (end - middle).LengthFast;
 
-            var maxStartLength = MathF.Min(startLength, 250f);
-            var maxEndLength = MathF.Min(endLength, 250f);
+            var maxStartLength = MathF.Min(startLength, 200f);
+            var maxEndLength = MathF.Min(endLength, 200f);
 
             var realStart = middle + (maxStartLength / startLength) * (start - middle);
             var realEnd = middle + (maxEndLength / endLength) * (end - middle);
@@ -145,11 +177,11 @@ public class OpponentNazrin : Opponent {
 
 
 
-    private static Vector2[] GenerateSmoothTurn(Vector2 a, Vector2 b, Vector2 c) {
+    private static Vector2[] GenerateSmoothTurn(Vector2 a, Vector2 b, Vector2 c, bool ignoreEnd) {
         var start = b + (a - b) / 2f;
         var end = b + (c - b) / 2f;
 
-        return new Bezier(start, b, end).SampleMultiple(13);
+        return new Bezier(start, b, end).SampleMultiple(8, ignoreEnd);
     }
 
 
@@ -170,6 +202,7 @@ public class OpponentNazrin : Opponent {
 
 
     private static void RenderPoints(Vector2[] points, Color4 color, Layer layer) {
+
         for (int i = 0; i < points.Length - 1; i++) {
 
             var a = points[i];
@@ -184,6 +217,19 @@ public class OpponentNazrin : Opponent {
             };
 
             Game.Draw(line, layer);
+        }
+
+        for (int i = 0; i < points.Length; i++) {
+            var a = points[i];
+
+            var node = new Rectangle {
+                Size = new Vector2(6f),
+                FillColor = color,
+                Origin = new Vector2(0.5f),
+                Position = a,
+            };
+
+            Game.Draw(node, layer);
         }
     }
 }

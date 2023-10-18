@@ -21,6 +21,12 @@ public abstract class Scene {
             CollisionGroup.OpponentProjectileMajor
         }},
 
+        {CollisionGroup.PlayerCompanion, new(){
+            CollisionGroup.Default,
+            CollisionGroup.OpponentProjectileMinor,
+            CollisionGroup.OpponentProjectileMajor
+        }},
+
         {CollisionGroup.PlayerProjectile, new() {
             CollisionGroup.Default,
         }},
@@ -37,12 +43,14 @@ public abstract class Scene {
         {CollisionGroup.OpponentProjectileMinor, new() {
             CollisionGroup.Default,
             CollisionGroup.Player,
+            CollisionGroup.PlayerCompanion,
             CollisionGroup.PlayerBomb
         }},
 
         {CollisionGroup.OpponentProjectileMajor, new() {
             CollisionGroup.Default,
             CollisionGroup.Player,
+            CollisionGroup.PlayerCompanion,
         }},
 
         {CollisionGroup.OpponentBomb, new() {

@@ -19,13 +19,14 @@ public struct Bezier {
 
     public Vector2[] SampleMultiple(int count, bool ignoreEnd = false) {
 
-        int _count = ignoreEnd ? count - 1 : count;
+        var samples = new Vector2[ignoreEnd ? count : count + 1];
 
-        var samples = new Vector2[_count];
-        samples[0] = start;
-        for (int i = 1; i < _count; i++) {
-            samples[i] = Sample(i / (count - 1f));
+        for (int i = 0; i < count; i++) {
+            samples[i] = Sample(i / (float)count);
         }
+
+        if (!ignoreEnd) samples[samples.Length - 1] = end;
+
         return samples;
     }
 }
