@@ -14,6 +14,9 @@ public abstract class Attack {
 
     public int Cost { get; protected set; }
 
+    public string Icon { get; protected set; }
+    public string FocusedIcon { get; protected set; }
+
     public abstract void PlayerPress(Player player, Time cooldownOverflow, bool focused);
     public abstract void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused);
     public abstract void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused);

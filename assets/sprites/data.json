@@ -104,11 +104,41 @@
       "Width": 132,
       "Height": 132
     },
+    "reimu_primary": {
+      "Left": 1037,
+      "Top": 872,
+      "Width": 120,
+      "Height": 120
+    },
+    "reimu_primary_focused": {
+      "Left": 302,
+      "Top": 1354,
+      "Width": 120,
+      "Height": 120
+    },
+    "reimu_secondary": {
+      "Left": 302,
+      "Top": 1476,
+      "Width": 120,
+      "Height": 120
+    },
+    "needle": {
+      "Left": 1165,
+      "Top": 1679,
+      "Width": 285,
+      "Height": 48
+    },
     "fade": {
       "Left": 1038,
       "Top": 395,
       "Width": 100,
       "Height": 100
+    },
+    "needle2": {
+      "Left": 0,
+      "Top": 1688,
+      "Width": 266,
+      "Height": 34
     },
     "opponentarrow": {
       "Left": 1140,
@@ -117,8 +147,8 @@
       "Height": 70
     },
     "largeknife": {
-      "Left": 1037,
-      "Top": 872,
+      "Left": 607,
+      "Top": 1606,
       "Width": 150,
       "Height": 50
     },
@@ -147,8 +177,8 @@
       "Height": 84
     },
     "smallknife": {
-      "Left": 1037,
-      "Top": 924,
+      "Left": 607,
+      "Top": 1658,
       "Width": 148,
       "Height": 40
     },
@@ -171,14 +201,14 @@
       "Height": 46
     },
     "bullet": {
-      "Left": 436,
-      "Top": 1086,
+      "Left": 1159,
+      "Top": 872,
       "Width": 80,
       "Height": 40
     },
     "kunai": {
-      "Left": 436,
-      "Top": 1128,
+      "Left": 1159,
+      "Top": 914,
       "Width": 80,
       "Height": 40
     },

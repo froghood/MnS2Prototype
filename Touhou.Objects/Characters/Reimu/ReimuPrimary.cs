@@ -18,18 +18,18 @@ public class ReimuPrimary : Attack {
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
 
     // pattern
-    private readonly Time spawnDelay = Time.InSeconds(0.15f);
+    private readonly Time spawnDuration = Time.InSeconds(0.15f);
     private readonly int grazeAmount = 2;
-    private readonly int numShots = 5;
+    private readonly int numShots = 7;
 
     private readonly float unfocusedSpacing = 0.3f; // radians
     private readonly float unfocusedVelocity = 115f;
 
-    private readonly float focusedSpacing = 18f; // pixels
-    private readonly float focusedVelocity = 300f;
+    private readonly float focusedSpacing = 20f; // pixels
+    private readonly float focusedVelocity = 700f;
 
-    private readonly float velocityFalloff = 0.25f;
-    private readonly float startingVelocityModifier = 4f;
+    private readonly float velocityFalloff = 1f;
+    private readonly float startingVelocityModifier = 3f;
 
 
     private readonly Time primaryCooldown = Time.InSeconds(0.5f);
@@ -40,6 +40,9 @@ public class ReimuPrimary : Attack {
     public ReimuPrimary() {
         Focusable = true;
         Holdable = true;
+
+        Icon = "reimu_primary";
+        FocusedIcon = "reimu_primary_focused";
     }
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
@@ -77,22 +80,23 @@ public class ReimuPrimary : Attack {
         if (focused) {
             for (int index = 0; index < numShots; index++) {
                 var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
-                var projectile = new Amulet(player.Position + offset, angle, true, false) {
-                    SpawnDelay = spawnDelay,
+                var projectile = new Needle(player.Position + offset, angle, focusedVelocity, true, false) {
+
+                    SpawnDelay = Time.InSeconds(0.02f * MathF.Abs(index - 3f)),
+                    SpawnDuration = spawnDuration,
                     CanCollide = false,
                     Color = new Color4(0f, 1f, 0f, 0.4f),
-                    StartingVelocity = focusedVelocity * startingVelocityModifier,
-                    GoalVelocity = focusedVelocity,
-                    VelocityFalloff = velocityFalloff,
                 };
                 projectile.ForwardTime(cooldownOverflow, false);
 
                 player.Scene.AddEntity(projectile);
+
+                player.ApplyMovespeedModifier(0.6f, Time.InSeconds(0.4f) - cooldownOverflow);
             }
         } else {
             for (int index = 0; index < numShots; index++) {
                 var projectile = new Amulet(player.Position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), true, false) {
-                    SpawnDelay = spawnDelay,
+                    SpawnDuration = spawnDuration,
                     CanCollide = false,
                     Color = new Color4(0f, 1f, 0f, 0.4f),
                     StartingVelocity = unfocusedVelocity * startingVelocityModifier,
@@ -136,13 +140,11 @@ public class ReimuPrimary : Attack {
         if (focused) {
             for (int index = 0; index < numShots; index++) {
                 var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (focusedSpacing * index - focusedSpacing / 2f * (numShots - 1));
-                var projectile = new Amulet(position + offset, angle, false, true) {
-                    SpawnDelay = spawnDelay,
+                var projectile = new Needle(position + offset, angle, focusedVelocity, false, true) {
+                    SpawnDelay = Time.InSeconds(0.02f * MathF.Abs(index - 3f)),
+                    SpawnDuration = spawnDuration,
                     Color = new Color4(1f, 0, 0, 1f),
                     GrazeAmount = grazeAmount,
-                    StartingVelocity = focusedVelocity * startingVelocityModifier,
-                    GoalVelocity = focusedVelocity,
-                    VelocityFalloff = velocityFalloff,
                 };
                 projectile.ForwardTime(delta, true);
                 opponent.Scene.AddEntity(projectile);
@@ -150,7 +152,7 @@ public class ReimuPrimary : Attack {
         } else {
             for (int index = 0; index < numShots; index++) {
                 var projectile = new Amulet(position, angle + unfocusedSpacing * index - unfocusedSpacing / 2f * (numShots - 1), false, true) {
-                    SpawnDelay = spawnDelay,
+                    SpawnDuration = spawnDuration,
                     Color = new Color4(1f, 0, 0, 1f),
                     GrazeAmount = grazeAmount,
                     StartingVelocity = unfocusedVelocity * startingVelocityModifier,

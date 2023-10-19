@@ -192,7 +192,7 @@ public class RemoteHomingAmulet : Homing {
             Color.B,
             Color.A * spawnRatio);
 
-        Game.Draw(sprite, Layer.OpponentProjectiles1);
+        Game.Draw(sprite, Layer.OpponentProjectiles);
 
     }
 }

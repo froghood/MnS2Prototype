@@ -57,7 +57,7 @@ public class MarisaSecondary : Attack {
     public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
 
         var explodingStar = new ExplodingStar(250f, 150f, player.Position, aimAngle, true, false) {
-            SpawnDelay = Time.InSeconds(0.25f),
+            SpawnDuration = Time.InSeconds(0.25f),
             DestroyedOnScreenExit = false,
             CanCollide = false,
             Color = new Color4(0f, 1f, 0f, 0.4f)
@@ -105,7 +105,7 @@ public class MarisaSecondary : Attack {
         var latency = Game.Network.Time - theirTime;
 
         var explodingStar = new ExplodingStar(250f, 150f, theirPosition, theirAngle, false, true) {
-            SpawnDelay = Time.InSeconds(0.25f),
+            SpawnDuration = Time.InSeconds(0.25f),
             DestroyedOnScreenExit = false,
             Color = new Color4(1f, 0f, 0f, 1f),
             GrazeAmount = grazeAmount,

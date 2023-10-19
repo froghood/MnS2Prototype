@@ -14,11 +14,14 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     public Vector2 Origin { get; private set; }
     public float Orientation { get; private set; }
     public Time SpawnDelay { get; init; }
+    public Time SpawnDuration { get; init; }
     public Time TimeOffset { get => timeOffset; }
 
 
     public Time FuncTime { get => LifeTime + timeOffset + interpolationOffset * Easing.In(1f - interpolationTime.AsSeconds(), 2f); }
-    public Time FuncTimeWithSpawnDelay { get => Time.Max(FuncTime - SpawnDelay, 0L); }
+    public Time FuncTimeWithSpawnOffset { get => FuncTime - SpawnDelay - SpawnDuration; }
+
+    public float SpawnFactor { get => Math.Clamp((FuncTime - SpawnDelay).AsSeconds() / SpawnDuration.AsSeconds(), 0f, 1f); }
 
 
     private Time interpolationTime { get => Time.Min(Game.Time - interpolationStartTime, Time.InSeconds(1f)); }
@@ -50,7 +53,9 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
     public override void Update() {
 
-        var t = FuncTimeWithSpawnDelay.AsSeconds();
+        var t = MathF.Max(FuncTimeWithSpawnOffset.AsSeconds(), 0f);
+
+        CanCollide = FuncTimeWithSpawnOffset >= 0L ? true : false;
 
         Position = SecondaryPositionFunction(t, Origin + PositionFunction(t) * orientationMatrix);
         Tick(t);

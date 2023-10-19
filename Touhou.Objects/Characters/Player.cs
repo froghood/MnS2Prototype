@@ -94,6 +94,9 @@ public abstract class Player : Entity, IReceivable {
 
     private Timer invulnerabilityTimer;
 
+
+    protected List<Color4> palette = new();
+
     public Color4 Color { get; set; } = new Color4(0.7f, 1f, 0.7f, 1f);
 
 
@@ -138,29 +141,12 @@ public abstract class Player : Entity, IReceivable {
 
     public override void Update() {
 
-        if (isDeathConfirmed && Game.Time >= deathConfirmationTime + Time.InSeconds(2f)) {
-            var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
-
-            var matchRestartPacket = new Packet(PacketType.Rematch).In(matchStartTime);
-            Game.Network.Send(matchRestartPacket);
-
-            Game.Command(() => {
-                //Game.Scenes.PopScene();
-                Game.Scenes.ChangeScene<MatchScene>(false, isP1, matchStartTime);
-            });
-        }
-
         if (!Match.Started || isDead) return;
 
         UpdateEffects();
         UpdateHit();
         UpdateKnockback();
         UpdateMovement();
-
-        Position = new Vector2(
-            Math.Clamp(Position.X, -Match.Bounds.X, Match.Bounds.X),
-            Math.Clamp(Position.Y, -Match.Bounds.Y, Match.Bounds.Y)
-        );
 
         var order = Game.Input.GetActionOrder();
         foreach (var action in order) ProcessActionPresses(action);
@@ -190,6 +176,7 @@ public abstract class Player : Entity, IReceivable {
 
 
     private void UpdateHit() {
+
         if (!isHit) return;
 
         if (hitTimer.HasFinished) {
@@ -259,6 +246,11 @@ public abstract class Player : Entity, IReceivable {
         ChangeVelocity(velocityVector);
 
         Position += Velocity * Game.Delta.AsSeconds();
+
+        Position = new Vector2(
+            Math.Clamp(Position.X, -Match.Bounds.X, Match.Bounds.X),
+            Math.Clamp(Position.Y, -Match.Bounds.Y, Match.Bounds.Y)
+        );
     }
 
     private void ProcessActionPresses(PlayerActions action) {
@@ -609,5 +601,18 @@ public abstract class Player : Entity, IReceivable {
     public void ApplyMovespeedModifier(float modifier, Time duration) {
         movespeedModifier = modifier;
         movespeedModifierTimer = new Timer(duration);
+
+
     }
+
+    public bool IsAttackHeld(Attack attack, out (Time CooldownOverflow, Time HeldTime, bool Focused) state) {
+        if (currentlyHeldAttacks.TryGetValue(attack, out var _state)) {
+            state = _state;
+            return true;
+        }
+        state = default;
+        return false;
+    }
+
+
 }

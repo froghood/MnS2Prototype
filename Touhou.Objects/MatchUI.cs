@@ -71,22 +71,75 @@ public class MatchUI : Entity {
 
     private void RenderCooldowns() {
 
+        var attacks = Player.Attacks.ToArray();
+
         int i = 0;
-        foreach (var (name, attack) in Player.Attacks) {
+        foreach (var (action, attack) in attacks) {
 
             var fillColor = Player.Power < attack.Cost ? new Color4(230, 180, 190, 255) : (attack.Disabled | !attack.CooldownTimer.HasFinished ? Color4.Gray : Color4.White);
 
+
+
             var rectangle = new Rectangle {
-                Origin = new Vector2((0.5f - 1.15f * i) + 1.15f * (Player.Attacks.Count() - 1) / 2f, -0.30f),
-                Size = new Vector2(120f, 120f),
-                StrokeColor = Color4.Black,
-                StrokeWidth = 1f,
-                FillColor = fillColor,
+                Origin = new Vector2(0.5f),
+                Position = new Vector2(150f * i - (attacks.Length - 1) * 140f, 80f),
+                Size = new Vector2(136f, 136f),
+                StrokeColor = Player.Color,
+                StrokeWidth = 4f,
+                FillColor = Color4.Black,
                 IsUI = true,
                 Alignment = new Vector2(0f, attack.Disabled | !attack.CooldownTimer.HasFinished ? -1.01f : -1f),
             };
 
             Game.Draw(rectangle, Layer.UI1);
+
+
+
+
+
+            string iconName;
+
+            if (attack.Focusable) { // A
+
+                if (Player.IsAttackHeld(attack, out var heldState)) { // B
+
+                    iconName = heldState.Focused ? attack.FocusedIcon : attack.Icon; // C
+
+                } else {
+                    if (Game.Input.IsActionPressBuffered(action, out var bufferTime, out var bufferState)) {
+
+                        iconName = bufferTime >= attack.CooldownTimer.FinishTime - Time.InSeconds(0.3f) // E
+                            && bufferState.HasFlag(PlayerActions.Focus) ? attack.FocusedIcon : attack.Icon;
+
+                    } else {
+
+                        iconName = Game.IsActionPressed(PlayerActions.Focus) ? attack.FocusedIcon : attack.Icon; // F
+                    }
+                }
+            } else {
+
+                iconName = attack.Icon;
+            }
+
+
+
+
+
+            if (iconName is not null) {
+
+                var icon = new Sprite(iconName) {
+                    Origin = new Vector2(0.5f),
+                    Position = new Vector2(150f * i - (attacks.Length - 1) * 140f, 80f),
+                    IsUI = true,
+                    Alignment = new Vector2(0f, attack.Disabled | !attack.CooldownTimer.HasFinished ? -1.01f : -1f),
+                    Color = Player.Color,
+                    UseColorSwapping = true,
+                };
+
+                Game.Draw(icon, Layer.UI1);
+            }
+
+
 
             i++;
         }

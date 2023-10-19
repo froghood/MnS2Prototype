@@ -115,11 +115,11 @@ public class Laser : Projectile {
                 Color = new Color4(Color.R, Color.G, Color.B, 0.25f),
             };
 
-            Game.Draw(indicatorStart, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
-            Game.Draw(indicator, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+            Game.Draw(indicatorStart, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
+            Game.Draw(indicator, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
 
-            Game.Draw(progressStart, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
-            Game.Draw(progress, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+            Game.Draw(progressStart, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
+            Game.Draw(progress, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
 
 
         } else {
@@ -142,8 +142,8 @@ public class Laser : Projectile {
                 Scale = new Vector2(visualScale, visualScale * scaleEasing),
             };
 
-            Game.Draw(laserStart, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
-            Game.Draw(laser, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+            Game.Draw(laserStart, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
+            Game.Draw(laser, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
 
         }
     }

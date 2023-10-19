@@ -38,25 +38,15 @@ public class Amulet : ParametricProjectile {
 
     public override void Render() {
 
-        float spawnTime = MathF.Min(LifeTime.AsSeconds() / SpawnDelay.AsSeconds(), 1f);
-
         sprite.Position = Position;
-        sprite.Scale = new Vector2(0.4f, 0.4f) * (1f + 3f * (1f - spawnTime));
+        sprite.Scale = new Vector2(0.4f) * (1f + 3f * (1f - SpawnFactor));
         sprite.Color = new Color4(
            Color.R,
            Color.G,
            Color.B,
-           Color.A * spawnTime);
+           Color.A * SpawnFactor);
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
-    }
-
-    public override void PostRender() { }
-
-    public override void DebugRender() {
-        foreach (CircleHitbox hitbox in Hitboxes) {
-
-        }
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 }
 

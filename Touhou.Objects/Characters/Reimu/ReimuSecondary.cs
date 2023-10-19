@@ -39,6 +39,8 @@ public class ReimuSecondary : Attack {
 
     public ReimuSecondary() {
         Holdable = true;
+
+        Icon = "reimu_secondary";
     }
 
     public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {

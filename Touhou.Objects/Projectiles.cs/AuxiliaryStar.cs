@@ -47,17 +47,17 @@ public class AuxiliaryStar : ParametricProjectile {
 
     public override void Update() {
 
-        DestroyedOnScreenExit = FuncTimeWithSpawnDelay.AsSeconds() >= divergeTime + 1f ? true : false;
-        CanCollide = !IsPlayerOwned && (FuncTimeWithSpawnDelay.AsSeconds() >= divergeTime ? true : false);
+        DestroyedOnScreenExit = FuncTimeWithSpawnOffset.AsSeconds() >= divergeTime + 1f ? true : false;
+        CanCollide = !IsPlayerOwned && (FuncTimeWithSpawnOffset.AsSeconds() >= divergeTime ? true : false);
 
         base.Update();
     }
 
     public override void Render() {
 
-        if (FuncTimeWithSpawnDelay.AsSeconds() < divergeTime) return;
+        if (FuncTimeWithSpawnOffset.AsSeconds() < divergeTime) return;
 
-        float divergeRatio = Math.Clamp(FuncTimeWithSpawnDelay.AsSeconds() - divergeTime, 0f, 0.25f) * 4f;
+        float divergeRatio = Math.Clamp(FuncTimeWithSpawnOffset.AsSeconds() - divergeTime, 0f, 0.25f) * 4f;
 
         var sprite = new Sprite("star") {
 
@@ -78,7 +78,7 @@ public class AuxiliaryStar : ParametricProjectile {
             BlendMode = BlendMode.Additive
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 
     public override void Receive(Packet packet, IPEndPoint endPoint) {

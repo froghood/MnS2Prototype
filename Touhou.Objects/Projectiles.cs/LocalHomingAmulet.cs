@@ -149,7 +149,7 @@ public class LocalHomingAmulet : Homing {
              Color.B,
              Color.A * spawnRatio);
 
-        Game.Draw(sprite, Layer.PlayerProjectiles1);
+        Game.Draw(sprite, Layer.PlayerProjectiles);
     }
 
     public override void PostRender() {

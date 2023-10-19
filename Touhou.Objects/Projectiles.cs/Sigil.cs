@@ -45,6 +45,6 @@ public class Sigil : ParametricProjectile {
 
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 }

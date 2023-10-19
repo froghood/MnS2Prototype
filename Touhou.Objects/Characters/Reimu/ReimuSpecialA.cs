@@ -9,7 +9,7 @@ public class ReimuSpecialA : Attack {
     private readonly int numShots = 30;
     private readonly float velocity = 500;
     private readonly float deceleration = 500;
-    private readonly Time spawnDelay = Time.InSeconds(0.15f);
+    private readonly Time spawnDuration = Time.InSeconds(0.15f);
     private readonly int grazeAmount = 1;
 
     public ReimuSpecialA() {
@@ -31,7 +31,7 @@ public class ReimuSpecialA : Attack {
         for (int i = 0; i < numShots; i++) {
 
             var projectile = new TargetingAmulet(player.Position, angle + arcAngle * i, true, false, velocity, deceleration) {
-                SpawnDelay = spawnDelay,
+                SpawnDuration = spawnDuration,
                 DestroyedOnScreenExit = false,
                 CanCollide = false,
                 Color = new Color4(0f, 1f, 0, 0.4f),
@@ -81,7 +81,7 @@ public class ReimuSpecialA : Attack {
 
         for (int i = 0; i < numShots; i++) {
             var projectile = new TargetingAmulet(position, angle + arcAngle * i, false, true, velocity, deceleration) {
-                SpawnDelay = spawnDelay,
+                SpawnDuration = spawnDuration,
                 DestroyedOnScreenExit = false,
                 Color = new Color4(1f, 0, 0, 1f),
                 GrazeAmount = grazeAmount

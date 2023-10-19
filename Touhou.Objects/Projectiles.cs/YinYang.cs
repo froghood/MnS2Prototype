@@ -29,68 +29,24 @@ public class YinYang : ParametricProjectile {
 
     public override void Render() {
 
-
-        float spawnRatio = MathF.Min(LifeTime.AsSeconds() / SpawnDelay.AsSeconds(), 1f);
-
-
         sprite.Position = Position;
-        sprite.Scale = Vector2.One * visualRadius / 250f * Easing.Out(spawnRatio, 3f);
+        sprite.Scale = Vector2.One * visualRadius / 250f * Easing.Out(SpawnFactor, 3f);
 
-        if (LifeTime >= SpawnDelay) sprite.Rotation = Velocity * (LifeTime - SpawnDelay).AsSeconds() / visualRadius;
+        if (LifeTime >= SpawnDelay + SpawnDuration) sprite.Rotation = Velocity * LifeTime.AsSeconds() / visualRadius;
 
         sprite.Color = new Color4(
            Color.R,
            Color.G,
            Color.B,
-           Color.A * Easing.Out(spawnRatio, 3f));
+           Color.A * Easing.Out(SpawnFactor, 3f));
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerBackgroundProjectiles : Layer.OpponentBackgroundProjectiles);
 
-        // Game.Draw(new Circle {
-        //     Origin = new Vector2(0.5f),
-        //     Position = Position,
-        //     Radius = radius,
-        //     StrokeWidth = 1f,
-        //     StrokeColor = new Color4(0f, 0f, 1f, 1f),
-        //     FillColor = Color4.Transparent,
-
-        // }, Layers.Foreground2);
     }
-
-    public override void DebugRender() {
-        foreach (CircleHitbox hitbox in Hitboxes) {
-
-            // var states = new CircleStates() {
-            //     Origin = new Vector2(0.5f, 0.5f),
-            //     Position = hitbox.Position,
-            //     Radius = hitbox.Radius,
-            //     FillColor4 = Color.Transparent,
-            //     OutlineColor4 = Color.White,
-            // };
-
-            //Game.DrawCircle(states, Layers.UI2);
-
-            // hitboxShape.Position = hitbox.Position;
-            // hitboxShape.Radius = hitbox.Radius;
-            // hitboxShape.Origin = new Vector2(hitbox.Radius, hitbox.Radius);
-            // Game.Draw(hitboxShape, 0);
-
-            // var bounds = hitbox.GetBounds();
-            // boundsShape.Position = new Vector2(bounds.Left, bounds.Top);
-            // boundsShape.Size = new Vector2(bounds.Width, bounds.Height);
-            // Game.Draw(boundsShape, 0);
-
-
-        }
-    }
-
 
 
     protected override Vector2 PositionFunction(float t) {
-        return new Vector2(
-            Velocity * t,
-            0f
-        );
+        return new Vector2(Velocity * t, 0f);
     }
 
 

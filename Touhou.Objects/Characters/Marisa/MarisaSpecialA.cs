@@ -65,7 +65,7 @@ public class MarisaSpecialA : Attack {
         var spawnPosition = new Vector2(spawnPositionX, player.Match.Bounds.Y);
 
         var shootingStar = new ShootingStar(seed, velocity, trailVelocity, spawnPosition, spawnAngle, true, false) {
-            SpawnDelay = Time.InSeconds(0.25f),
+            SpawnDuration = Time.InSeconds(0.25f),
             CanCollide = false,
             Color = new Color4(0f, 1f, 0f, 0.4f),
         };
@@ -116,7 +116,7 @@ public class MarisaSpecialA : Attack {
         var spawnPosition = new Vector2(theirPositionX, opponent.Match.Bounds.Y);
 
         var shootingStar = new ShootingStar(theirSeed, velocity, trailVelocity, spawnPosition, theirAngle, false, true) {
-            SpawnDelay = Time.InSeconds(0.25f),
+            SpawnDuration = Time.InSeconds(0.25f),
             Color = new Color4(1f, 0f, 0f, 1f),
             GrazeAmount = grazeAmount,
             TrailGrazeAmount = trailGrazeAmount,

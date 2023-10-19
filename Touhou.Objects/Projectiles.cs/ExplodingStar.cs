@@ -31,7 +31,7 @@ public class ExplodingStar : ParametricProjectile {
             var offset = new Vector2(MathF.Cos(Orientation + divergeAngle), MathF.Sin(Orientation + divergeAngle)) * 20f;
 
             explosionStars[i] = new AuxiliaryStar(Id, 10f, 1f, divergeAngle, velocity, modifiedVelocity, Origin + offset, Orientation, IsPlayerOwned, IsRemote) {
-                SpawnDelay = SpawnDelay,
+                SpawnDuration = SpawnDuration,
                 Color = Color,
                 GrazeAmount = ExplosionGrazeAmount
             };
@@ -49,7 +49,7 @@ public class ExplodingStar : ParametricProjectile {
 
     public override void Update() {
 
-        if (FuncTimeWithSpawnDelay >= Time.InSeconds(1f)) Destroy();
+        if (FuncTimeWithSpawnOffset >= Time.InSeconds(1f)) Destroy();
 
         base.Update();
     }
@@ -77,7 +77,7 @@ public class ExplodingStar : ParametricProjectile {
             BlendMode = BlendMode.Additive
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 
     public override void Receive(Packet packet, IPEndPoint endPoint) {
@@ -106,14 +106,14 @@ public class ExplodingStar : ParametricProjectile {
         base.Destroy();
 
         foreach (var star in explosionStars) {
-            if (star.DivergeTime > FuncTimeWithSpawnDelay.AsSeconds()) star.Destroy();
+            if (star.DivergeTime > FuncTimeWithSpawnOffset.AsSeconds()) star.Destroy();
         }
     }
 
     public override void NetworkDestroy() {
         Destroy();
 
-        var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000).In(FuncTimeWithSpawnDelay.AsSeconds());
+        var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000).In(FuncTimeWithSpawnOffset.AsSeconds());
         Game.Network.Send(packet);
     }
 }

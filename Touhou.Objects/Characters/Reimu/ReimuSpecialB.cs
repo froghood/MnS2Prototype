@@ -98,7 +98,7 @@ public class ReimuSpecialB : Attack {
             CanCollide = false,
             Color = new Color4(0f, 1f, 0f, 0.4f),
             Velocity = velocity,
-            SpawnDelay = Time.InSeconds(0.5f),
+            SpawnDuration = Time.InSeconds(0.5f),
         };
         projectile.ForwardTime(cooldownOverflow, false);
 
@@ -141,7 +141,7 @@ public class ReimuSpecialB : Attack {
             Color = new Color4(1f, 0f, 0f, 1f),
             GrazeAmount = grazeAmount,
             Velocity = velocity,
-            SpawnDelay = Time.InSeconds(0.5f),
+            SpawnDuration = Time.InSeconds(0.5f),
         };
         projectile.ForwardTime(delta, true);
 

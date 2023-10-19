@@ -48,7 +48,7 @@ public class ReimuBombWave : ParametricProjectile {
 
 
 
-        Game.Draw(sprite, Layer.PlayerProjectiles1);
+        Game.Draw(sprite, Layer.PlayerProjectiles);
 
 
         var hitbox = new Rectangle() {

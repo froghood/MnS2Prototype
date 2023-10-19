@@ -52,7 +52,7 @@ public class SmallKnife : TimestopProjectile {
             UseColorSwapping = true,
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
 
     }
 }

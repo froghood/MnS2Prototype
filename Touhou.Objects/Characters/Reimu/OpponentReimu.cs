@@ -25,7 +25,7 @@ public class OpponentReimu : Opponent {
         var sprite = new Sprite("reimu") {
             Origin = new Vector2(0.42f, 0.26f),
             Position = Position,
-            Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.2f,
+            Scale = new Vector2(MathF.Sign(Position.X - Player.Position.X), 1f) * 0.18f,
             Color = Color,
             UseColorSwapping = false,
         };

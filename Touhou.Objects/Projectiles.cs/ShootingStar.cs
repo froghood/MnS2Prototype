@@ -48,7 +48,7 @@ public class ShootingStar : ParametricProjectile {
             var offset = new Vector2(MathF.Cos(randomOffsetAngle), MathF.Sin(randomOffsetAngle)) * 10f;
 
             trailStars[i] = new AuxiliaryStar(Id, 8f, 0.1f * i + 0.05f, randomAngle, velocity, trailVelocity, Origin + offset, Orientation, IsPlayerOwned, IsRemote) {
-                SpawnDelay = SpawnDelay,
+                SpawnDuration = SpawnDuration,
                 Color = Color,
                 GrazeAmount = TrailGrazeAmount,
             };
@@ -84,7 +84,7 @@ public class ShootingStar : ParametricProjectile {
             BlendMode = BlendMode.Additive
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles1 : Layer.OpponentProjectiles1);
+        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 
     public override void Receive(Packet packet, IPEndPoint endPoint) {
@@ -116,7 +116,7 @@ public class ShootingStar : ParametricProjectile {
         base.Destroy();
 
         foreach (var star in trailStars) {
-            if (star.DivergeTime > FuncTimeWithSpawnDelay.AsSeconds()) star.Destroy();
+            if (star.DivergeTime > FuncTimeWithSpawnOffset.AsSeconds()) star.Destroy();
         }
     }
 
@@ -124,14 +124,14 @@ public class ShootingStar : ParametricProjectile {
         base.Destroy(delay);
 
         foreach (var star in trailStars) {
-            if (star.DivergeTime >= FuncTimeWithSpawnDelay.AsSeconds()) star.Destroy();
+            if (star.DivergeTime >= FuncTimeWithSpawnOffset.AsSeconds()) star.Destroy();
         }
     }
 
     public override void NetworkDestroy() {
         Destroy();
 
-        var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000).In(FuncTimeWithSpawnDelay.AsSeconds());
+        var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000).In(FuncTimeWithSpawnOffset.AsSeconds());
         Game.Network.Send(packet);
     }
 }
