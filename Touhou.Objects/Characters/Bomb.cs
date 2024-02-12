@@ -3,13 +3,16 @@ using Touhou.Networking;
 namespace Touhou.Objects.Characters;
 
 public abstract class Bomb {
+
     public Timer CooldownTimer { get; set; }
 
-    public abstract void PlayerPress(Player player, Time cooldownOverflow, bool focused);
+    public abstract void LocalPress(Time cooldownOverflow, bool focused);
+    public abstract void RemotePress(Packet packet);
 
-    public abstract void OpponentPress(Opponent opponent, Packet packet);
+}
 
-    public virtual void PlayerRender(Player player) { }
-    public virtual void OpponentRender(Opponent opponent) { }
+public abstract class Bomb<T> : Bomb where T : Character {
 
+    protected T c;
+    public Bomb(T c) => this.c = c;
 }

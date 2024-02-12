@@ -5,7 +5,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class YukariSpecialA : Attack {
+public class YukariSpecial : Attack<Character> {
 
     private float startingAngle;
 
@@ -28,15 +28,15 @@ public class YukariSpecialA : Attack {
     private readonly Time specialCooldown = Time.InSeconds(1f);
     private readonly Time globalCooldown = Time.InSeconds(0.25f);
 
-    public YukariSpecialA() {
-        Holdable = true;
+    public YukariSpecial(Character c) : base(c) {
+        IsHoldable = true;
         Cost = 8;
     }
 
 
 
-    public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        startingAngle = player.AngleToOpponent;
+    public override void LocalPress(Time cooldownOverflow, bool focused) {
+        startingAngle = c.AngleToOpponent;
 
         Log.Info(startingAngle);
 
@@ -44,14 +44,14 @@ public class YukariSpecialA : Attack {
         angleOffset = 0f;
         timeThreshold = Game.Time - cooldownOverflow;
 
-        player.MovespeedModifier = 0.2f;
+        c.ApplyMovespeedModifier(0.2f);
 
-        player.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialB);
+        c.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Super);
     }
 
 
 
-    public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
+    public override void LocalHold(Time cooldownOverflow, Time holdTime, bool focused) {
 
         while (Game.Time >= timeThreshold) {
 
@@ -61,7 +61,7 @@ public class YukariSpecialA : Attack {
             float angle = startingAngle + angleOffset / 360f * MathF.Tau + MathF.PI;
 
             for (int i = 0; i < numShots; i++) {
-                var projectile = new Amulet(player.Position, angle + MathF.Tau / numShots * i, true, false) {
+                var projectile = new Amulet(c.Position, angle + MathF.Tau / numShots * i, c.IsP1, c.IsPlayer, false) {
                     CanCollide = false,
                     Color = new Color4(0, 1f, 0, 0.4f),
                     StartingVelocity = velocity * startingVelocityModifier,
@@ -70,15 +70,15 @@ public class YukariSpecialA : Attack {
                 };
                 projectile.ForwardTime(cooldownOverflow + timeOffset, false);
 
-                player.Scene.AddEntity(projectile);
+                c.Scene.AddEntity(projectile);
 
             }
-            player.SpendPower(Cost);
+            c.SpendPower(Cost);
 
             var packet = new Packet(PacketType.AttackReleased)
-            .In(PlayerActions.SpecialA)
+            .In(PlayerActions.Special)
             .In(Game.Network.Time - cooldownOverflow + timeOffset)
-            .In(player.Position)
+            .In(c.Position)
             .In(angle);
 
             Game.Network.Send(packet);
@@ -90,23 +90,23 @@ public class YukariSpecialA : Attack {
 
 
 
-    public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
-        player.MovespeedModifier = 1f;
+    public override void LocalRelease(Time cooldownOverflow, Time heldTime, bool focused) {
+        c.ApplyMovespeedModifier(1f);
 
-        player.ApplyAttackCooldowns(specialCooldown, PlayerActions.SpecialA);
-        player.ApplyAttackCooldowns(globalCooldown, PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialB);
+        c.ApplyAttackCooldowns(specialCooldown, PlayerActions.Special);
+        c.ApplyAttackCooldowns(globalCooldown, PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Super);
 
-        player.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.SpecialB);
+        c.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Super);
     }
 
 
 
-    public override void OpponentReleased(Opponent opponent, Packet packet) {
+    public override void RemoteRelease(Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle);
         var latency = Game.Network.Time - theirTime;
 
         for (int i = 0; i < numShots; i++) {
-            var projectile = new Amulet(position, angle + MathF.Tau / numShots * i, false, true) {
+            var projectile = new Amulet(position, angle + MathF.Tau / numShots * i, c.IsP1, c.IsPlayer, true) {
                 Color = new Color4(1f, 0f, 0f, 1f),
                 GrazeAmount = grazeAmount,
                 StartingVelocity = velocity * startingVelocityModifier,
@@ -115,7 +115,7 @@ public class YukariSpecialA : Attack {
             };
             projectile.ForwardTime(latency, true);
 
-            opponent.Scene.AddEntity(projectile);
+            c.Scene.AddEntity(projectile);
         }
     }
 }

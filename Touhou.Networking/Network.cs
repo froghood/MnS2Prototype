@@ -95,6 +95,7 @@ public class Network {
         udpClient.Connect(endPoint);
 
         connectionTime = Game.Time;
+        TimeOffset = 0L;
         lastReceivedTime = Game.Time;
 
         isConnected = true;

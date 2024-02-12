@@ -12,13 +12,13 @@ public class ExplodingStar : ParametricProjectile {
     private readonly float explosionVelocity;
     private readonly AuxiliaryStar[] explosionStars;
 
-    public ExplodingStar(float velocity, float explosionVelocity, Vector2 origin, float orientation, bool isPlayerOwned, bool isRemote) : base(origin, orientation, isPlayerOwned, isRemote) {
+    public ExplodingStar(float velocity, float explosionVelocity, Vector2 origin, float orientation, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(origin, orientation, isP1Owned, isPlayerOwned, isRemote) {
         this.velocity = velocity;
         this.explosionVelocity = explosionVelocity;
 
         this.explosionStars = new AuxiliaryStar[24];
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 30f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 30f, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
     }
 
     public override void Init() {
@@ -30,7 +30,7 @@ public class ExplodingStar : ParametricProjectile {
             var modifiedVelocity = explosionVelocity * (1f + (i + 1) % 2 * 0.4f);
             var offset = new Vector2(MathF.Cos(Orientation + divergeAngle), MathF.Sin(Orientation + divergeAngle)) * 20f;
 
-            explosionStars[i] = new AuxiliaryStar(Id, 10f, 1f, divergeAngle, velocity, modifiedVelocity, Origin + offset, Orientation, IsPlayerOwned, IsRemote) {
+            explosionStars[i] = new AuxiliaryStar(Id, 10f, 1f, divergeAngle, velocity, modifiedVelocity, Origin + offset, Orientation, IsP1Owned, IsPlayerOwned, IsRemote) {
                 SpawnDuration = SpawnDuration,
                 Color = Color,
                 GrazeAmount = ExplosionGrazeAmount

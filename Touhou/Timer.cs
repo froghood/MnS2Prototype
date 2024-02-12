@@ -7,6 +7,8 @@ public struct Timer {
     public Time FinishTime { get => finishTime; }
     public Time TotalElapsed { get => Game.Time - startTime; }
     public Time Remaining { get => Time.Max(finishTime - Game.Time, 0L); }
+
+    public float RemainingRatio { get => Duration.AsSeconds() == 0f ? 1f : Remaining.AsSeconds() / Duration.AsSeconds(); }
     public bool HasFinished { get => Game.Time >= finishTime; }
 
     private Time startTime { get; init; }
@@ -26,7 +28,7 @@ public struct Timer {
         startTime = Game.Time;
     }
 
-    public static Timer Max() {
+    public static Timer MaxDuration() {
 
         return new Timer {
             startTime = Game.Time,

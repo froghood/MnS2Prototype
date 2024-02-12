@@ -6,10 +6,10 @@ namespace Touhou.Objects.Projectiles;
 public class SmallKnife : TimestopProjectile {
     private float velocity;
 
-    public SmallKnife(Vector2 origin, float direction, float velocity, bool isFrozen, bool isPlayerOwned, bool isRemote) : base(origin, direction, isFrozen, isPlayerOwned, isRemote) {
+    public SmallKnife(Vector2 origin, float direction, float velocity, bool isFrozen, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(origin, direction, isFrozen, isP1Owned, isPlayerOwned, isRemote) {
         this.velocity = velocity;
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 4.5f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 4.5f, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
     }
 
     protected override Vector2 PositionFunction(float t) {

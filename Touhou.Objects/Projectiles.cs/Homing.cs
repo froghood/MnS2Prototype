@@ -17,7 +17,7 @@ public class Homing : Projectile {
     protected HomingState state;
     protected int side;
     protected Vector2 turnPosition;
-    protected Homing(bool isPlayerOwned, bool isRemote) : base(isPlayerOwned, isRemote) { }
+    protected Homing(bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(isP1Owned, isPlayerOwned, isRemote) { }
 
     protected enum HomingState : byte {
         Spawning,

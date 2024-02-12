@@ -14,12 +14,12 @@ public class YinYang : ParametricProjectile {
 
     private readonly Sprite sprite;
 
-    public YinYang(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float radius) : base(origin, direction, isPlayerOwned, isRemote) {
+    public YinYang(Vector2 origin, float direction, bool isP1Owned, bool isPlayerOwned, bool isRemote, float radius) : base(origin, direction, isP1Owned, isPlayerOwned, isRemote) {
 
         this.radius = radius;
         this.visualRadius = radius + 8f;
 
-        Hitboxes.Add(new CircleHitbox(this, -new Vector2(0f, 0f), this.radius, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMajor));
+        Hitboxes.Add(new CircleHitbox(this, -new Vector2(0f, 0f), this.radius, isP1Owned ? CollisionGroup.P1MajorProjectile : CollisionGroup.P2MajorProjectile));
 
         sprite = new Sprite("yinyang") {
             Origin = new Vector2(0.5f),

@@ -9,21 +9,24 @@ namespace Touhou.Objects;
 
 public class CharacterSelector : Entity, IControllable, IReceivable {
     private bool isP1;
-    private CharacterSelectOption[] characterOptions;
+    private CharacterOption[] characterOptions;
 
-    private int playerPosition;
-    private int opponentPosition;
+    private int localIndex;
+    private int remoteIndex;
+
+    private CharacterOption localOption { get => ((CharacterOption)localIndex); }
+    private CharacterOption remoteOption { get => ((CharacterOption)remoteIndex); }
     private bool playerSelected;
     private bool opponentSelected;
-    private Dictionary<PacketType, Action<Packet>> receiveMethods;
+    private Dictionary<PacketType, Action<Packet>> receiveCallbacks;
 
     public CharacterSelector(bool isP1) {
 
         this.isP1 = isP1;
 
-        characterOptions = Enum.GetValues<CharacterSelectOption>();
+        characterOptions = Enum.GetValues<CharacterOption>();
 
-        receiveMethods = new Dictionary<PacketType, Action<Packet>> {
+        receiveCallbacks = new Dictionary<PacketType, Action<Packet>> {
             {PacketType.ChangedCharacter, ChangedCharacter},
             {PacketType.SelectedCharacter, SelectedCharacter},
             {PacketType.DeselectedCharacter, DeselectedCharacter},
@@ -38,17 +41,17 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
 
 
         if (!playerSelected) {
-            int prevPosition = playerPosition;
-            playerPosition += action switch {
+            int prevPosition = localIndex;
+            localIndex += action switch {
                 PlayerActions.Up => -1,
                 PlayerActions.Down => 1,
                 _ => 0
             };
 
-            playerPosition = Math.Clamp(playerPosition, 0, characterOptions.Length - 1);
+            localIndex = Math.Clamp(localIndex, 0, characterOptions.Length - 1);
 
-            if (playerPosition != prevPosition) {
-                var packet = new Packet(PacketType.ChangedCharacter).In(playerPosition - prevPosition);
+            if (localIndex != prevPosition) {
+                var packet = new Packet(PacketType.ChangedCharacter).In(localIndex - prevPosition);
                 Game.Network.Send(packet);
             }
         }
@@ -62,15 +65,13 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
 
             var packet = new Packet(PacketType.MatchReady)
             .In(matchStartTime)
-            .In((CharacterSelectOption)playerPosition)
-            .In((CharacterSelectOption)opponentPosition);
+            .In(localOption)
+            .In(remoteOption);
 
             Game.Network.Send(packet);
 
             Game.Command(() => {
-                Game.Scenes.ChangeScene<MatchScene>(false, true, matchStartTime,
-                GetPlayerCharacterType((CharacterSelectOption)playerPosition),
-                GetOpponentCharacterType((CharacterSelectOption)opponentPosition));
+                Game.Scenes.ChangeScene<NetplayMatchScene>(false, true, matchStartTime, localOption, remoteOption);
             });
 
         }
@@ -98,8 +99,8 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
     public void Release(PlayerActions action) { }
 
     public void Receive(Packet packet, IPEndPoint endPoint) {
-        if (receiveMethods.TryGetValue(packet.Type, out var method)) {
-            method?.Invoke(packet);
+        if (receiveCallbacks.TryGetValue(packet.Type, out var callback)) {
+            callback.Invoke(packet);
         }
     }
 
@@ -123,7 +124,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             Origin = new Vector2(isP1 ? 1f : 0f, 0.3f),
             Position = new Vector2(
                 isP1 ? -300f : 300f,
-                -100f * playerPosition
+                -100f * localIndex
             ),
             Color = new Color4(0f, 1f, 0f, 1f),
             DisplayedText = isP1 ? "P1" : "P2",
@@ -136,7 +137,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             Origin = new Vector2(!isP1 ? 1f : 0f, 0.3f),
             Position = new Vector2(
                 !isP1 ? -300f : 300f,
-                -100f * opponentPosition
+                -100f * remoteIndex
             ),
             Color = new Color4(1f, 0f, 0f, 1f),
             DisplayedText = !isP1 ? "P1" : "P2",
@@ -153,7 +154,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
                 Origin = new Vector2(0f, 0.5f),
                 Position = new Vector2(
                     isP1 ? -300f : 300f,
-                    -100f * playerPosition
+                    -100f * localIndex
                 ),
                 Scale = new Vector2(6.5f, 0.8f) * new Vector2(isP1 ? 1 : -1f, 1f),
                 Color = new Color4(0f, 1f, 0f, 1f),
@@ -169,7 +170,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
                 Origin = new Vector2(0f, 0.5f),
                 Position = new Vector2(
                     !isP1 ? -300f : 300f,
-                    -100f * opponentPosition
+                    -100f * remoteIndex
                 ),
                 Scale = new Vector2(6.5f, 0.8f) * new Vector2(!isP1 ? 1 : -1f, 1f),
                 Color = new Color4(1f, 0f, 0f, 1f),
@@ -185,7 +186,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
     private void ChangedCharacter(Packet packet) {
         packet.Out(out int direction, true);
 
-        opponentPosition += direction;
+        remoteIndex += direction;
     }
 
     private void SelectedCharacter(Packet packet) {
@@ -198,33 +199,14 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
     private void MatchReady(Packet packet) {
         packet
         .Out(out Time matchStartTime)
-        .Out(out CharacterSelectOption opponentCharacter)
-        .Out(out CharacterSelectOption playerCharacter);
+        .Out(out CharacterOption remoteOption)
+        .Out(out CharacterOption localOption);
 
         Game.Command(() => {
-            Game.Scenes.ChangeScene<MatchScene>(false, false, matchStartTime,
-            GetPlayerCharacterType(playerCharacter),
-            GetOpponentCharacterType(opponentCharacter));
+            Game.Scenes.ChangeScene<NetplayMatchScene>(false, false, matchStartTime, localOption, remoteOption);
+
         });
 
 
-    }
-
-    private static Type GetPlayerCharacterType(CharacterSelectOption option) {
-        return option switch {
-            CharacterSelectOption.Reimu => typeof(PlayerReimu),
-            CharacterSelectOption.Marisa => typeof(PlayerMarisa),
-            CharacterSelectOption.Sakuya => typeof(PlayerSakuya),
-            _ => throw new Exception("Character type does not exist")
-        };
-    }
-
-    private static Type GetOpponentCharacterType(CharacterSelectOption option) {
-        return option switch {
-            CharacterSelectOption.Reimu => typeof(OpponentReimu),
-            CharacterSelectOption.Marisa => typeof(OpponentMarisa),
-            CharacterSelectOption.Sakuya => typeof(OpponentSakuya),
-            _ => throw new Exception("Character type does not exist")
-        };
     }
 }

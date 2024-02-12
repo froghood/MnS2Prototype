@@ -18,7 +18,7 @@ public class Laser : Projectile {
     private Time time { get => LifeTime + timeOffset; }
     private Time timeWithSpawnDelay { get => Time.Max(time - SpawnDeley, 0L); }
 
-    public Laser(Vector2 position, float direction, float width, Time startupTime, Time activeTime, bool isPlayerOwned, bool isRemote) : base(isPlayerOwned, isRemote) {
+    public Laser(Vector2 position, float direction, float width, Time startupTime, Time activeTime, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(isP1Owned, isPlayerOwned, isRemote) {
         Position = position;
         this.direction = direction;
         this.directionVector = new Vector2(MathF.Cos(direction), MathF.Sin(direction));
@@ -40,7 +40,7 @@ public class Laser : Projectile {
             this,
             new Vector2(width / 2f, 0f) * directionMatrix,
             width / 2f,
-            IsPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMajor);
+            IsP1Owned ? CollisionGroup.P1MajorProjectile : CollisionGroup.P2MajorProjectile);
 
         Hitboxes.Add(startHitbox);
 
@@ -51,7 +51,7 @@ public class Laser : Projectile {
                 new Vector2(width * i + width, 0f) * directionMatrix,
                 new Vector2(width),
                 direction,
-                IsPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMajor);
+                IsP1Owned ? CollisionGroup.P1MajorProjectile : CollisionGroup.P2MajorProjectile);
 
             var bounds = hitbox.GetBounds();
 

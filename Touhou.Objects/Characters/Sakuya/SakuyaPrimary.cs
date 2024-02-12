@@ -5,7 +5,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class SakuyaPrimary : Attack {
+public class SakuyaPrimary : Attack<Sakuya> {
     private Time heldTimeTheshold;
     private bool isActive;
     private byte fireCount;
@@ -20,42 +20,42 @@ public class SakuyaPrimary : Attack {
 
 
 
-    public SakuyaPrimary() {
-        Holdable = true;
-        Focusable = true;
+    public SakuyaPrimary(Sakuya c) : base(c) {
+        IsHoldable = true;
+
     }
 
-    public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
+    public override void LocalPress(Time cooldownOverflow, bool focused) {
 
         heldTimeTheshold = Game.Time - cooldownOverflow;
 
         isActive = true;
-        aimAngle = player.AngleToOpponent;
+        aimAngle = c.AngleToOpponent;
         fireCount = 0;
 
-        player.DisableAttacks(
+        c.DisableAttacks(
             PlayerActions.Secondary,
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB
+            PlayerActions.Special,
+            PlayerActions.Super
         );
     }
 
 
 
-    public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
+    public override void LocalHold(Time cooldownOverflow, Time holdTime, bool focused) {
 
 
 
-        float targetAngle = MathF.Atan2(player.Velocity.Y, player.Velocity.X);
-        bool isMoving = (player.Velocity.X != 0f || player.Velocity.Y != 0f);
+        float targetAngle = MathF.Atan2(c.Velocity.Y, c.Velocity.X);
+        bool isMoving = (c.Velocity.X != 0f || c.Velocity.Y != 0f);
         float angleFromTarget = TMathF.NormalizeAngle(targetAngle - aimAngle);
 
-        if (!player.Focused) {
+        if (!c.IsFocused) {
             if (isMoving) {
-                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.025f, Game.Delta.AsSeconds())));
+                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(c.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.025f, Game.Delta.AsSeconds())));
                 aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 2f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
             } else {
-                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.001f, Game.Delta.AsSeconds())));
+                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(c.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.001f, Game.Delta.AsSeconds())));
 
             }
         }
@@ -76,20 +76,22 @@ public class SakuyaPrimary : Attack {
                 _ => 2
             };
 
-            bool isTimestopped = player.GetEffect<Timestop>(out var timestop);
+            //bool isTimestopped = c.GetEffect<Timestop>(out var timestop);
+
+            bool isTimestopped = false;
 
             for (int i = 0; i < numShots; i++) {
                 var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (spacing * fireCount * i - spacing * fireCount / 2f * (numShots - 1));
-                var projectile = new SmallKnife(player.Position + offset, angle, velocity, isTimestopped, true, false) {
+                var projectile = new SmallKnife(c.Position + offset, angle, velocity, isTimestopped, c.IsP1, c.IsPlayer, false) {
                     SpawnDelay = Time.InSeconds(0.15f),
                     CanCollide = false,
                     Color = new Color4(0f, 1f, 0f, 0.4f),
                 };
                 if (!isTimestopped) projectile.IncreaseTime(cooldownOverflow + timeOffset, false);
 
-                timestop?.AddProjectile(projectile);
+                //timestop?.AddProjectile(projectile);
 
-                player.Scene.AddEntity(projectile);
+                c.Scene.AddEntity(projectile);
             }
 
 
@@ -98,7 +100,7 @@ public class SakuyaPrimary : Attack {
             .In(PlayerActions.Primary)
             .In(Game.Network.Time - cooldownOverflow + timeOffset)
             .In((byte)fireCount)
-            .In(player.Position)
+            .In(c.Position)
             .In(angle);
 
             fireCount = (byte)((fireCount + 1) % 3);
@@ -110,19 +112,19 @@ public class SakuyaPrimary : Attack {
 
 
 
-    public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
+    public override void LocalRelease(Time cooldownOverflow, Time heldTime, bool focused) {
         isActive = false;
 
-        player.EnableAttacks(
+        c.EnableAttacks(
             PlayerActions.Secondary,
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB
+            PlayerActions.Special,
+            PlayerActions.Super
         );
 
-        player.ApplyAttackCooldowns(globalCooldown,
+        c.ApplyAttackCooldowns(globalCooldown,
             PlayerActions.Primary,
             PlayerActions.Secondary,
-            PlayerActions.SpecialA
+            PlayerActions.Special
         );
 
 
@@ -130,7 +132,7 @@ public class SakuyaPrimary : Attack {
 
 
 
-    public override void OpponentReleased(Opponent opponent, Packet packet) {
+    public override void RemoteRelease(Packet packet) {
 
         //Log.Info("t");
 
@@ -149,30 +151,32 @@ public class SakuyaPrimary : Attack {
             _ => 2
         };
 
-        var isTimestopped = opponent.GetEffect<Timestop>(out var timestop);
+        //var isTimestopped = c.GetEffect<Timestop>(out var timestop);
+
+        bool isTimestopped = false;
 
         for (int i = 0; i < numShots; i++) {
             var offset = new Vector2(MathF.Cos(theirAngle + MathF.PI / 2f), MathF.Sin(theirAngle + MathF.PI / 2f)) * (spacing * fireCount * i - spacing * fireCount / 2f * (numShots - 1));
-            var projectile = new SmallKnife(theirPosition + offset, theirAngle, velocity, isTimestopped, false, true) {
+            var projectile = new SmallKnife(theirPosition + offset, theirAngle, velocity, isTimestopped, c.IsP1, c.IsPlayer, true) {
                 SpawnDelay = Time.InSeconds(0.15f),
                 Color = new Color4(1f, 0f, 0f, 1f),
                 GrazeAmount = grazeAmount
             };
             projectile.IncreaseTime(latency, true);
 
-            if (isTimestopped) timestop.AddProjectile(projectile);
+            //if (isTimestopped) timestop.AddProjectile(projectile);
 
-            opponent.Scene.AddEntity(projectile);
+            c.Scene.AddEntity(projectile);
         }
     }
 
-    public override void PlayerRender(Player player) {
+    public override void Render() {
 
         if (!isActive) return;
 
         var aimArrowSprite = new Sprite("aimarrow2") {
             Origin = new Vector2(-0.0625f, 0.5f),
-            Position = player.Position,
+            Position = c.Position,
             Rotation = aimAngle,
             Scale = new Vector2(0.3f),
             Color = new Color4(1f, 1f, 1f, 0.5f),
@@ -182,6 +186,6 @@ public class SakuyaPrimary : Attack {
 
         Game.Draw(aimArrowSprite, Layer.Player);
 
-        base.PlayerRender(player);
+        base.Render();
     }
 }

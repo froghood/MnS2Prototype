@@ -13,15 +13,22 @@ public class Amulet : ParametricProjectile {
 
     private Sprite sprite;
 
-    public Amulet(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote) : base(origin, direction, isPlayerOwned, isRemote) {
+    public Amulet(Vector2 origin, float direction, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(origin, direction, isP1Owned, isPlayerOwned, isRemote) {
 
-        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
 
         sprite = new Sprite("amulet") {
             Origin = new Vector2(0.5f, 0.5f),
             Rotation = Orientation,
             UseColorSwapping = true,
         };
+    }
+
+    public override void Update() {
+
+        DestroyedOnScreenExit = FuncTimeWithSpawnOffset.AsSeconds() >= 1f ? true : false;
+
+        base.Update();
     }
 
 
@@ -44,7 +51,7 @@ public class Amulet : ParametricProjectile {
            Color.R,
            Color.G,
            Color.B,
-           Color.A * SpawnFactor);
+           Color.A * SpawnFactor * (1f - DestroyedFactor));
 
         Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }

@@ -16,16 +16,15 @@ public class RemoteHomingAmulet : Homing {
 
 
 
-    private Player Player => player is null ? player = Scene.GetFirstEntity<Player>() : player;
-    private Player player;
-
+    private Character character { get => _character ??= Scene.GetFirstEntityWhere<Character>(e => e.IsP1 != IsP1Owned); }
+    private Character _character;
 
 
     private Sprite sprite;
 
 
 
-    public RemoteHomingAmulet(Vector2 position, float startAngle, float turnRadius, float velocity, float hitboxRadius) : base(false, true) {
+    public RemoteHomingAmulet(Vector2 position, float startAngle, float turnRadius, float velocity, float hitboxRadius, bool isP1Owned, bool isPlayerOwned) : base(isP1Owned, isPlayerOwned, true) {
         Position = position;
         angle = startAngle;
         visualRotation = startAngle + MathF.PI / 2f;
@@ -40,12 +39,14 @@ public class RemoteHomingAmulet : Homing {
             Y = turnRadius * MathF.Sin(angle + MathF.PI / 2f)
         };
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, CollisionGroup.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
 
         sprite = new Sprite("spinningamulet") {
             Origin = new Vector2(0.5f),
             UseColorSwapping = true,
         };
+
+        Log.Info(isP1Owned);
 
     }
 
@@ -89,17 +90,17 @@ public class RemoteHomingAmulet : Homing {
         // homing
         var prevSide = side;
 
-        var angleFromProjectileToPlayer = TMathF.NormalizeAngle(MathF.Atan2(Player.Position.Y - Position.Y, Player.Position.X - Position.X) - angle);
+        var angleFromProjectileToCharacter = TMathF.NormalizeAngle(MathF.Atan2(character.Position.Y - Position.Y, character.Position.X - Position.X) - angle);
 
         // center
         if (side == 0) {
 
-            var distFromProjectileToPlayer = MathF.Sqrt(MathF.Pow(Player.Position.X - Position.X, 2f) + MathF.Pow(Player.Position.Y - Position.Y, 2f));
+            var distFromProjectileToCharacter = MathF.Sqrt(MathF.Pow(character.Position.X - Position.X, 2f) + MathF.Pow(character.Position.Y - Position.Y, 2f));
 
-            var opposite = Math.Abs(distFromProjectileToPlayer * MathF.Sin(angleFromProjectileToPlayer));
+            var opposite = Math.Abs(distFromProjectileToCharacter * MathF.Sin(angleFromProjectileToCharacter));
 
-            if (opposite > hitboxRadius || MathF.Abs(angleFromProjectileToPlayer) > MathF.PI / 2f) { // switch to turning
-                side = MathF.Sign(angleFromProjectileToPlayer);
+            if (opposite > hitboxRadius || MathF.Abs(angleFromProjectileToCharacter) > MathF.PI / 2f) { // switch to turning
+                side = MathF.Sign(angleFromProjectileToCharacter);
                 turnPosition = Position + new Vector2() {
                     X = turnRadius * MathF.Cos(angle + MathF.PI / 2f * (int)side),
                     Y = turnRadius * MathF.Sin(angle + MathF.PI / 2f * (int)side)
@@ -128,7 +129,7 @@ public class RemoteHomingAmulet : Homing {
 
         void Turn() {
 
-            var targetSide = MathF.Sign(angleFromProjectileToPlayer);
+            var targetSide = MathF.Sign(angleFromProjectileToCharacter);
 
             if (targetSide != side) {
 
@@ -140,11 +141,11 @@ public class RemoteHomingAmulet : Homing {
                 };
             }
 
-            var distFromTurnCenterToPlayer = MathF.Sqrt(MathF.Pow(Player.Position.X - turnPosition.X, 2f) + MathF.Pow(Player.Position.Y - turnPosition.Y, 2f));
-            var ratio = turnRadius / distFromTurnCenterToPlayer;
+            var distFromTurnCenterToCharacter = MathF.Sqrt(MathF.Pow(character.Position.X - turnPosition.X, 2f) + MathF.Pow(character.Position.Y - turnPosition.Y, 2f));
+            var ratio = turnRadius / distFromTurnCenterToCharacter;
 
-            var angleFromTurnCenterToPlayer = MathF.Atan2(Player.Position.Y - turnPosition.Y, Player.Position.X - turnPosition.X);
-            var targetTangentAngle = TMathF.NormalizeAngle(MathF.Asin(ratio) * (int)side + angleFromTurnCenterToPlayer); // -Pi : Pi
+            var angleFromTurnCenterToCharacter = MathF.Atan2(character.Position.Y - turnPosition.Y, character.Position.X - turnPosition.X);
+            var targetTangentAngle = TMathF.NormalizeAngle(MathF.Asin(ratio) * (int)side + angleFromTurnCenterToCharacter); // -Pi : Pi
             var arcLengthToTarget = TMathF.Mod((targetTangentAngle - angle) * (int)side, MathF.Tau); // 0 : Tau
             var maxTurn = velocity * Game.Delta.AsSeconds() / (turnRadius * MathF.Tau) * MathF.Tau;
 
@@ -193,6 +194,8 @@ public class RemoteHomingAmulet : Homing {
             Color.A * spawnRatio);
 
         Game.Draw(sprite, Layer.OpponentProjectiles);
+
+        base.Render();
 
     }
 }

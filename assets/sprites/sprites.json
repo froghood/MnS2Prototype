@@ -1,0 +1,306 @@
+{
+  "Width": 3222,
+  "Height": 3187,
+  "Sprites": {
+    "reimu0000": {
+      "Left": 0,
+      "Top": 0,
+      "Right": 777,
+      "Bottom": 1386
+    },
+    "reimu0001": {
+      "Left": 0,
+      "Top": 1391,
+      "Right": 777,
+      "Bottom": 2777
+    },
+    "reimu0002": {
+      "Left": 782,
+      "Top": 0,
+      "Right": 1559,
+      "Bottom": 1386
+    },
+    "dummy0000": {
+      "Left": 782,
+      "Top": 1391,
+      "Right": 1456,
+      "Bottom": 2631
+    },
+    "dummy0001": {
+      "Left": 1564,
+      "Top": 0,
+      "Right": 2238,
+      "Bottom": 1240
+    },
+    "dummy0002": {
+      "Left": 2243,
+      "Top": 0,
+      "Right": 2917,
+      "Bottom": 1240
+    },
+    "dummy2": {
+      "Left": 2804,
+      "Top": 1245,
+      "Right": 1564,
+      "Bottom": 1821
+    },
+    "laser_start": {
+      "Left": 2544,
+      "Top": 1826,
+      "Right": 1461,
+      "Bottom": 2358
+    },
+    "dummy": {
+      "Left": 2682,
+      "Top": 2363,
+      "Right": 1461,
+      "Bottom": 2882
+    },
+    "timestop": {
+      "Left": 2549,
+      "Top": 1826,
+      "Right": 3048,
+      "Bottom": 2325
+    },
+    "yinyang": {
+      "Left": 782,
+      "Top": 2636,
+      "Right": 1282,
+      "Bottom": 3135
+    },
+    "reimu": {
+      "Left": 3057,
+      "Top": 2330,
+      "Right": 2687,
+      "Bottom": 2745
+    },
+    "sakuya": {
+      "Left": 2687,
+      "Top": 2750,
+      "Right": 3084,
+      "Bottom": 3117
+    },
+    "sigil": {
+      "Left": 0,
+      "Top": 2782,
+      "Right": 325,
+      "Bottom": 3108
+    },
+    "marisa": {
+      "Left": 330,
+      "Top": 2782,
+      "Right": 717,
+      "Bottom": 3085
+    },
+    "vortex": {
+      "Left": 2809,
+      "Top": 1245,
+      "Right": 3111,
+      "Bottom": 1550
+    },
+    "aimindicator": {
+      "Left": 1287,
+      "Top": 2887,
+      "Right": 1586,
+      "Bottom": 3186
+    },
+    "laser_indicator_progress_start": {
+      "Left": 2190,
+      "Top": 2887,
+      "Right": 1591,
+      "Bottom": 3186
+    },
+    "laser_indicator_start": {
+      "Left": 2922,
+      "Top": 0,
+      "Right": 3221,
+      "Bottom": 599
+    },
+    "reimubombwave": {
+      "Left": 2809,
+      "Top": 1555,
+      "Right": 3063,
+      "Bottom": 1809
+    },
+    "star": {
+      "Left": 2195,
+      "Top": 2887,
+      "Right": 2438,
+      "Bottom": 3130
+    },
+    "butterfly": {
+      "Left": 1456,
+      "Top": 2636,
+      "Right": 1287,
+      "Bottom": 2772
+    },
+    "hitboxfocused": {
+      "Left": 2443,
+      "Top": 2887,
+      "Right": 2574,
+      "Bottom": 3018
+    },
+    "hitboxunfocused": {
+      "Left": 2922,
+      "Top": 604,
+      "Right": 3053,
+      "Bottom": 735
+    },
+    "icon_background": {
+      "Left": 3058,
+      "Top": 604,
+      "Right": 3177,
+      "Bottom": 723
+    },
+    "reimu_primary": {
+      "Left": 2922,
+      "Top": 740,
+      "Right": 3041,
+      "Bottom": 859
+    },
+    "reimu_primary_focused": {
+      "Left": 2922,
+      "Top": 864,
+      "Right": 3041,
+      "Bottom": 983
+    },
+    "reimu_secondary": {
+      "Left": 2922,
+      "Top": 988,
+      "Right": 3041,
+      "Bottom": 1107
+    },
+    "fade": {
+      "Left": 2443,
+      "Top": 3023,
+      "Right": 2542,
+      "Bottom": 3122
+    },
+    "aimarrow2": {
+      "Left": 1547,
+      "Top": 1391,
+      "Right": 1461,
+      "Bottom": 1659
+    },
+    "ball": {
+      "Left": 1287,
+      "Top": 2777,
+      "Right": 1366,
+      "Bottom": 2856
+    },
+    "ball2": {
+      "Left": 2579,
+      "Top": 2887,
+      "Right": 2658,
+      "Bottom": 2966
+    },
+    "heart": {
+      "Left": 1461,
+      "Top": 1664,
+      "Right": 1540,
+      "Bottom": 1743
+    },
+    "spinningamulet": {
+      "Left": 83,
+      "Top": 3113,
+      "Right": 0,
+      "Bottom": 3184
+    },
+    "opponentarrow": {
+      "Left": 2922,
+      "Top": 1112,
+      "Right": 3031,
+      "Bottom": 1181
+    },
+    "arrowhead": {
+      "Left": 1371,
+      "Top": 2777,
+      "Right": 1443,
+      "Bottom": 2834
+    },
+    "box": {
+      "Left": 722,
+      "Top": 2782,
+      "Right": 771,
+      "Bottom": 2831
+    },
+    "largeknife": {
+      "Left": 2195,
+      "Top": 3135,
+      "Right": 2344,
+      "Bottom": 3184
+    },
+    "needle": {
+      "Left": 330,
+      "Top": 3090,
+      "Right": 614,
+      "Bottom": 3137
+    },
+    "amulet": {
+      "Left": 1461,
+      "Top": 1748,
+      "Right": 1530,
+      "Bottom": 1793
+    },
+    "pellet": {
+      "Left": 2579,
+      "Top": 2971,
+      "Right": 2619,
+      "Bottom": 3011
+    },
+    "bullet": {
+      "Left": 2922,
+      "Top": 1186,
+      "Right": 3001,
+      "Bottom": 1225
+    },
+    "kunai": {
+      "Left": 88,
+      "Top": 3113,
+      "Right": 167,
+      "Bottom": 3152
+    },
+    "rice": {
+      "Left": 619,
+      "Top": 3090,
+      "Right": 688,
+      "Bottom": 3129
+    },
+    "smallknife": {
+      "Left": 761,
+      "Top": 2836,
+      "Right": 722,
+      "Bottom": 2983
+    },
+    "needle2": {
+      "Left": 3101,
+      "Top": 1555,
+      "Right": 3068,
+      "Bottom": 1820
+    },
+    "aimarrow": {
+      "Left": 2682,
+      "Top": 2887,
+      "Right": 2663,
+      "Bottom": 3046
+    },
+    "laser": {
+      "Left": 3116,
+      "Top": 728,
+      "Right": 3116,
+      "Bottom": 1811
+    },
+    "laser_indicator": {
+      "Left": 3121,
+      "Top": 728,
+      "Right": 3121,
+      "Bottom": 1327
+    },
+    "laser_indicator_progress": {
+      "Left": 3126,
+      "Top": 728,
+      "Right": 3126,
+      "Bottom": 1327
+    }
+  }
+}

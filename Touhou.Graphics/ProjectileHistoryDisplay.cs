@@ -19,9 +19,9 @@ public class ProjectileHistoryDisplay : Rectangle {
         {Projectile.ProjectileType.BombWave, "reimubombwave"},
     };
     private string name;
-    private Queue<List<(uint, Projectile.ProjectileType, bool, bool, Color4)>> history;
+    private Queue<List<(uint, Projectile.ProjectileType, bool, bool, bool, Color4)>> history;
 
-    public ProjectileHistoryDisplay(string name, Queue<List<(uint, Projectile.ProjectileType, bool, bool, Color4)>> history) {
+    public ProjectileHistoryDisplay(string name, Queue<List<(uint, Projectile.ProjectileType, bool, bool, bool, Color4)>> history) {
 
         this.name = name;
         this.history = history;
@@ -69,7 +69,7 @@ public class ProjectileHistoryDisplay : Rectangle {
 
             for (int i = 0; i < group.Count; i++) {
 
-                (uint id, var type, bool isPlayerOwned, bool isRemote, Color4 color) = group[i];
+                (uint id, var type, bool isP1Owned, bool isPlayerOwned, bool isRemote, Color4 color) = group[i];
 
                 float angle = MathF.Tau / 5f;
 

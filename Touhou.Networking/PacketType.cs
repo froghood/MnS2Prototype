@@ -21,7 +21,7 @@ public enum PacketType : byte {
     EffectCancelled,
     Grazed,
     Hit,
-    Knockback,
+    Knockbacked,
     Death,
     DeathConfirmation,
     Rematch,

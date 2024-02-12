@@ -9,25 +9,28 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Scenes;
 
-public class MatchScene : Scene {
+public class NetplayMatchScene : Scene {
 
     private readonly bool isP1;
     private readonly Time startTime;
-    private readonly Type playerType;
-    private readonly Type opponentType;
+
     private readonly Graph updateTimeGraph;
     private readonly Graph renderTimeGraph;
-    private readonly Player player;
-    private readonly Opponent opponent;
+
+    private readonly CharacterOption localOption;
+    private readonly CharacterOption remoteOption;
+    private readonly Character localCharacter;
+    private readonly Character remoteCharacter;
+
 
     //private Action<Time> latencyGraphDelegate;
 
-    public MatchScene(bool isP1, Time startTime, Type playerType, Type opponentType) {
+    public NetplayMatchScene(bool isP1, Time startTime, CharacterOption localOption, CharacterOption remoteOption) {
 
         this.isP1 = isP1;
         this.startTime = startTime;
-        this.playerType = playerType;
-        this.opponentType = opponentType;
+        this.localOption = localOption;
+        this.remoteOption = remoteOption;
 
         updateTimeGraph = new Graph(() => {
             Game.Stats.TryGet("update", out var value);
@@ -50,9 +53,6 @@ public class MatchScene : Scene {
             IsUI = true,
             Alignment = new Vector2(0.42f, -1f),
         };
-
-        player = (Player)Activator.CreateInstance(playerType, new object[] { isP1 });
-        opponent = (Opponent)Activator.CreateInstance(opponentType, new object[] { isP1 });
     }
 
     public override void OnInitialize() {
@@ -60,11 +60,18 @@ public class MatchScene : Scene {
         Projectile.TotalLocalProjectiles = 0;
         Projectile.TotalRemoteProjectiles = 0x80000000;
 
-        var match = new Match(isP1, startTime, player, opponent);
-        AddEntity(match);
+        var localCharacter = localOption.GetCharacter(isP1, true, new Color4(0.8f, 1f, 0.8f, 1f));
+        var remoteCharacter = remoteOption.GetCharacter(!isP1, false, new Color4(1f, 0.8f, 0.8f, 1f));
 
-        AddEntity(player);
-        AddEntity(opponent);
+        var match = new NetplayMatch(isP1, startTime, localOption, remoteOption, localCharacter, remoteCharacter);
+
+
+        AddEntity(match);
+        AddEntity(localCharacter.GetController(ControllerType.LocalNetplay));
+        AddEntity(remoteCharacter.GetController(ControllerType.RemoteNetplay));
+        AddEntity(localCharacter);
+        AddEntity(remoteCharacter);
+
 
 
         AddEntity(new RenderCallback(() => {
@@ -140,20 +147,20 @@ public class MatchScene : Scene {
         AddEntity(new UpdateCallback(() => {
 
             var distance = MathF.Sqrt(
-                MathF.Pow(opponent.Position.X - player.Position.X, 2f) +
-                MathF.Pow(opponent.Position.Y - player.Position.Y, 2f)
+                MathF.Pow(remoteCharacter.Position.X - localCharacter.Position.X, 2f) +
+                MathF.Pow(remoteCharacter.Position.Y - localCharacter.Position.Y, 2f)
             );
 
             float zoom = MathF.Max(MathF.Min((distance - 250f) / 750f, 1f), 0f);
 
             var targetView = new Vector2(1600f, 900f) * (0.9f + 0.1f * zoom);
-            Game.Camera.View += (targetView - Game.Camera.View) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
+            //Game.Camera.View += (targetView - Game.Camera.View) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
 
-            var targetPosition = (player.Position + opponent.Position) / new Vector2(3f, 9f);
+            var targetPosition = (localCharacter.Position + remoteCharacter.Position) / new Vector2(3f, 9f);
             Game.Camera.Position += (targetPosition - Game.Camera.Position) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
         }));
 
-        AddEntity(new MatchUI(isP1));
+        AddEntity(new NetplayMatchUI(isP1));
 
 
         //Game.Network.DataReceived += latencyGraphDelegate;

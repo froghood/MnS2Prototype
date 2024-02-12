@@ -12,7 +12,7 @@ public enum PlayerActions : uint {
     Focus = 16,
     Primary = 32,
     Secondary = 64,
-    SpecialA = 128,
-    SpecialB = 256,
+    Special = 128,
+    Super = 256,
     Bomb = 512
 }

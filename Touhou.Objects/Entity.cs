@@ -6,7 +6,7 @@ public abstract class Entity {
 
     public Scene Scene { get; set; }
 
-    public Vector2 Position { get; set; }
+    public Vector2 Position { get; protected set; }
 
     public event Action Destroyed;
     public bool IsDestroyed { get; private set; }

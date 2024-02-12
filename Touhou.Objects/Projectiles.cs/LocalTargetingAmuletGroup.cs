@@ -10,7 +10,7 @@ public class LocalTargetingAmuletGroup : Projectile {
 
     private List<TargetingAmulet> targetingAmulets = new();
 
-    public LocalTargetingAmuletGroup() : base(true, false) {
+    public LocalTargetingAmuletGroup(bool isP1Owned, bool isPlayerOwned) : base(isP1Owned, isPlayerOwned, false) {
         DestroyedOnScreenExit = false;
     }
 

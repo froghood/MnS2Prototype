@@ -16,11 +16,11 @@ public class TargetingAmulet : ParametricProjectile {
     private Sprite sprite;
 
 
-    public TargetingAmulet(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote, float velocity, float deceleration) : base(origin, direction, isPlayerOwned, isRemote) {
+    public TargetingAmulet(Vector2 origin, float direction, bool isP1Owned, bool isPlayerOwned, bool isRemote, float velocity, float deceleration) : base(origin, direction, isP1Owned, isPlayerOwned, isRemote) {
         this.velocity = velocity;
         this.deceleration = deceleration;
 
-        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 7.5f, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
 
         sprite = new Sprite("amulet") {
             Origin = new Vector2(0.5f, 0.5f),
@@ -57,7 +57,7 @@ public class TargetingAmulet : ParametricProjectile {
         Destroy();
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
-        var projectile = new SpecialAmulet(Position, angle, false, false) {
+        var projectile = new SpecialAmulet(Position, angle, IsP1Owned, IsPlayerOwned, false) {
             GrazeAmount = 1,
             Color = Color,
             StartingVelocity = 500f,
@@ -77,7 +77,7 @@ public class TargetingAmulet : ParametricProjectile {
         var latency = Game.Network.Time - theirTime;
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
-        var projectile = new SpecialAmulet(Position, angle, true, true) {
+        var projectile = new SpecialAmulet(Position, angle, IsP1Owned, IsPlayerOwned, true) {
             CanCollide = false,
             Color = Color,
             StartingVelocity = 500f,

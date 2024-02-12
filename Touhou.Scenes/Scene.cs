@@ -15,38 +15,48 @@ public abstract class Scene {
             Enum.GetValues<CollisionGroup>().ToHashSet() // all other collision groups
         },
 
-        {CollisionGroup.Player, new() {
+        {CollisionGroup.P1, new() {
             CollisionGroup.Default,
-            CollisionGroup.OpponentProjectileMinor,
-            CollisionGroup.OpponentProjectileMajor
+            CollisionGroup.P2MinorProjectile,
+            CollisionGroup.P2MajorProjectile,
         }},
 
-        {CollisionGroup.PlayerProjectile, new() {
+        {CollisionGroup.P1MinorProjectile, new() {
             CollisionGroup.Default,
+            CollisionGroup.P2,
+            CollisionGroup.P2Bomb,
         }},
 
-        {CollisionGroup.PlayerBomb, new() {
+        {CollisionGroup.P1MajorProjectile, new() {
             CollisionGroup.Default,
-            CollisionGroup.OpponentProjectileMinor
+            CollisionGroup.P2,
         }},
 
-        {CollisionGroup.Opponent, new() {
+        {CollisionGroup.P1Bomb, new() {
             CollisionGroup.Default,
+            CollisionGroup.P2MinorProjectile,
         }},
 
-        {CollisionGroup.OpponentProjectileMinor, new() {
+        {CollisionGroup.P2, new() {
             CollisionGroup.Default,
-            CollisionGroup.Player,
-            CollisionGroup.PlayerBomb
+            CollisionGroup.P1MinorProjectile,
+            CollisionGroup.P1MajorProjectile,
         }},
 
-        {CollisionGroup.OpponentProjectileMajor, new() {
+        {CollisionGroup.P2MinorProjectile, new() {
             CollisionGroup.Default,
-            CollisionGroup.Player,
+            CollisionGroup.P1,
+            CollisionGroup.P1Bomb,
         }},
 
-        {CollisionGroup.OpponentBomb, new() {
+        {CollisionGroup.P2MajorProjectile, new() {
             CollisionGroup.Default,
+            CollisionGroup.P1,
+        }},
+
+        {CollisionGroup.P2Bomb, new() {
+            CollisionGroup.Default,
+            CollisionGroup.P1MinorProjectile,
         }},
     };
 
@@ -72,7 +82,15 @@ public abstract class Scene {
             if (entities[index] is T entity) return entity;
         }
 
-        return null;
+        throw new Exception($"Entity of type {typeof(T).Name} not found");
+    }
+
+    public T GetFirstEntityWhere<T>(Func<T, bool> predicate) where T : Entity {
+        for (int index = 0; index < entities.Count; index++) {
+            if (entities[index] is T entity && predicate.Invoke(entity)) return entity;
+        }
+
+        throw new Exception($"Entity of type {typeof(T).Name} not found");
     }
 
     public void Press(PlayerActions action) {

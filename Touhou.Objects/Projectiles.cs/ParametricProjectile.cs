@@ -33,7 +33,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
 
 
 
-    protected ParametricProjectile(Vector2 origin, float orientation, bool isPlayerOwned, bool isRemote) : base(isPlayerOwned, isRemote) {
+    protected ParametricProjectile(Vector2 origin, float orientation, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(isP1Owned, isPlayerOwned, isRemote) {
         Origin = origin;
         Orientation = orientation;
 

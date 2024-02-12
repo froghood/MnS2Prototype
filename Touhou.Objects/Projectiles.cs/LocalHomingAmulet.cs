@@ -24,19 +24,21 @@ public class LocalHomingAmulet : Homing {
 
 
 
-    public LocalHomingAmulet(Vector2 position, float startingAngle, float turnRadius, float velocity, float hitboxRadius) : base(true, false) {
+    public LocalHomingAmulet(Vector2 position, float startingAngle, float turnRadius, float velocity, float hitboxRadius, bool isP1Owned, bool isPlayerOwned) : base(isP1Owned, isPlayerOwned, false) {
         Position = position;
         angle = startingAngle;
         visualRotation = startingAngle + MathF.PI / 2f;
         this.turnRadius = turnRadius;
         this.velocity = velocity;
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, CollisionGroup.PlayerProjectile));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, hitboxRadius, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
 
         sprite = new Sprite("spinningamulet") {
             Origin = new Vector2(0.5f),
             UseColorSwapping = true,
         };
+
+        Log.Info(isP1Owned);
     }
 
     public override void Update() {

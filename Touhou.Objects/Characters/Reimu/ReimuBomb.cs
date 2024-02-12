@@ -4,13 +4,15 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class ReimuBomb : Bomb {
+public class ReimuBomb : Bomb<Reimu> {
+
+
 
     private readonly int numShots = 4;
 
-    public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
+    public ReimuBomb(Reimu c) : base(c) { }
 
-        Log.Info("t");
+    public override void LocalPress(Time cooldownOverflow, bool focused) {
 
         for (int i = 0; i < numShots; i++) {
 
@@ -18,9 +20,7 @@ public class ReimuBomb : Bomb {
             float x = MathF.Abs(MathF.Cos(direction));
             float y = MathF.Abs(MathF.Sin(direction));
 
-            Log.Info($"{x}, {y}");
-
-            var projectile = new ReimuBombWave(player.Position * new Vector2(x, y), direction, true, false) {
+            var projectile = new BombWave(c.Position * new Vector2(x, y), direction, c.IsP1, c.IsPlayer, false) {
                 Velocity = 750f,
                 SpawnDuration = Time.InSeconds(0.5f),
                 DestroyedOnScreenExit = true,
@@ -28,7 +28,7 @@ public class ReimuBomb : Bomb {
             };
             projectile.ForwardTime(cooldownOverflow, false);
 
-            player.Scene.AddEntity(projectile);
+            c.Scene.AddEntity(projectile);
 
         }
 
@@ -38,24 +38,27 @@ public class ReimuBomb : Bomb {
 
         CooldownTimer = new Timer(cooldown);
 
-        player.ApplyAttackCooldowns(cooldown, PlayerActions.Primary);
-        player.ApplyAttackCooldowns(cooldown, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(cooldown, PlayerActions.SpecialA);
-        player.ApplyAttackCooldowns(cooldown, PlayerActions.SpecialB);
+        c.ApplyAttackCooldowns(cooldown, PlayerActions.Primary);
+        c.ApplyAttackCooldowns(cooldown, PlayerActions.Secondary);
+        c.ApplyAttackCooldowns(cooldown, PlayerActions.Special);
+        c.ApplyAttackCooldowns(cooldown, PlayerActions.Super);
 
-        player.ApplyInvulnerability(cooldown);
+        c.ApplyInvulnerability(cooldown);
 
-        var packet = new Packet(PacketType.BombPressed)
-        .In(Game.Network.Time - cooldownOverflow)
-        .In(player.Position);
+        if (Game.Network.IsConnected) {
+            var packet = new Packet(PacketType.BombPressed)
+            .In(Game.Network.Time - cooldownOverflow)
+            .In(c.Position);
 
-        Game.Network.Send(packet);
+            Game.Network.Send(packet);
+        }
 
-        Game.Sounds.Play("spell");
-        Game.Sounds.Play("bomb");
+
+
+
 
     }
-    public override void OpponentPress(Opponent opponent, Packet packet) {
+    public override void RemotePress(Packet packet) {
 
         packet.Out(out Time theirTime).Out(out Vector2 position);
         Time delta = Game.Network.Time - theirTime;
@@ -64,14 +67,14 @@ public class ReimuBomb : Bomb {
 
         for (int i = 0; i < numShots; i++) {
 
-            var projectile = new ReimuBombWave(opponent.Position, MathF.PI / 2f * i, false, true) {
+            var projectile = new BombWave(position, MathF.PI / 2f * i, c.IsP1, c.IsPlayer, true) {
                 Velocity = 750f,
                 SpawnDuration = Time.InSeconds(0.5f),
                 DestroyedOnScreenExit = true,
                 Color = (i % 2 == 0) ? new Color4(1f, 0.5f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
 
-            opponent.Scene.AddEntity(projectile);
+            c.Scene.AddEntity(projectile);
         }
     }
 

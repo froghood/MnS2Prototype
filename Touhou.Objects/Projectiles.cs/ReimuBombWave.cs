@@ -4,10 +4,10 @@ using Touhou.Networking;
 
 namespace Touhou.Objects.Projectiles;
 
-public class ReimuBombWave : ParametricProjectile {
+public class BombWave : ParametricProjectile {
 
     public float Velocity { get; init; }
-    public ReimuBombWave(Vector2 origin, float direction, bool isPlayerOwned, bool isRemote) : base(origin, direction, isPlayerOwned, isRemote) { }
+    public BombWave(Vector2 origin, float direction, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(origin, direction, isP1Owned, isPlayerOwned, isRemote) { }
 
     public override void Init() {
 
@@ -18,7 +18,7 @@ public class ReimuBombWave : ParametricProjectile {
 
         var offset = new Vector2(cos, sin) * 80f;
 
-        Hitboxes.Add(new RectangleHitbox(this, offset, new Vector2(160f, width), Orientation, IsPlayerOwned ? CollisionGroup.PlayerBomb : CollisionGroup.OpponentBomb, Hit));
+        Hitboxes.Add(new RectangleHitbox(this, offset, new Vector2(160f, width), Orientation, IsP1Owned ? CollisionGroup.P1Bomb : CollisionGroup.P2Bomb, Hit));
 
         base.Init();
     }
@@ -32,7 +32,7 @@ public class ReimuBombWave : ParametricProjectile {
 
     public override void Render() {
 
-        var alpha = MathF.Min(SpawnDelay.AsSeconds(), LifeTime) / SpawnDelay.AsSeconds() * Color.A;
+        var alpha = SpawnFactor * Color.A;
         //Log.Info(alpha);
 
 
@@ -67,11 +67,7 @@ public class ReimuBombWave : ParametricProjectile {
 
         if (!(other is Projectile projectile)) return;
 
-        projectile.Destroy();
-
-        // must toggle the last bit because the opponents' projectile ids are opposite
-        var packet = new Packet(PacketType.DestroyProjectile).In(projectile.Id ^ 0x80000000);
-        Game.Network.Send(packet);
+        projectile.NetworkDestroy();
 
     }
 }

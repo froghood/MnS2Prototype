@@ -5,7 +5,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class MarisaPrimary : Attack {
+public class MarisaPrimary : Attack<Marisa> {
 
 
     private static readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
@@ -26,33 +26,34 @@ public class MarisaPrimary : Attack {
 
 
 
-    public MarisaPrimary() {
-        Holdable = true;
+    public MarisaPrimary(Marisa c) : base(c) {
+        IsHoldable = true;
+        HasFocusVariant = true;
     }
 
 
 
-    public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
+    public override void LocalPress(Time cooldownOverflow, bool focused) {
 
         //Log.Info($"{this.GetType().Name} press: {cooldownOverflow.AsSeconds()}");
 
-        aimAngle = player.AngleToOpponent;
+        aimAngle = c.AngleToOpponent;
         aimAngleVector = new Vector2(MathF.Cos(aimAngle), MathF.Sin(aimAngle));
 
         if (!focused) {
-            CalculateUnfocusedLaserPositionAndAngle(player);
+            CalculateUnfocusedLaserPositionAndAngle();
         }
 
-        player.DisableAttacks(
+        c.DisableAttacks(
             PlayerActions.Secondary,
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB
+            PlayerActions.Special,
+            PlayerActions.Super
         );
     }
 
 
 
-    public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
+    public override void LocalHold(Time cooldownOverflow, Time holdTime, bool focused) {
 
         //Log.Info($"{this.GetType().Name} hold: {cooldownOverflow.AsSeconds()}, {holdTime.AsSeconds()}");
 
@@ -62,42 +63,42 @@ public class MarisaPrimary : Attack {
         isUnfocusedAiming = !focused;
         isFocusedAiming = focused;
 
-        float targetAngle = MathF.Atan2(player.Velocity.Y, player.Velocity.X);
-        bool isMoving = (player.Velocity.X != 0f || player.Velocity.Y != 0f);
+        float targetAngle = MathF.Atan2(c.Velocity.Y, c.Velocity.X);
+        bool isMoving = (c.Velocity.X != 0f || c.Velocity.Y != 0f);
         float angleFromTarget = TMathF.NormalizeAngle(targetAngle - aimAngle);
 
         if (isMoving) {
             if (focused) {
 
-                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds())));
+                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(c.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds())));
                 aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 1.2f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
 
             } else {
 
-                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.1f, Game.Delta.AsSeconds())));
+                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(c.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.1f, Game.Delta.AsSeconds())));
                 aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 2.2f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
             }
         } else {
             if (focused) {
 
-                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.0001f, Game.Delta.AsSeconds())));
+                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(c.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.0001f, Game.Delta.AsSeconds())));
 
             } else {
 
-                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds())));
+                aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(c.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds())));
             }
         }
 
         aimAngleVector = new Vector2(MathF.Cos(aimAngle), MathF.Sin(aimAngle));
 
         if (!focused) {
-            CalculateUnfocusedLaserPositionAndAngle(player);
+            CalculateUnfocusedLaserPositionAndAngle();
         }
     }
 
 
 
-    public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
+    public override void LocalRelease(Time cooldownOverflow, Time heldTime, bool focused) {
 
         //Log.Info($"{this.GetType().Name} release: {cooldownOverflow.AsSeconds()}, {heldTime.AsSeconds()}");
 
@@ -105,34 +106,34 @@ public class MarisaPrimary : Attack {
         Laser laser;
 
         if (focused) {
-            laser = new Laser(player.Position, aimAngle, laserWidth, startupTime, activeTime, true, false) {
+            laser = new Laser(c.Position, aimAngle, laserWidth, startupTime, activeTime, c.IsP1, c.IsPlayer, false) {
                 Color = new Color4(0f, 1f, 0f, 0.4f),
                 CanCollide = false
             };
 
-            player.Scene.AddEntity(laser);
+            c.Scene.AddEntity(laser);
             laser.FowardTime(cooldownOverflow);
 
-            player.ApplyMovespeedModifier(0.3f, Time.InSeconds(0.3f));
+            c.ApplyMovespeedModifier(0.3f, Time.InSeconds(0.3f));
 
         } else {
 
             var angle = MathF.Atan2(-MathF.Sign(unfocusedLaserPosition.Y), -MathF.Sign(unfocusedLaserPosition.X));
 
-            laser = new Laser(unfocusedLaserPosition, unfocusedAngle, laserWidth, startupTime, activeTime, true, false) {
+            laser = new Laser(unfocusedLaserPosition, unfocusedAngle, laserWidth, startupTime, activeTime, c.IsP1, c.IsPlayer, false) {
                 SpawnDeley = Time.InSeconds(1f),
                 Color = new Color4(0f, 1f, 0f, 0.4f),
                 CanCollide = false
             };
 
-            var sigil = new Sigil(player.Position, unfocusedLaserPosition, Time.InSeconds(1f), Time.InSeconds(1f), true, false) {
+            var sigil = new Sigil(c.Position, unfocusedLaserPosition, Time.InSeconds(1f), Time.InSeconds(1f), c.IsP1, c.IsPlayer, false) {
                 Color = new Color4(0f, 1f, 0f, 0.4f),
             };
 
-            player.Scene.AddEntity(laser);
+            c.Scene.AddEntity(laser);
             laser.FowardTime(cooldownOverflow);
 
-            player.Scene.AddEntity(sigil);
+            c.Scene.AddEntity(sigil);
             sigil.ForwardTime(cooldownOverflow, false);
         }
 
@@ -140,17 +141,17 @@ public class MarisaPrimary : Attack {
 
         Log.Info(refundTime.AsSeconds());
 
-        player.ApplyAttackCooldowns(Time.InSeconds(0.6f) - cooldownOverflow - refundTime, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(Time.InSeconds(0.6f) - cooldownOverflow - refundTime, PlayerActions.Primary);
+        c.ApplyAttackCooldowns(Time.InSeconds(0.6f) - cooldownOverflow - refundTime, PlayerActions.Secondary);
+        c.ApplyAttackCooldowns(Time.InSeconds(0.6f) - cooldownOverflow - refundTime, PlayerActions.Primary);
 
-        player.ApplyAttackCooldowns(Time.InSeconds(0.2f) - cooldownOverflow,
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB);
+        c.ApplyAttackCooldowns(Time.InSeconds(0.2f) - cooldownOverflow,
+            PlayerActions.Special,
+            PlayerActions.Super);
 
-        player.EnableAttacks(
+        c.EnableAttacks(
             PlayerActions.Secondary,
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB);
+            PlayerActions.Special,
+            PlayerActions.Super);
 
         isAiming = false;
 
@@ -158,7 +159,7 @@ public class MarisaPrimary : Attack {
         .In(PlayerActions.Primary)
         .In(Game.Network.Time - cooldownOverflow)
         .In(focused)
-        .In(player.Position);
+        .In(c.Position);
         if (!focused) {
             packet.In(unfocusedLaserPosition);
         }
@@ -171,7 +172,7 @@ public class MarisaPrimary : Attack {
 
 
 
-    public override void OpponentReleased(Opponent opponent, Packet packet) {
+    public override void RemoteRelease(Packet packet) {
         packet
         .Out(out Time theirTime)
         .Out(out bool focused);
@@ -183,13 +184,13 @@ public class MarisaPrimary : Attack {
             .Out(out Vector2 laserPosition)
             .Out(out float laserAngle);
 
-            var laser = new Laser(laserPosition, laserAngle, laserWidth, startupTime, activeTime, false, true) {
+            var laser = new Laser(laserPosition, laserAngle, laserWidth, startupTime, activeTime, c.IsP1, c.IsPlayer, true) {
                 Color = new Color4(1f, 0f, 0f, 1f),
                 CanCollide = false,
                 GrazeAmount = grazeAmount
             };
 
-            opponent.Scene.AddEntity(laser);
+            c.Scene.AddEntity(laser);
             laser.FowardTime(latency);
 
         } else {
@@ -198,21 +199,21 @@ public class MarisaPrimary : Attack {
             .Out(out Vector2 laserPosition)
             .Out(out float laserAngle);
 
-            var laser = new Laser(laserPosition, laserAngle, laserWidth, startupTime, activeTime, false, true) {
+            var laser = new Laser(laserPosition, laserAngle, laserWidth, startupTime, activeTime, c.IsP1, c.IsPlayer, true) {
                 SpawnDeley = Time.InSeconds(1f),
                 Color = new Color4(1f, 0f, 0f, 1f),
                 CanCollide = false,
                 GrazeAmount = grazeAmount
             };
 
-            var sigil = new Sigil(theirPosition, laserPosition, Time.InSeconds(1f), Time.InSeconds(1f), false, true) {
+            var sigil = new Sigil(theirPosition, laserPosition, Time.InSeconds(1f), Time.InSeconds(1f), c.IsP1, c.IsPlayer, true) {
                 Color = new Color4(1f, 0f, 0f, 0.7f),
             };
 
-            opponent.Scene.AddEntity(laser);
+            c.Scene.AddEntity(laser);
             laser.FowardTime(latency);
 
-            opponent.Scene.AddEntity(sigil);
+            c.Scene.AddEntity(sigil);
             sigil.ForwardTime(latency, true);
         }
 
@@ -221,7 +222,7 @@ public class MarisaPrimary : Attack {
 
 
 
-    public override void PlayerRender(Player player) {
+    public override void Render() {
 
         if (!isAiming) return;
 
@@ -231,7 +232,7 @@ public class MarisaPrimary : Attack {
 
             var laserPreview = new Sprite("laser_indicator") {
                 Origin = new Vector2(0f, 0.5f),
-                Position = player.Position + aimAngleVector * laserWidth / 2f,
+                Position = c.Position + aimAngleVector * laserWidth / 2f,
                 Rotation = aimAngle,
                 Scale = new Vector2(10000f, visualScale),
                 Color = new Color4(1f, 1f, 1f, 0.1f),
@@ -276,9 +277,9 @@ public class MarisaPrimary : Attack {
             };
 
             var line = new Rectangle() {
-                Size = new Vector2((unfocusedLaserPosition - player.Position).Length - laserPositionPreview.Radius, 4f),
+                Size = new Vector2((unfocusedLaserPosition - c.Position).Length - laserPositionPreview.Radius, 4f),
                 Origin = new Vector2(0f, 0.5f),
-                Position = player.Position,
+                Position = c.Position,
                 Rotation = aimAngle,
                 StrokeWidth = 0f,
                 StrokeColor = Color4.Transparent,
@@ -295,21 +296,21 @@ public class MarisaPrimary : Attack {
 
 
 
-    private void CalculateUnfocusedLaserPositionAndAngle(Player player) {
+    private void CalculateUnfocusedLaserPositionAndAngle() {
         var cos = MathF.Cos(aimAngle);
         var sin = MathF.Sin(aimAngle);
 
         var distToVerticalWall = MathF.Max(
-            (player.Match.Bounds.X - player.Position.X) / cos,
-            (-player.Match.Bounds.X - player.Position.X) / cos);
+            (c.Match.Bounds.X - c.Position.X) / cos,
+            (-c.Match.Bounds.X - c.Position.X) / cos);
 
         var distToHorizontalWall = MathF.Max(
-            (player.Match.Bounds.Y - player.Position.Y) / sin,
-            (-player.Match.Bounds.Y - player.Position.Y) / sin);
+            (c.Match.Bounds.Y - c.Position.Y) / sin,
+            (-c.Match.Bounds.Y - c.Position.Y) / sin);
 
         var distToWall = MathF.Min(distToVerticalWall, distToHorizontalWall);
 
-        unfocusedLaserPosition = player.Position + new Vector2(distToWall * cos, distToWall * sin);
+        unfocusedLaserPosition = c.Position + new Vector2(distToWall * cos, distToWall * sin);
 
         var halfPI = MathF.PI / 2f;
 

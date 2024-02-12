@@ -24,6 +24,7 @@ public abstract class Projectile : Entity, IReceivable {
     public static uint TotalRemoteProjectiles = 0x80000000;
 
 
+    public bool IsP1Owned { get; }
     public bool IsPlayerOwned { get; }
     public bool IsRemote { get; }
 
@@ -44,15 +45,16 @@ public abstract class Projectile : Entity, IReceivable {
 
     private static int lastLocalFrame = 0;
     private static int lastRemoteFrame = 0;
-    private static List<(uint, ProjectileType, bool, bool, Color4)> currentLocalProjectileGroup;
-    private static List<(uint, ProjectileType, bool, bool, Color4)> currentRemoteProjectileGroup;
-    public static Queue<List<(uint, ProjectileType, bool, bool, Color4)>> LocalProjectileHistory = new();
-    public static Queue<List<(uint, ProjectileType, bool, bool, Color4)>> RemoteProjectileHistory = new();
+    private static List<(uint, ProjectileType, bool, bool, bool, Color4)> currentLocalProjectileGroup;
+    private static List<(uint, ProjectileType, bool, bool, bool, Color4)> currentRemoteProjectileGroup;
+    public static Queue<List<(uint, ProjectileType, bool, bool, bool, Color4)>> LocalProjectileHistory = new();
+    public static Queue<List<(uint, ProjectileType, bool, bool, bool, Color4)>> RemoteProjectileHistory = new();
     private bool isDelayDestroyed;
 
-    private Timer destroyTimer = Timer.Max();
+    private Timer destroyTimer = Timer.MaxDuration();
 
-    public Projectile(bool isPlayerOwned, bool isRemote) {
+    public Projectile(bool isP1Owned, bool isPlayerOwned, bool isRemote) {
+        IsP1Owned = isP1Owned;
         IsPlayerOwned = isPlayerOwned;
         IsRemote = isRemote;
 
@@ -78,20 +80,20 @@ public abstract class Projectile : Entity, IReceivable {
             RemoteTargetingAmuletGroup => ProjectileType.RemoteTargetingAmuletGroup,
             TargetingAmulet => ProjectileType.TargetingAmulet,
             YinYang => ProjectileType.YinYang,
-            ReimuBombWave => ProjectileType.BombWave,
+            BombWave => ProjectileType.BombWave,
             _ => ProjectileType.Unknown,
         };
 
         if (IsRemote) {
 
             if (lastRemoteFrame != Game.FrameCount) {
-                currentRemoteProjectileGroup = new List<(uint, ProjectileType, bool, bool, Color4)>();
+                currentRemoteProjectileGroup = new List<(uint, ProjectileType, bool, bool, bool, Color4)>();
                 RemoteProjectileHistory.Enqueue(currentRemoteProjectileGroup);
 
                 while (RemoteProjectileHistory.Count > 15 && RemoteProjectileHistory.TryDequeue(out _)) ;
             }
 
-            currentRemoteProjectileGroup.Add((Id ^ 0x80000000, type, IsPlayerOwned, IsRemote, Color));
+            currentRemoteProjectileGroup.Add((Id ^ 0x80000000, type, IsP1Owned, IsPlayerOwned, IsRemote, Color));
             lastRemoteFrame = Game.FrameCount;
 
             // if (lastRemoteFrame != Game.FrameCount) Game.Log("remoteprojectiles", "");
@@ -100,14 +102,14 @@ public abstract class Projectile : Entity, IReceivable {
         } else {
 
             if (lastLocalFrame != Game.FrameCount) {
-                currentLocalProjectileGroup = new List<(uint, ProjectileType, bool, bool, Color4)>();
+                currentLocalProjectileGroup = new List<(uint, ProjectileType, bool, bool, bool, Color4)>();
                 LocalProjectileHistory.Enqueue(currentLocalProjectileGroup);
 
                 while (LocalProjectileHistory.Count > 15 && LocalProjectileHistory.TryDequeue(out _)) ;
 
             }
 
-            currentLocalProjectileGroup.Add((Id, type, IsPlayerOwned, IsRemote, Color));
+            currentLocalProjectileGroup.Add((Id, type, IsP1Owned, IsPlayerOwned, IsRemote, Color));
             lastLocalFrame = Game.FrameCount;
             // if (lastLocalFrame != Game.FrameCount) Game.Log("localprojectiles", "");
             // Game.Log("localprojectiles", $"{Id}: {this.GetType().Name}");
@@ -129,7 +131,7 @@ public abstract class Projectile : Entity, IReceivable {
     }
 
     private void DestroyIfOutOfBounds() {
-        if (Hitboxes.Count == 0) return;
+
         if (DestroyedOnScreenExit && Hitboxes.Count > 0) {
             foreach (var hitbox in Hitboxes) {
                 var bounds = hitbox.GetBounds();

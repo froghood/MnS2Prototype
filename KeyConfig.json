@@ -7,16 +7,16 @@
         "Focus": "LeftShift",
         "Primary": "Z",
         "Secondary": "X",
-        "SpecialA": "C",
-        "SpecialB": "V",
+        "Special": "C",
+        "Super": "V",
         "Bomb": "Space"
     },
     "Gamepad": {
         "Focus": 4,
         "Primary": 2,
         "Secondary": 0,
-        "SpecialA": 1,
-        "SpecialB": 5,
+        "Special": 1,
+        "Super": 5,
         "Bomb": 3
     }
 }

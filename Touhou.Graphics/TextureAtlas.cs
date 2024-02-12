@@ -42,13 +42,13 @@ public class TextureAtlas {
 
             //Log.Info($"boudns: {bounds}");
 
-            var bottomLeft = new Vector2(bounds.Left, size.Y - (bounds.Top + bounds.Height));
+            var bottomLeft = new Vector2(bounds.Left, size.Y - (bounds.Top + bounds.Bottom));
 
             if (name == "reimu") {
                 //Log.Info($"{new Vector2(bounds.Left, size.Y - (bounds.Top + bounds.Height))} | {new Vector2(bounds.Width, bounds.Height)}");
             }
 
-            return new Box2(new Vector2(bounds.Left + 0.5f, size.Y - bounds.Top - 0.5f) / size, new Vector2(bounds.Left + bounds.Width - 0.5f, size.Y - (bounds.Top + bounds.Height) + 0.5f) / size);
+            return new Box2(new Vector2(bounds.Left + 0.5f, size.Y - bounds.Top - 0.5f) / size, new Vector2(bounds.Right - 0.5f, size.Y - bounds.Bottom + 0.5f) / size);
 
 
 
@@ -59,7 +59,7 @@ public class TextureAtlas {
 
     internal Vector2i GetSize(string name) {
         if (sprites.TryGetValue(name, out var bounds)) {
-            return new Vector2i(bounds.Width, bounds.Height);
+            return new Vector2i(bounds.Right - bounds.Left, bounds.Bottom - bounds.Top);
         } else {
             return default(Vector2i);
         }
@@ -86,9 +86,9 @@ public struct SubTexture {
     public int Top { get; init; }
 
 
-    public int Width { get; init; }
+    public int Right { get; init; }
 
 
-    public int Height { get; init; }
+    public int Bottom { get; init; }
 
 }

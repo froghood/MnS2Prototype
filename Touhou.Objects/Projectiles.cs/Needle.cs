@@ -9,11 +9,11 @@ public class Needle : ParametricProjectile {
     private Sprite sprite;
     private float velocity;
 
-    public Needle(Vector2 origin, float direction, float velocity, bool isPlayerOwned, bool isRemote) : base(origin, direction, isPlayerOwned, isRemote) {
+    public Needle(Vector2 origin, float direction, float velocity, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(origin, direction, isP1Owned, isPlayerOwned, isRemote) {
 
         this.velocity = velocity;
 
-        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 6f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, new Vector2(0f, 0f), 6f, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
 
         sprite = new Sprite("needle2") {
             Origin = new Vector2(0.75f, 0.5f),
@@ -38,7 +38,7 @@ public class Needle : ParametricProjectile {
            Color.R,
            Color.G,
            Color.B,
-           Color.A * SpawnFactor);
+           Color.A * SpawnFactor * (1f - DestroyedFactor));
 
         Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }

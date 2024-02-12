@@ -9,7 +9,7 @@ public class Sigil : ParametricProjectile {
     private readonly Time destroyTime;
 
 
-    public Sigil(Vector2 startPosition, Vector2 endPosition, Time arrivalTime, Time destroyTime, bool isPlayerOwned, bool isRemote) : base(startPosition, 0f, isPlayerOwned, isRemote) {
+    public Sigil(Vector2 startPosition, Vector2 endPosition, Time arrivalTime, Time destroyTime, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(startPosition, 0f, isP1Owned, isPlayerOwned, isRemote) {
 
         distance = endPosition - startPosition;
 

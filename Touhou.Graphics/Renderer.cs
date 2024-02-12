@@ -47,7 +47,7 @@ public class Renderer {
         this.context = context;
 
         textureAtlas = new TextureAtlas();
-        textureAtlas.Load("./assets/sprites/data.json");
+        textureAtlas.Load("./assets/sprites/sprites.json");
 
         textureLibrary = new TextureLibrary();
         textureLibrary.LoadTexture("./assets/sprites/sprites.png");
@@ -77,6 +77,8 @@ public class Renderer {
         fontLibrary.Load("./assets/fonts/consolas.png", "./assets/fonts/consolas.json");
 
         renderableLayers = Enum.GetNames<Layer>().Select(_ => new Queue<Renderable>()).ToArray();
+
+        Log.Info($"Max texture size: {GL.GetInteger(GetPName.MaxTextureSize)}");
 
         GL.Enable(EnableCap.Blend);
         GL.BlendEquation(BlendEquationMode.FuncAdd);

@@ -38,7 +38,7 @@ public abstract class TimestopProjectile : Projectile {
 
 
 
-    public TimestopProjectile(Vector2 origin, float orientation, bool startsTimeStopped, bool isPlayerOwned, bool isRemote) : base(isPlayerOwned, isRemote) {
+    public TimestopProjectile(Vector2 origin, float orientation, bool startsTimeStopped, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(isP1Owned, isPlayerOwned, isRemote) {
 
         this.origin = origin;
         this.orientation = orientation;

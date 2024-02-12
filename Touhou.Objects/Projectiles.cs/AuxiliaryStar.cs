@@ -23,7 +23,7 @@ public class AuxiliaryStar : ParametricProjectile {
 
 
 
-    public AuxiliaryStar(uint parentId, float size, float divergeTime, float divergeAngle, float beforeDivergeVelocity, float afterDivergeVelocity, Vector2 origin, float orientation, bool isPlayerOwned, bool isRemote) : base(origin, orientation, isPlayerOwned, isRemote) {
+    public AuxiliaryStar(uint parentId, float size, float divergeTime, float divergeAngle, float beforeDivergeVelocity, float afterDivergeVelocity, Vector2 origin, float orientation, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(origin, orientation, isP1Owned, isPlayerOwned, isRemote) {
 
         this.parentId = parentId;
         this.size = size;
@@ -35,7 +35,7 @@ public class AuxiliaryStar : ParametricProjectile {
         this.initialRotation = Game.Random.NextSingle() * MathF.Tau;
         this.rotationDirection = MathF.Sign(Game.Random.Next(2) - 0.5f);
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, size, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, size, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
     }
 
     protected override Vector2 PositionFunction(float t) {
@@ -48,7 +48,7 @@ public class AuxiliaryStar : ParametricProjectile {
     public override void Update() {
 
         DestroyedOnScreenExit = FuncTimeWithSpawnOffset.AsSeconds() >= divergeTime + 1f ? true : false;
-        CanCollide = !IsPlayerOwned && (FuncTimeWithSpawnOffset.AsSeconds() >= divergeTime ? true : false);
+        CanCollide = !IsP1Owned && (FuncTimeWithSpawnOffset.AsSeconds() >= divergeTime ? true : false);
 
         base.Update();
     }

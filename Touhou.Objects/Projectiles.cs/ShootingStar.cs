@@ -21,7 +21,7 @@ public class ShootingStar : ParametricProjectile {
 
     private readonly AuxiliaryStar[] trailStars;
 
-    public ShootingStar(int seed, float velocity, float trailVelocity, Vector2 origin, float orientation, bool isPlayerOwned, bool isRemote) : base(origin, orientation, isPlayerOwned, isRemote) {
+    public ShootingStar(int seed, float velocity, float trailVelocity, Vector2 origin, float orientation, bool isP1Owned, bool isPlayerOwned, bool isRemote) : base(origin, orientation, isP1Owned, isPlayerOwned, isRemote) {
 
         this.seed = seed;
         this.velocity = velocity;
@@ -32,7 +32,7 @@ public class ShootingStar : ParametricProjectile {
 
         this.trailStars = new AuxiliaryStar[38];
 
-        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 20f, isPlayerOwned ? CollisionGroup.PlayerProjectile : CollisionGroup.OpponentProjectileMinor));
+        Hitboxes.Add(new CircleHitbox(this, Vector2.Zero, 20f, isP1Owned ? CollisionGroup.P1MinorProjectile : CollisionGroup.P2MinorProjectile));
 
     }
 
@@ -47,7 +47,7 @@ public class ShootingStar : ParametricProjectile {
 
             var offset = new Vector2(MathF.Cos(randomOffsetAngle), MathF.Sin(randomOffsetAngle)) * 10f;
 
-            trailStars[i] = new AuxiliaryStar(Id, 8f, 0.1f * i + 0.05f, randomAngle, velocity, trailVelocity, Origin + offset, Orientation, IsPlayerOwned, IsRemote) {
+            trailStars[i] = new AuxiliaryStar(Id, 8f, 0.1f * i + 0.05f, randomAngle, velocity, trailVelocity, Origin + offset, Orientation, IsP1Owned, IsPlayerOwned, IsRemote) {
                 SpawnDuration = SpawnDuration,
                 Color = Color,
                 GrazeAmount = TrailGrazeAmount,

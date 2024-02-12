@@ -1,0 +1,6 @@
+{
+    "SourceDirectory": "./source",
+    "OutputDirectory": "./",
+    "OutputName": "sprites",
+    "Margin": 4
+}

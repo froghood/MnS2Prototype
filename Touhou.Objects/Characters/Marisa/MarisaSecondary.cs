@@ -5,7 +5,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class MarisaSecondary : Attack {
+public class MarisaSecondary : Attack<Marisa> {
 
     private readonly Time aimHoldTimeThreshhold = Time.InMilliseconds(75);
     private readonly int grazeAmount = 6;
@@ -14,39 +14,39 @@ public class MarisaSecondary : Attack {
     private bool isAiming;
 
 
-    public MarisaSecondary() {
-        Holdable = true;
+    public MarisaSecondary(Marisa c) : base(c) {
+        IsHoldable = true;
     }
 
 
 
-    public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
+    public override void LocalPress(Time cooldownOverflow, bool focused) {
 
-        aimAngle = player.AngleToOpponent;
+        aimAngle = c.AngleToOpponent;
 
-        player.DisableAttacks(
+        c.DisableAttacks(
             PlayerActions.Primary,
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB
+            PlayerActions.Special,
+            PlayerActions.Super
         );
     }
 
 
 
-    public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
+    public override void LocalHold(Time cooldownOverflow, Time holdTime, bool focused) {
         if (holdTime < aimHoldTimeThreshhold) return;
 
         isAiming = true;
 
-        float targetAngle = MathF.Atan2(player.Velocity.Y, player.Velocity.X);
-        bool isMoving = (player.Velocity.X != 0f || player.Velocity.Y != 0f);
+        float targetAngle = MathF.Atan2(c.Velocity.Y, c.Velocity.X);
+        bool isMoving = (c.Velocity.X != 0f || c.Velocity.Y != 0f);
         float angleFromTarget = TMathF.NormalizeAngle(targetAngle - aimAngle);
 
         if (isMoving) {
-            aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds())));
+            aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(c.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds())));
             aimAngle = TMathF.NormalizeAngle(aimAngle + MathF.Min(MathF.Abs(angleFromTarget), 3f * Game.Delta.AsSeconds()) * MathF.Sign(angleFromTarget));
         } else {
-            aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(player.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.001f, Game.Delta.AsSeconds())));
+            aimAngle = TMathF.NormalizeAngle(aimAngle + TMathF.NormalizeAngle(c.AngleToOpponent - aimAngle) * (1f - MathF.Pow(0.001f, Game.Delta.AsSeconds())));
 
         }
 
@@ -54,37 +54,37 @@ public class MarisaSecondary : Attack {
 
 
 
-    public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
+    public override void LocalRelease(Time cooldownOverflow, Time heldTime, bool focused) {
 
-        var explodingStar = new ExplodingStar(250f, 150f, player.Position, aimAngle, true, false) {
+        var explodingStar = new ExplodingStar(250f, 150f, c.Position, aimAngle, c.IsP1, c.IsPlayer, false) {
             SpawnDuration = Time.InSeconds(0.25f),
             DestroyedOnScreenExit = false,
             CanCollide = false,
             Color = new Color4(0f, 1f, 0f, 0.4f)
         };
 
-        player.Scene.AddEntity(explodingStar);
+        c.Scene.AddEntity(explodingStar);
         explodingStar.ForwardTime(cooldownOverflow, false);
 
         var refundTime = Time.Min(heldTime, Time.InSeconds(0.3f));
 
-        player.ApplyAttackCooldowns(Time.InSeconds(0.6f) - refundTime - cooldownOverflow, PlayerActions.Primary);
-        player.ApplyAttackCooldowns(Time.InSeconds(1f) - refundTime - cooldownOverflow, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(Time.InSeconds(0.2f),
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB
+        c.ApplyAttackCooldowns(Time.InSeconds(0.6f) - refundTime - cooldownOverflow, PlayerActions.Primary);
+        c.ApplyAttackCooldowns(Time.InSeconds(1f) - refundTime - cooldownOverflow, PlayerActions.Secondary);
+        c.ApplyAttackCooldowns(Time.InSeconds(0.2f),
+            PlayerActions.Special,
+            PlayerActions.Super
         );
 
-        player.EnableAttacks(
+        c.EnableAttacks(
             PlayerActions.Primary,
-            PlayerActions.SpecialA,
-            PlayerActions.SpecialB
+            PlayerActions.Special,
+            PlayerActions.Super
         );
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Secondary)
         .In(Game.Network.Time - cooldownOverflow)
-        .In(player.Position)
+        .In(c.Position)
         .In(aimAngle);
 
         Game.Network.Send(packet);
@@ -95,7 +95,7 @@ public class MarisaSecondary : Attack {
 
 
 
-    public override void OpponentReleased(Opponent opponent, Packet packet) {
+    public override void RemoteRelease(Packet packet) {
 
         packet
         .Out(out Time theirTime)
@@ -104,7 +104,7 @@ public class MarisaSecondary : Attack {
 
         var latency = Game.Network.Time - theirTime;
 
-        var explodingStar = new ExplodingStar(250f, 150f, theirPosition, theirAngle, false, true) {
+        var explodingStar = new ExplodingStar(250f, 150f, theirPosition, theirAngle, c.IsP1, c.IsPlayer, true) {
             SpawnDuration = Time.InSeconds(0.25f),
             DestroyedOnScreenExit = false,
             Color = new Color4(1f, 0f, 0f, 1f),
@@ -112,19 +112,19 @@ public class MarisaSecondary : Attack {
             ExplosionGrazeAmount = explosionGrazeAmount,
         };
 
-        opponent.Scene.AddEntity(explodingStar);
+        c.Scene.AddEntity(explodingStar);
 
         explodingStar.ForwardTime(latency, true);
 
     }
 
-    public override void PlayerRender(Player player) {
+    public override void Render() {
 
         if (!isAiming) return;
 
         var aimArrowSprite = new Sprite("aimarrow2") {
             Origin = new Vector2(-0.0625f, 0.5f),
-            Position = player.Position,
+            Position = c.Position,
             Rotation = aimAngle,
             Scale = new Vector2(0.3f),
             Color = new Color4(1f, 1f, 1f, 0.5f),

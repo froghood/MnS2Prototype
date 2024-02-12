@@ -6,7 +6,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class ReimuSecondary : Attack {
+public class ReimuSecondary : Attack<Reimu> {
 
     private readonly float velocity = 200f;
     private readonly float turnRadius = 150f;
@@ -32,32 +32,32 @@ public class ReimuSecondary : Attack {
     // cooldowns
     private readonly Time primaryCooldown = Time.InSeconds(0.5f);
     private readonly Time secondaryCooldown = Time.InSeconds(2.5f);
-    private readonly Time specialACooldown = Time.InSeconds(0.5f);
-    private readonly Time specialBCooldown = Time.InSeconds(0.5f);
+    private readonly Time specialCooldown = Time.InSeconds(0.5f);
+    private readonly Time superCooldown = Time.InSeconds(0.5f);
 
 
 
-    public ReimuSecondary() {
-        Holdable = true;
+    public ReimuSecondary(Reimu c) : base(c) {
+        IsHoldable = true;
 
         Icon = "reimu_secondary";
     }
 
-    public override void PlayerPress(Player player, Time cooldownOverflow, bool focused) {
-        player.DisableAttacks(PlayerActions.Primary, PlayerActions.SpecialA, PlayerActions.SpecialB);
+    public override void LocalPress(Time cooldownOverflow, bool focused) {
+        c.DisableAttacks(PlayerActions.Primary, PlayerActions.Special, PlayerActions.Super);
     }
 
 
 
-    public override void PlayerHold(Player player, Time cooldownOverflow, Time holdTime, bool focused) {
+    public override void LocalHold(Time cooldownOverflow, Time holdTime, bool focused) {
         float aimRangeRadians = MathF.PI / 180f * aimRange;
         float gamma = 1 - MathF.Pow(aimStrength, Game.Delta.AsSeconds());
-        float velocityAngle = MathF.Atan2(player.Velocity.Y, player.Velocity.X);
-        bool moving = (player.Velocity.X != 0 || player.Velocity.Y != 0);
+        float velocityAngle = MathF.Atan2(c.Velocity.Y, c.Velocity.X);
+        bool moving = (c.Velocity.X != 0 || c.Velocity.Y != 0);
 
         if (holdTime > aimHoldTimeThreshhold) { // 75ms / 4.5 frames
             attackHold = true;
-            var arcLengthToVelocity = TMathF.NormalizeAngle(velocityAngle - TMathF.NormalizeAngle(player.AngleToOpponent + normalizedAimOffset * aimRangeRadians));
+            var arcLengthToVelocity = TMathF.NormalizeAngle(velocityAngle - TMathF.NormalizeAngle(c.AngleToOpponent + normalizedAimOffset * aimRangeRadians));
             if (moving) {
                 normalizedAimOffset -= normalizedAimOffset * gamma;
                 normalizedAimOffset += MathF.Abs(arcLengthToVelocity / aimRangeRadians) < gamma ? arcLengthToVelocity / aimRangeRadians : gamma * MathF.Sign(arcLengthToVelocity);
@@ -74,10 +74,10 @@ public class ReimuSecondary : Attack {
 
 
 
-    public override void PlayerRelease(Player player, Time cooldownOverflow, Time heldTime, bool focused) {
+    public override void LocalRelease(Time cooldownOverflow, Time heldTime, bool focused) {
 
         foreach (var angle in angles) {
-            var projectile = new LocalHomingAmulet(player.Position, player.AngleToOpponent + aimOffset + angle, turnRadius, velocity, hitboxRadius) {
+            var projectile = new LocalHomingAmulet(c.Position, c.AngleToOpponent + aimOffset + angle, turnRadius, velocity, hitboxRadius, c.IsP1, c.IsPlayer) {
                 SpawnDuration = spawnDuration,
                 PreHomingDuration = preHomingDuration,
                 HomingDuration = homingDuration,
@@ -86,25 +86,25 @@ public class ReimuSecondary : Attack {
                 CanCollide = false,
             };
 
-            player.Scene.AddEntity(projectile);
+            c.Scene.AddEntity(projectile);
         }
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Secondary)
         .In(Game.Network.Time)
-        .In(player.Position)
-        .In(player.AngleToOpponent + aimOffset);
+        .In(c.Position)
+        .In(c.AngleToOpponent + aimOffset);
 
         Game.Network.Send(packet);
 
 
 
-        player.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
-        player.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerActions.Secondary);
-        player.ApplyAttackCooldowns(specialACooldown - cooldownOverflow, PlayerActions.SpecialA);
-        player.ApplyAttackCooldowns(specialBCooldown - cooldownOverflow, PlayerActions.SpecialB);
+        c.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
+        c.ApplyAttackCooldowns(secondaryCooldown - cooldownOverflow, PlayerActions.Secondary);
+        c.ApplyAttackCooldowns(specialCooldown - cooldownOverflow, PlayerActions.Special);
+        c.ApplyAttackCooldowns(superCooldown - cooldownOverflow, PlayerActions.Super);
 
-        player.EnableAttacks(PlayerActions.Primary, PlayerActions.SpecialA, PlayerActions.SpecialB);
+        c.EnableAttacks(PlayerActions.Primary, PlayerActions.Special, PlayerActions.Super);
 
         attackHold = false;
         aimOffset = 0f;
@@ -113,12 +113,12 @@ public class ReimuSecondary : Attack {
 
 
 
-    public override void OpponentReleased(Opponent opponent, Packet packet) {
+    public override void RemoteRelease(Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2 theirPosition).Out(out float theirAngle);
         var delta = Game.Network.Time - theirTime;
 
         foreach (var angle in angles) {
-            var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, turnRadius, velocity, hitboxRadius) {
+            var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, turnRadius, velocity, hitboxRadius, c.IsP1, c.IsPlayer) {
 
                 SpawnDuration = spawnDuration,
                 PreHomingDuration = preHomingDuration,
@@ -128,19 +128,19 @@ public class ReimuSecondary : Attack {
                 GrazeAmount = 3,
             };
 
-            opponent.Scene.AddEntity(projectile);
+            c.Scene.AddEntity(projectile);
         }
     }
 
-    public override void PlayerRender(Player player) {
+    public override void Render() {
         if (!attackHold) return;
 
         float darkness = 1f - 0.4f * MathF.Abs(normalizedAimOffset);
 
         var aimArrowSprite = new Sprite("aimarrow2") {
             Origin = new Vector2(-0.0625f, 0.5f),
-            Position = player.Position,
-            Rotation = player.AngleToOpponent + aimOffset,
+            Position = c.Position,
+            Rotation = c.AngleToOpponent + aimOffset,
             Scale = new Vector2(0.3f),
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
