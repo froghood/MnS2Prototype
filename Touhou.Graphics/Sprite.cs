@@ -36,91 +36,45 @@ public class Sprite : Renderable {
 
     public override void Render() {
 
-
-
         var textureUV = Game.Renderer.TextureAtlas.GetUVTuple(SpriteName);
         var textureSize = Game.Renderer.TextureAtlas.GetSize(SpriteName);
 
-        var origin = textureSize * Origin;
-
-        var rotationMatrix = Matrix2.CreateRotation(Rotation);
-
+        // model + projection matrix
         var cameraPosition = IsUI ? Vector2.Zero : Game.Camera.Position;
-
-        var modelMatrix = Matrix4.Identity;
-        modelMatrix *= Matrix4.CreateScale(Scale.X, Scale.Y, 0f);
-        modelMatrix *= Matrix4.CreateRotationZ(Rotation);
-        modelMatrix *= Matrix4.CreateTranslation(Position.X, Position.Y, 0f);
-        modelMatrix *= Matrix4.CreateTranslation(-cameraPosition.X, -cameraPosition.Y, 0f);
-
         var cameraScale = Game.Camera.GetCameraScale(IsUI);
 
+        var modelProjectionMatrix =
+              Matrix4.CreateTranslation(-Origin.X, -Origin.Y, 0f)
+            * Matrix4.CreateScale(textureSize.X * Scale.X, textureSize.Y * Scale.Y, 0f)
+            * Matrix4.CreateRotationZ(Rotation)
+            * Matrix4.CreateTranslation(Position.X - cameraPosition.X, Position.Y - cameraPosition.Y, 0f)
+            * Matrix4.CreateOrthographicOffCenter(
+                Game.WindowSize.X * -cameraScale / 2f,
+                Game.WindowSize.X * cameraScale / 2f,
+                Game.WindowSize.Y * -cameraScale / 2f,
+                Game.WindowSize.Y * cameraScale / 2f,
+                -1f, 1f
+            );
 
-
-        var projectionMatrix = Matrix4.CreateOrthographicOffCenter(
-            Game.WindowSize.X * -cameraScale / 2f,
-            Game.WindowSize.X * cameraScale / 2f,
-            Game.WindowSize.Y * -cameraScale / 2f,
-            Game.WindowSize.Y * cameraScale / 2f,
-             -1f, 1f);
-
-        float[] vertices = new float[32];
-
-        // bottom left
-        var bl = Vector2.Zero - origin; // model space
-        vertices[0] = bl.X;
-        vertices[1] = bl.Y;
-        vertices[2] = textureUV.BottomLeft.X;
-        vertices[3] = textureUV.BottomLeft.Y;
-
-        // bottom right
-        var br = Vector2.UnitX * textureSize - origin; // model space
-        vertices[4] = br.X;
-        vertices[5] = br.Y;
-        vertices[6] = textureUV.BottomRight.X;
-        vertices[7] = textureUV.BottomRight.Y;
-
-        // top left
-        var tl = Vector2.UnitY * textureSize - origin; // model space
-        vertices[8] = tl.X;
-        vertices[9] = tl.Y;
-        vertices[10] = textureUV.TopLeft.X;
-        vertices[11] = textureUV.TopLeft.Y;
-
-        // top right
-        var tr = Vector2.One * textureSize - origin; // model space
-        vertices[12] = tr.X;
-        vertices[13] = tr.Y;
-        vertices[14] = textureUV.TopRight.X;
-        vertices[15] = textureUV.TopRight.Y;
+        float[] vertices = new float[] {
+            0f, 0f, textureUV.BottomLeft.X,  textureUV.BottomLeft.Y,
+            1f, 0f, textureUV.BottomRight.X, textureUV.BottomRight.Y,
+            0f, 1f, textureUV.TopLeft.X,     textureUV.TopLeft.Y,
+            1f, 1f, textureUV.TopRight.X,    textureUV.TopRight.Y,
+        };
 
         vertexArray.BufferVertexData(vertices, BufferUsageHint.DynamicDraw);
-
         vertexArray.Bind();
 
         Game.Renderer.ShaderLibrary.UseShader("spriteb");
 
-        Game.Renderer.ShaderLibrary.Uniform("cameraPosition", cameraPosition);
-        Game.Renderer.ShaderLibrary.Uniform("modelMatrix", modelMatrix);
-        Game.Renderer.ShaderLibrary.Uniform("projectionMatrix", projectionMatrix);
+        Game.Renderer.ShaderLibrary.Uniform("modelProjectionMatrix", modelProjectionMatrix);
         Game.Renderer.ShaderLibrary.Uniform("alignment", Alignment);
-
         Game.Renderer.ShaderLibrary.Uniform("inColor", Color);
         Game.Renderer.ShaderLibrary.Uniform("useColorSwapping", UseColorSwapping);
 
         Game.Renderer.TextureLibrary.UseTexture("sprites", TextureUnit.Texture0);
 
-
-
         GL.DrawElements(PrimitiveType.Triangles, vertexArray.IndexCount, DrawElementsType.UnsignedInt, 0);
-    }
-
-    private Vector2 TransformModelToNDC(Vector2 position, Matrix2 rotation) {
-        //if (!IsUI) Log.Info(Game.Camera.GetCameraScale(IsUI));
-
-        position = position * rotation * Scale + Position; // world space
-        position = position / ((Vector2)Game.WindowSize * Game.Camera.GetCameraScale(IsUI)) * 2f;
-        position += IsUI ? Alignment : -Game.Camera.Position;
-        return position;
     }
 }
