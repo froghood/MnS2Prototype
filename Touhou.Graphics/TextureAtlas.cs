@@ -57,9 +57,43 @@ public class TextureAtlas {
         }
     }
 
+    public (Vector2 BottomLeft, Vector2 BottomRight, Vector2 TopLeft, Vector2 TopRight) GetUVTuple(string name) {
+
+
+
+        if (!sprites.TryGetValue(name, out var bounds)) return (Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero);
+
+        var size = new Vector2(width, height);
+
+        var left = bounds.Left + 0.0f;
+        var right = bounds.Right + 1f - 0.0f;
+
+        var bottom = size.Y - (bounds.Bottom + 1f) + 0.0f;
+        var top = size.Y - bounds.Top - 0.0f;
+
+        var uv = bounds.IsRotated ? (
+            new Vector2(left + 0.0f, top + 0.0f) / size,
+            new Vector2(left - 0.0f, bottom + 0.0f) / size,
+            new Vector2(right + 0.0f, top - 0.0f) / size,
+            new Vector2(right - 0.0f, bottom - 0.0f) / size
+        ) : (
+            new Vector2(left + 0.0f, bottom + 0.0f) / size,
+            new Vector2(right - 0.0f, bottom + 0.0f) / size,
+            new Vector2(left + 0.0f, top - 0.0f) / size,
+            new Vector2(right - 0.0f, top - 0.0f) / size
+        );
+
+        if (name == "aimarrow2") System.Console.WriteLine(uv);
+
+        return uv;
+
+    }
+
     internal Vector2i GetSize(string name) {
         if (sprites.TryGetValue(name, out var bounds)) {
-            return new Vector2i(bounds.Right - bounds.Left, bounds.Bottom - bounds.Top);
+            return bounds.IsRotated ?
+            new Vector2i(bounds.Bottom - bounds.Top + 1, bounds.Right - bounds.Left + 1) :
+            new Vector2i(bounds.Right - bounds.Left + 1, bounds.Bottom - bounds.Top + 1);
         } else {
             return default(Vector2i);
         }
@@ -90,5 +124,6 @@ public struct SubTexture {
 
 
     public int Bottom { get; init; }
+    public bool IsRotated { get; init; }
 
 }

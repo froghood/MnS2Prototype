@@ -63,34 +63,46 @@ public class OpenGLTestScene : Scene {
         AddEntity(new Touhou.Objects.Generics.RenderCallback(() => {
 
             var bg = new Sprite("box") {
-                Origin = new Vector2(0.5f, 0.333f),
+                Origin = new Vector2(0.5f, 0.5f),
+                Position = new Vector2(0f, 0f),
                 Scale = new Vector2(3f),
-                Rotation = Game.Time.AsSeconds(),
+                //Rotation = Game.Time.AsSeconds(),
                 Color = new Color4(1f, 0f, 0f, 1f),
                 IsUI = true,
             };
 
-            Game.Draw(bg, Layer.Background1);
+            Game.Draw(bg, Layer.Background2);
 
-            var bg2 = new Sprite("box") {
-                Origin = new Vector2(0.5f, 0.667f),
+            var bg2 = new Sprite("box2") {
+                Origin = new Vector2(0.5f, 0.5f),
+                Position = new Vector2(0f, 300f),
                 Scale = new Vector2(3f),
-                Rotation = Game.Time.AsSeconds() / 2f,
+                //Rotation = Game.Time.AsSeconds() / 2f,
                 Color = new Color4(0f, 1f, 0f, 1f),
                 IsUI = true,
             };
 
-            Game.Draw(bg2, Layer.Background1);
+            Game.Draw(bg2, Layer.Background2);
 
-            var bg3 = new Sprite("box") {
-                Origin = new Vector2(0.5f, 1f),
-                Scale = new Vector2(3f),
-                Rotation = Game.Time.AsSeconds() / 4f,
-                Color = new Color4(0f, 0f, 1f, 1f),
+            var laser = new Sprite("laser") {
+                Origin = new Vector2(0.5f, 0.5f),
+                Scale = new Vector2(3000f, 1f),
+                Color = new Color4(1f, 0f, 0f, 1f),
+                UseColorSwapping = true,
                 IsUI = true,
             };
 
-            Game.Draw(bg3, Layer.Background1);
+            Game.Draw(laser, Layer.Background1);
+
+            // var bg3 = new Sprite("box") {
+            //     Origin = new Vector2(0.5f, 1f),
+            //     Scale = new Vector2(1f),
+            //     //Rotation = Game.Time.AsSeconds() / 4f,
+            //     Color = new Color4(0f, 0f, 1f, 1f),
+            //     IsUI = true,
+            // };
+
+            // Game.Draw(bg3, Layer.Background1);
 
             // var sprite = new Sprite("blendtest") {
             //     Origin = new Vector2(0.5f),

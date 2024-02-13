@@ -38,7 +38,7 @@ public class Sprite : Renderable {
 
 
 
-        var textureUV = Game.Renderer.TextureAtlas.GetUV(SpriteName);
+        var textureUV = Game.Renderer.TextureAtlas.GetUVTuple(SpriteName);
         var textureSize = Game.Renderer.TextureAtlas.GetSize(SpriteName);
 
         var origin = textureSize * Origin;
@@ -70,29 +70,29 @@ public class Sprite : Renderable {
         var bl = Vector2.Zero - origin; // model space
         vertices[0] = bl.X;
         vertices[1] = bl.Y;
-        vertices[2] = textureUV.Min.X;
-        vertices[3] = textureUV.Min.Y;
+        vertices[2] = textureUV.BottomLeft.X;
+        vertices[3] = textureUV.BottomLeft.Y;
 
         // bottom right
         var br = Vector2.UnitX * textureSize - origin; // model space
         vertices[4] = br.X;
         vertices[5] = br.Y;
-        vertices[6] = textureUV.Max.X;
-        vertices[7] = textureUV.Min.Y;
+        vertices[6] = textureUV.BottomRight.X;
+        vertices[7] = textureUV.BottomRight.Y;
 
         // top left
         var tl = Vector2.UnitY * textureSize - origin; // model space
         vertices[8] = tl.X;
         vertices[9] = tl.Y;
-        vertices[10] = textureUV.Min.X;
-        vertices[11] = textureUV.Max.Y;
+        vertices[10] = textureUV.TopLeft.X;
+        vertices[11] = textureUV.TopLeft.Y;
 
         // top right
         var tr = Vector2.One * textureSize - origin; // model space
         vertices[12] = tr.X;
         vertices[13] = tr.Y;
-        vertices[14] = textureUV.Max.X;
-        vertices[15] = textureUV.Max.Y;
+        vertices[14] = textureUV.TopRight.X;
+        vertices[15] = textureUV.TopRight.Y;
 
         vertexArray.BufferVertexData(vertices, BufferUsageHint.DynamicDraw);
 

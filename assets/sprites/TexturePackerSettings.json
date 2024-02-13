@@ -2,5 +2,5 @@
     "SourceDirectory": "./source",
     "OutputDirectory": "./",
     "OutputName": "sprites",
-    "Margin": 4
+    "Margin": 16
 }
