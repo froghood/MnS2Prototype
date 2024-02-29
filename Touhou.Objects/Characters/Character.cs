@@ -13,7 +13,6 @@ public class Character : Entity {
 
 
     public Color4 Color { get; init; }
-
     public float Speed { get; protected init; }
     public float FocusedSpeed { get; protected init; }
 
