@@ -28,7 +28,7 @@ public class Character : Entity {
 
     public bool IsFocused { get; protected set; }
     public Vector2 Velocity { get; protected set; }
-    public Vector2 MovementVector { get; protected set; }
+
     public float MovespeedModifier { get; protected set; }
     public Timer MovespeedModifierTimer { get; protected set; }
 
@@ -50,7 +50,7 @@ public class Character : Entity {
     public Timer InvulnerabilityTimer { get; protected set; }
 
     public Timer HitTimer { get; protected set; }
-    public Timer KnockbackTimer { get; protected set; }
+    public Timer KnockbackedTimer { get; protected set; }
 
     public Time DeathTime { get; protected set; }
 
@@ -74,69 +74,27 @@ public class Character : Entity {
 
 
 
-
-
     public Match Match { get => match ??= Scene.GetFirstEntity<Match>(); }
     private Match match;
 
-    private Vector2 basePosition;
-    private Vector2 interpolationOffset;
-    private Timer interpolationTimer;
 
-    private List<(Vector2 Offset, Timer Timer, Func<float, float> Easing)> interpolations = new();
 
     private Dictionary<PlayerActions, Attack> attacks = new();
     private Dictionary<PlayerActions, (Time CooldownOverflow, Time HoldTime, bool IsFocused)> heldAttacks = new();
-
     private Bomb bomb;
 
-    private Vector2 knockbackStartPosition;
-    private Vector2 knockbackEndPosition;
 
 
     public Character(bool isP1, bool isPlayer, Color4 color) {
         IsP1 = isP1;
         IsPlayer = isPlayer;
 
-
         Color = color;
 
-        basePosition = new Vector2(isP1 ? -200f : 200f, 0f);
-
+        Position = new Vector2(isP1 ? -200f : 200f, 0f);
     }
 
 
-
-    public override void Update() {
-        switch (State) {
-            case CharacterState.Free:
-                UpdateMovement();
-                break;
-
-            case CharacterState.Knockbacked:
-                UpdateKnockback();
-                break;
-        }
-
-        basePosition = new Vector2(
-            Math.Clamp(basePosition.X, -Match.Bounds.X, Match.Bounds.X),
-            Math.Clamp(basePosition.Y, -Match.Bounds.Y, Match.Bounds.Y)
-        );
-
-        Position = basePosition;
-
-        foreach (var interpolation in interpolations) {
-            Position += interpolation.Offset * interpolation.Easing(interpolation.Timer.RemainingRatio);
-        }
-
-        Position = new Vector2(
-            Math.Clamp(Position.X, -Match.Bounds.X, Match.Bounds.X),
-            Math.Clamp(Position.Y, -Match.Bounds.Y, Match.Bounds.Y)
-        );
-
-
-
-    }
 
     public override void Render() {
         foreach (var attack in attacks) {
@@ -145,6 +103,7 @@ public class Character : Entity {
 
         RenderArrow();
         RenderMiniHud();
+        RenderHitbox();
     }
 
 
@@ -199,31 +158,27 @@ public class Character : Entity {
 
     }
 
+    private void RenderHitbox() {
+        var hitboxSprite = new Sprite(IsFocused ? "hitboxfocused" : "hitboxunfocused") {
+            Origin = new Vector2(0.5f, 0.5f),
+            Position = Position,
+            Scale = new Vector2(IsFocused ? 0.15f : 0.2f),
+            Color = Color,
+            UseColorSwapping = true,
+        };
+
+        Game.Draw(hitboxSprite, IsPlayer ? Layer.Player : Layer.Opponent);
+    }
+
+    public void SetState(CharacterState state) => State = state;
+
     public void Focus() => IsFocused = true;
     public void Unfocus() => IsFocused = false;
 
-    public void SetPosition(Vector2 position) {
-        State = CharacterState.Free;
+    public void SetVelocity(Vector2 velocity) => Velocity = velocity;
+    public void SetPosition(Vector2 position) => Position = position;
 
-        basePosition = position;
-    }
 
-    public void AddInterpolation(Vector2 offset, Time duration, Func<float, float> function) {
-        interpolations.Add((offset, new Timer(duration), function));
-    }
-
-    public void ResetInterpolations() => interpolations.Clear();
-
-    public void InterpolatePosition(Vector2 offset, Time duration) {
-        interpolationOffset = offset;
-        interpolationTimer = new Timer(duration);
-    }
-
-    public void SetVelocity(Vector2 velocity) {
-        State = CharacterState.Free;
-        Velocity = velocity;
-
-    }
 
     public void ApplyMovespeedModifier(float modifier) {
         MovespeedModifier = modifier;
@@ -299,50 +254,42 @@ public class Character : Entity {
     }
 
     public void ReleaseLocalAttack(PlayerActions action) {
-
         if (!heldAttacks.TryGetValue(action, out var holdState)) return;
 
         var attack = attacks[action];
 
         attack.LocalRelease(holdState.CooldownOverflow, Game.Time - holdState.HoldTime, holdState.IsFocused);
         heldAttacks.Remove(action);
-
-    }
-
-    public void ReleaseRemoteAttack(PlayerActions action, Packet packet) {
-        attacks[action].RemoteRelease(packet);
-
     }
 
 
 
-    public bool IsBombAvailable() {
-        return (BombCount > 0 && bomb.CooldownTimer.HasFinished);
+    public void ReleaseAllLocalAttacks() {
+        foreach ((var action, var holdState) in heldAttacks) {
+
+            var attack = attacks[action];
+
+            attack.LocalRelease(holdState.CooldownOverflow, Game.Time - holdState.HoldTime, holdState.IsFocused);
+            heldAttacks.Remove(action);
+        }
     }
 
+    public void ReleaseRemoteAttack(PlayerActions action, Packet packet) => attacks[action].RemoteRelease(packet);
+
+
+
+    public bool IsBombAvailable() => BombCount > 0 && bomb.CooldownTimer.HasFinished;
     public Timer GetBombCooldownTimer() => bomb.CooldownTimer;
 
-    public void PressLocalBomb(Time cooldownOverflow, bool isFocused) {
+    public void PressLocalBomb(Time cooldownOverflow, bool isFocused) => bomb.LocalPress(cooldownOverflow, isFocused);
 
-        bomb.LocalPress(cooldownOverflow, isFocused);
-        BombCount--;
+    public void PressRemoteBomb(Packet packet) => bomb.RemotePress(packet);
 
-        State = CharacterState.Free;
-    }
-
-    internal void PressRemoteBomb(Packet packet) {
-        bomb.RemotePress(packet);
-        BombCount--;
-
-        State = CharacterState.Free;
-
-    }
 
 
 
     public void ApplyAttackCooldowns(Time duration, params PlayerActions[] actions) {
         foreach (var action in actions) attacks[action].ApplyCooldown(duration);
-
     }
 
     public void DisableAttacks(params PlayerActions[] actions) {
@@ -369,6 +316,10 @@ public class Character : Entity {
         return amountActuallySpent;
     }
 
+    public void SpendBomb(int amount = 1) {
+        BombCount -= amount;
+    }
+
 
     public void ApplyInvulnerability() => InvulnerabilityTimer = Timer.MaxDuration();
     public void ApplyInvulnerability(Time duration) => InvulnerabilityTimer = new Timer(duration);
@@ -381,6 +332,7 @@ public class Character : Entity {
         State = CharacterState.Hit;
         HitTimer = Timer.MaxDuration();
     }
+
     public void Hit(Time duration) {
         State = CharacterState.Hit;
         HitTimer = new Timer(duration);
@@ -389,11 +341,9 @@ public class Character : Entity {
     public void Damage() => HeartCount = Math.Max(HeartCount - 1, 0);
 
 
-    public void Knockback(float direction, float strength, Time duration) {
+    public void Knockback(Time duration) {
         State = CharacterState.Knockbacked;
-        knockbackStartPosition = Position;
-        knockbackEndPosition = Position + new Vector2(MathF.Cos(direction), MathF.Sin(direction)) * strength;
-        KnockbackTimer = new Timer(duration);
+        KnockbackedTimer = new Timer(duration);
     }
 
 
@@ -431,15 +381,5 @@ public class Character : Entity {
 
         this.bomb = bomb;
     }
-
-
-
-    private void UpdateMovement() => basePosition += Velocity * Game.Delta.AsSeconds();
-
-    private void UpdateKnockback() {
-        var t = 1f - KnockbackTimer.Remaining.AsSeconds() / KnockbackTimer.Duration.AsSeconds();
-        basePosition = knockbackStartPosition + (knockbackEndPosition - knockbackStartPosition) * Easing.Out(t, 5f);
-    }
-
 
 }
