@@ -137,18 +137,22 @@ internal static class Game {
 
         network.PacketReceived += (packet, endPoint) => sceneManager.Current.Receive(packet, endPoint);
 
-        // renderer.ClearColor = new Color4(0.1f, 0.1f, 0.16f, 1f);
         renderer.ClearColor = new Color4(.1f, .1f, .16f, 1f);
-        //renderer.ClearColor = new Color4(0f, 0f, 0f, 1f);
-        //renderer.ClearColor = new Color4(1f, 1f, 1f, 1f);
 
-        //Debug.Fields.Add("step");
-        Stats.Add("update");
-        //Debug.Fields.Add("collision");
-        Stats.Add("render");
-        //Debug.Fields.Add("postRender");
 
-        Scenes.ChangeScene<MainScene>();
+        Stats.Add("updateTime");
+        Stats.Add("renderTime");
+
+
+
+        foreach (var arg in args) {
+            (arg switch {
+                "-h" => () => Scenes.ChangeScene<HostingScene>(),
+                "-c" => () => Scenes.ChangeScene<ConnectingScene>(),
+                "-t" => () => Scenes.ChangeScene<OpenGLTestScene>(),
+                _ => (Action)(() => Scenes.ChangeScene<MainScene>())
+            })();
+        }
 
         window.IsVisible = true;
     }

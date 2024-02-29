@@ -80,39 +80,39 @@
       "IsRotated": false
     },
     "reimu": {
-      "Left": 2723,
-      "Top": 2366,
-      "Right": 3093,
-      "Bottom": 2781,
-      "IsRotated": true
-    },
-    "sakuya": {
       "Left": 0,
       "Top": 2806,
-      "Right": 397,
-      "Bottom": 3173,
+      "Right": 415,
+      "Bottom": 3176,
       "IsRotated": false
     },
+    "sakuya": {
+      "Left": 2723,
+      "Top": 2366,
+      "Right": 3090,
+      "Bottom": 2763,
+      "IsRotated": true
+    },
     "sigil": {
-      "Left": 414,
+      "Left": 432,
       "Top": 2806,
-      "Right": 739,
+      "Right": 757,
       "Bottom": 3132,
       "IsRotated": false
     },
     "marisa": {
-      "Left": 2845,
-      "Top": 1257,
-      "Right": 3148,
-      "Bottom": 1644,
-      "IsRotated": true
+      "Left": 2723,
+      "Top": 2780,
+      "Right": 3110,
+      "Bottom": 3083,
+      "IsRotated": false
     },
     "vortex": {
-      "Left": 2723,
-      "Top": 2798,
-      "Right": 3028,
-      "Bottom": 3100,
-      "IsRotated": true
+      "Left": 2845,
+      "Top": 1257,
+      "Right": 3147,
+      "Bottom": 1562,
+      "IsRotated": false
     },
     "aimindicator": {
       "Left": 1311,
@@ -136,17 +136,17 @@
       "IsRotated": false
     },
     "reimubombwave": {
-      "Left": 2243,
-      "Top": 2935,
-      "Right": 2497,
-      "Bottom": 3189,
+      "Left": 2845,
+      "Top": 1579,
+      "Right": 3099,
+      "Bottom": 1833,
       "IsRotated": false
     },
     "star": {
-      "Left": 2970,
-      "Top": 616,
-      "Right": 3213,
-      "Bottom": 859,
+      "Left": 2243,
+      "Top": 2935,
+      "Right": 2486,
+      "Bottom": 3178,
       "IsRotated": false
     },
     "butterfly": {
@@ -157,52 +157,52 @@
       "IsRotated": false
     },
     "hitboxfocused": {
-      "Left": 2845,
-      "Top": 1661,
-      "Right": 2976,
-      "Bottom": 1792,
+      "Left": 2503,
+      "Top": 2935,
+      "Right": 2634,
+      "Bottom": 3066,
       "IsRotated": false
     },
     "hitboxunfocused": {
-      "Left": 2993,
-      "Top": 1661,
-      "Right": 3124,
-      "Bottom": 1792,
+      "Left": 2970,
+      "Top": 616,
+      "Right": 3101,
+      "Bottom": 747,
       "IsRotated": false
     },
     "icon_background": {
-      "Left": 2514,
-      "Top": 2935,
-      "Right": 2633,
-      "Bottom": 3054,
+      "Left": 2970,
+      "Top": 764,
+      "Right": 3089,
+      "Bottom": 883,
       "IsRotated": false
     },
     "reimu_primary": {
       "Left": 2970,
-      "Top": 876,
+      "Top": 900,
       "Right": 3089,
-      "Bottom": 995,
+      "Bottom": 1019,
       "IsRotated": false
     },
     "reimu_primary_focused": {
       "Left": 2970,
-      "Top": 1012,
+      "Top": 1036,
       "Right": 3089,
-      "Bottom": 1131,
+      "Bottom": 1155,
       "IsRotated": false
     },
     "reimu_secondary": {
-      "Left": 2514,
-      "Top": 3071,
-      "Right": 2633,
-      "Bottom": 3190,
+      "Left": 3118,
+      "Top": 616,
+      "Right": 3237,
+      "Bottom": 735,
       "IsRotated": false
     },
     "fade": {
-      "Left": 3106,
-      "Top": 876,
-      "Right": 3205,
-      "Bottom": 975,
+      "Left": 2503,
+      "Top": 3083,
+      "Right": 2602,
+      "Bottom": 3182,
       "IsRotated": false
     },
     "aimarrow2": {
@@ -213,24 +213,24 @@
       "IsRotated": true
     },
     "ball": {
-      "Left": 2970,
-      "Top": 1148,
-      "Right": 3049,
-      "Bottom": 1227,
-      "IsRotated": false
-    },
-    "ball2": {
-      "Left": 3106,
-      "Top": 992,
-      "Right": 3185,
-      "Bottom": 1071,
-      "IsRotated": false
-    },
-    "heart": {
       "Left": 1485,
       "Top": 1688,
       "Right": 1564,
       "Bottom": 1767,
+      "IsRotated": false
+    },
+    "ball2": {
+      "Left": 3116,
+      "Top": 1579,
+      "Right": 3195,
+      "Bottom": 1658,
+      "IsRotated": false
+    },
+    "heart": {
+      "Left": 3116,
+      "Top": 1675,
+      "Right": 3195,
+      "Bottom": 1754,
       "IsRotated": false
     },
     "spinningamulet": {
@@ -241,11 +241,18 @@
       "IsRotated": true
     },
     "opponentarrow": {
-      "Left": 3045,
-      "Top": 2798,
-      "Right": 3114,
-      "Bottom": 2907,
-      "IsRotated": true
+      "Left": 3116,
+      "Top": 1771,
+      "Right": 3225,
+      "Bottom": 1840,
+      "IsRotated": false
+    },
+    "grid": {
+      "Left": 2970,
+      "Top": 1172,
+      "Right": 3033,
+      "Bottom": 1235,
+      "IsRotated": false
     },
     "arrowhead": {
       "Left": 1411,
@@ -255,31 +262,31 @@
       "IsRotated": true
     },
     "box": {
-      "Left": 2650,
-      "Top": 2935,
-      "Right": 2699,
-      "Bottom": 3134,
+      "Left": 3101,
+      "Top": 1857,
+      "Right": 3150,
+      "Bottom": 2056,
       "IsRotated": true
     },
     "box2": {
-      "Left": 3045,
-      "Top": 2924,
-      "Right": 3094,
-      "Bottom": 3123,
+      "Left": 3101,
+      "Top": 2073,
+      "Right": 3150,
+      "Bottom": 2272,
       "IsRotated": true
     },
     "largeknife": {
-      "Left": 414,
-      "Top": 3149,
-      "Right": 563,
-      "Bottom": 3198,
-      "IsRotated": false
+      "Left": 3167,
+      "Top": 1857,
+      "Right": 3216,
+      "Bottom": 2006,
+      "IsRotated": true
     },
     "needle": {
-      "Left": 2716,
-      "Top": 3117,
-      "Right": 3000,
-      "Bottom": 3164,
+      "Left": 432,
+      "Top": 3149,
+      "Right": 716,
+      "Bottom": 3196,
       "IsRotated": false
     },
     "amulet": {
@@ -291,72 +298,72 @@
     },
     "pellet": {
       "Left": 0,
-      "Top": 3190,
+      "Top": 3193,
       "Right": 40,
-      "Bottom": 3230,
+      "Bottom": 3233,
       "IsRotated": false
     },
     "bullet": {
-      "Left": 580,
-      "Top": 3149,
-      "Right": 659,
-      "Bottom": 3188,
+      "Left": 2243,
+      "Top": 3195,
+      "Right": 2322,
+      "Bottom": 3234,
       "IsRotated": false
     },
     "kunai": {
-      "Left": 3106,
-      "Top": 1088,
-      "Right": 3185,
-      "Bottom": 1127,
-      "IsRotated": false
+      "Left": 2651,
+      "Top": 2935,
+      "Right": 2690,
+      "Bottom": 3014,
+      "IsRotated": true
     },
     "rice": {
-      "Left": 57,
-      "Top": 3190,
-      "Right": 126,
-      "Bottom": 3229,
+      "Left": 2339,
+      "Top": 3195,
+      "Right": 2408,
+      "Bottom": 3234,
       "IsRotated": false
     },
     "smallknife": {
-      "Left": 143,
-      "Top": 3190,
-      "Right": 290,
-      "Bottom": 3229,
+      "Left": 57,
+      "Top": 3193,
+      "Right": 204,
+      "Bottom": 3232,
       "IsRotated": false
     },
     "needle2": {
-      "Left": 3230,
-      "Top": 616,
-      "Right": 3263,
-      "Bottom": 881,
+      "Left": 3167,
+      "Top": 2023,
+      "Right": 3200,
+      "Bottom": 2288,
       "IsRotated": true
     },
     "aimarrow": {
-      "Left": 2243,
-      "Top": 3206,
-      "Right": 2402,
-      "Bottom": 3225,
+      "Left": 221,
+      "Top": 3193,
+      "Right": 380,
+      "Bottom": 3212,
       "IsRotated": false
     },
     "laser": {
-      "Left": 3165,
-      "Top": 1144,
-      "Right": 3165,
-      "Bottom": 2227,
+      "Left": 3217,
+      "Top": 2023,
+      "Right": 3217,
+      "Bottom": 3106,
       "IsRotated": false
     },
     "laser_indicator": {
-      "Left": 3182,
-      "Top": 1144,
-      "Right": 3182,
-      "Bottom": 1743,
+      "Left": 3234,
+      "Top": 1857,
+      "Right": 3234,
+      "Bottom": 2456,
       "IsRotated": false
     },
     "laser_indicator_progress": {
-      "Left": 3199,
-      "Top": 1144,
-      "Right": 3199,
-      "Bottom": 1743,
+      "Left": 3234,
+      "Top": 2473,
+      "Right": 3234,
+      "Bottom": 3072,
       "IsRotated": false
     }
   }

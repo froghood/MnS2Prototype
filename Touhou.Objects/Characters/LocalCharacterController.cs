@@ -16,6 +16,9 @@ public class LocalCharacterController<T> : Entity where T : Character {
     private Vector2 previousVelocity;
 
 
+    private Vector2 knockbackStartPosition;
+    private Vector2 knockbackEndPosition;
+
     public LocalCharacterController(T c) {
 
         this.c = c;
@@ -34,8 +37,12 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
         if (!c.Match.HasStarted || c.State == CharacterState.Dead) return;
 
-        UpdateMovement();
-        UpdateHit();
+        if (c.State == CharacterState.Free) UpdateMovement();
+        if (c.State == CharacterState.Hit) UpdateHit();
+        if (c.State == CharacterState.Knockbacked) {
+            UpdateKnockback();
+            return;
+        }
 
         foreach (var action in Game.Input.GetActionOrder().Where(e => (e & (PlayerActions.Primary | PlayerActions.Secondary | PlayerActions.Special | PlayerActions.Super | PlayerActions.Bomb)) != 0)) {
             UpdateAttackPress(action);
@@ -46,52 +53,20 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
 
 
-    private void UpdateHit() {
-
-        if (c.State != CharacterState.Hit) return;
-
-        if (!c.HitTimer.HasFinished) return;
-
-
-
-        if (c.HeartCount == 1) Game.Sounds.Play("low_hearts");
-
-        if (c.HeartCount <= 0) {
-
-            Die();
-            return;
-        }
-
-        c.Damage();
-        c.Knockback(c.AngleToOpponent + MathF.PI, 100f, Time.InSeconds(1f));
-
-        if (!Game.Network.IsConnected) return;
-
-        var packet = new Packet(PacketType.Knockbacked).In(Game.Network.Time).In(c.Position).In(c.AngleToOpponent);
-        Game.Network.Send(packet);
-
-    }
-
-
-
     private void UpdateMovement() {
-
-        if (c.State == CharacterState.Hit || c.State == CharacterState.Dead) return;
-        if (c.State == CharacterState.Knockbacked && !c.KnockbackTimer.HasFinished) return;
 
         // movement
         if (Game.IsActionPressed(PlayerActions.Focus) && !c.IsFocused) c.Focus();
         if (!Game.IsActionPressed(PlayerActions.Focus) && c.IsFocused) c.Unfocus();
 
-        var movementVector = new Vector2(
+        var inputVector = new Vector2(
             (Game.IsActionPressed(PlayerActions.Right) ? 1f : 0f) - (Game.IsActionPressed(PlayerActions.Left) ? 1f : 0f),
             (Game.IsActionPressed(PlayerActions.Up) ? 1f : 0f) - (Game.IsActionPressed(PlayerActions.Down) ? 1f : 0f)
         );
 
-        var movementAngle = MathF.Atan2(movementVector.Y, movementVector.X);
-        var movementVectorNormalized = new Vector2(MathF.Abs(MathF.Cos(movementAngle)), MathF.Abs(MathF.Sin(movementAngle)));
+        var movementAngle = MathF.Atan2(inputVector.Y, inputVector.X);
+        var movementVector = new Vector2(MathF.Abs(MathF.Cos(movementAngle)), MathF.Abs(MathF.Sin(movementAngle))) * inputVector;
 
-        movementVector *= movementVectorNormalized;
 
         var speed = c.IsFocused ? c.FocusedSpeed : c.Speed;
         var modifier = c.MovespeedModifierTimer.HasFinished ? 1f : c.MovespeedModifier;
@@ -113,16 +88,60 @@ public class LocalCharacterController<T> : Entity where T : Character {
                 Game.Network.Send(packet);
             }
         }
+
+        // output
+        c.SetPosition(c.Position + c.Velocity * Game.Delta.AsSeconds());
+
+        // keeps character inside match bounds
+        c.SetPosition(Vector2.Clamp(c.Position, -c.Match.Bounds, c.Match.Bounds));
+    }
+
+
+
+    private void UpdateHit() {
+
+        if (!c.HitTimer.HasFinished) return;
+
+        // when finished
+
+        c.Damage();
+
+        Knockback();
+
+        if (c.HeartCount == 1) Game.Sounds.Play("low_hearts");
+        if (c.HeartCount <= 0) {
+            Die();
+            return;
+        }
+
+        if (!Game.Network.IsConnected) return;
+
+        var packet = new Packet(PacketType.Knockbacked).In(Game.Network.Time).In(c.Position).In(c.AngleToOpponent);
+        Game.Network.Send(packet);
+    }
+
+
+
+    private void UpdateKnockback() {
+        if (c.KnockbackedTimer.HasFinished) {
+            c.SetState(CharacterState.Free);
+            return;
+        }
+
+        float t = 1f - c.KnockbackedTimer.RemainingRatio;
+        c.SetPosition(knockbackStartPosition + (knockbackEndPosition - knockbackStartPosition) * Easing.Out(t, 5f));
+
+        c.SetPosition(Vector2.Clamp(c.Position, -c.Match.Bounds, c.Match.Bounds));
     }
 
     private void UpdateAttackPress(PlayerActions action) {
 
 
-        if (action != PlayerActions.Primary && action != PlayerActions.Secondary && action != PlayerActions.Special && action != PlayerActions.Super) return;
+        if (action == PlayerActions.Bomb) return;
 
 
-        if (c.State == CharacterState.Hit || c.State == CharacterState.Dead) return;
-        if (c.State == CharacterState.Knockbacked && !c.KnockbackTimer.HasFinished) return;
+        if (c.State == CharacterState.Hit) return;
+
 
         if (!c.IsAttackAvailable(action)) return;
 
@@ -224,7 +243,10 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
     private void UpdateBomb(PlayerActions action) {
 
+
         if (action != PlayerActions.Bomb || !c.IsBombAvailable()) return;
+
+
 
         if (!Game.Input.IsActionPressBuffered(PlayerActions.Bomb, out var bufferPressTime, out var bufferState)) return;
 
@@ -235,7 +257,9 @@ public class LocalCharacterController<T> : Entity where T : Character {
         var cooldownOverflow = (bufferPressTime < bombFinishTime) ?
             Game.Time - bombFinishTime : (Time)0L;
 
+        c.ReleaseAllLocalAttacks();
         c.PressLocalBomb(cooldownOverflow, bufferState.HasFlag(PlayerActions.Focus));
+        c.SetState(CharacterState.Free);
 
         Game.Sounds.Play("spell");
         Game.Sounds.Play("bomb");
@@ -284,11 +308,19 @@ public class LocalCharacterController<T> : Entity where T : Character {
         }
     }
 
+    private void Knockback() {
+        c.Knockback(Time.InSeconds(1f));
+
+        float angle = c.AngleToOpponent + MathF.PI;
+        float strength = 100f;
+
+        knockbackStartPosition = c.Position;
+        knockbackEndPosition = c.Position + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * strength;
+    }
+
 
 
     private void Die() {
-
-        c.Damage();
 
         var deathTime = Game.Network.IsConnected ? Game.Network.Time : Game.Time;
 

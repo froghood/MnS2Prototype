@@ -57,7 +57,7 @@ public class TextureAtlas {
         }
     }
 
-    public (Vector2 BottomLeft, Vector2 BottomRight, Vector2 TopLeft, Vector2 TopRight) GetUVTuple(string name) {
+    public (Vector2 BottomLeft, Vector2 BottomRight, Vector2 TopLeft, Vector2 TopRight) GetUVTuple(string name, Vector2 paddingOffset) {
 
 
 
@@ -65,22 +65,22 @@ public class TextureAtlas {
 
         var size = new Vector2(width, height);
 
-        var left = bounds.Left + 0.0f;
-        var right = bounds.Right + 1f - 0.0f;
+        float left = bounds.Left;
+        float right = bounds.Right + 1f;
 
-        var bottom = size.Y - (bounds.Bottom + 1f) + 0.0f;
-        var top = size.Y - bounds.Top - 0.0f;
+        float bottom = size.Y - (bounds.Bottom + 1f);
+        float top = size.Y - bounds.Top;
 
         var uv = bounds.IsRotated ? (
-            new Vector2(left + 0.0f, top + 0.0f) / size,
-            new Vector2(left - 0.0f, bottom + 0.0f) / size,
-            new Vector2(right + 0.0f, top - 0.0f) / size,
-            new Vector2(right - 0.0f, bottom - 0.0f) / size
+            new Vector2(left - paddingOffset.X, top - paddingOffset.Y) / size,
+            new Vector2(left + paddingOffset.X, bottom - paddingOffset.Y) / size,
+            new Vector2(right - paddingOffset.X, top + paddingOffset.Y) / size,
+            new Vector2(right + paddingOffset.X, bottom + paddingOffset.Y) / size
         ) : (
-            new Vector2(left + 0.0f, bottom + 0.0f) / size,
-            new Vector2(right - 0.0f, bottom + 0.0f) / size,
-            new Vector2(left + 0.0f, top - 0.0f) / size,
-            new Vector2(right - 0.0f, top - 0.0f) / size
+            new Vector2(left - paddingOffset.X, bottom - paddingOffset.Y) / size,
+            new Vector2(right + paddingOffset.X, bottom - paddingOffset.Y) / size,
+            new Vector2(left - paddingOffset.X, top + paddingOffset.Y) / size,
+            new Vector2(right + paddingOffset.X, top + paddingOffset.Y) / size
         );
 
         if (name == "aimarrow2") System.Console.WriteLine(uv);

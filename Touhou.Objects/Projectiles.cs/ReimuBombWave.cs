@@ -43,6 +43,7 @@ public class BombWave : ParametricProjectile {
             Scale = new Vector2(1f, 20f) * 0.7f,
             Color = new Color4(Color.R, Color.G, Color.B, alpha),
             UseColorSwapping = false,
+            UVPaddingOffset = new Vector2(0f, -0.5f),
             BlendMode = BlendMode.Additive,
         };
 

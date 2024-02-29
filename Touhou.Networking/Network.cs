@@ -236,7 +236,7 @@ public class Network {
         for (int i = numPackets - numToRead; i < numPackets; i++) {
             var packetType = (PacketType)data[packetBlockOffset + individualPacketOffsets[i]];
 
-            Log.Info($"{packetType} packed received");
+            Log.Info($"{totalUniquePacketsReceived} | {packetType} packed received");
 
             var packet = new Packet(packetType);
 

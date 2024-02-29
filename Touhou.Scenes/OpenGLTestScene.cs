@@ -62,12 +62,12 @@ public class OpenGLTestScene : Scene {
     public override void OnInitialize() {
         AddEntity(new Touhou.Objects.Generics.RenderCallback(() => {
 
-            var bg = new Sprite("box") {
+            var bg = new Sprite("grid") {
                 Origin = new Vector2(0.5f, 0.5f),
                 Position = new Vector2(0f, 0f),
-                Scale = new Vector2(3f),
+                Scale = new Vector2(3f + Game.Time.AsSeconds() * 0.1f),
                 //Rotation = Game.Time.AsSeconds(),
-                Color = new Color4(1f, 0f, 0f, 1f),
+                //Color = new Color4(1f, 0f, 0f, 1f),
                 IsUI = true,
             };
 
@@ -84,11 +84,12 @@ public class OpenGLTestScene : Scene {
 
             Game.Draw(bg2, Layer.Background2);
 
-            var laser = new Sprite("laser") {
+            var laser = new Sprite("laser_indicator") {
                 Origin = new Vector2(0.5f, 0.5f),
-                Scale = new Vector2(3000f, 1f),
+                Scale = new Vector2(3f + Game.Time.AsSeconds() * 100f, 1f),
                 Color = new Color4(1f, 0f, 0f, 1f),
                 UseColorSwapping = true,
+                UVPaddingOffset = new Vector2(-0.5f, 0f),
                 IsUI = true,
             };
 

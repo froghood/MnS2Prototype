@@ -9,15 +9,18 @@ public class NetplayMatchUI : Entity {
     private Character p1C { get => _p1C ??= Scene.GetFirstEntityWhere<Character>(e => e.IsP1); }
     private Character _p1C;
 
+
     private Character p2C { get => _p2C ??= Scene.GetFirstEntityWhere<Character>(e => !e.IsP1); }
     private Character _p2C;
 
-    private Character localC { get => _localC ??= Scene.GetFirstEntityWhere<Character>(e => e.IsP1 == isP1); }
 
+    private Character localC { get => _localC ??= Scene.GetFirstEntityWhere<Character>(e => e.IsP1 == isP1); }
     private Character _localC;
+
 
     private Match Match => match is null ? Scene.GetFirstEntity<Match>() : match;
     private Match match;
+
 
     private float playerSmoothPower;
     private bool isP1;
@@ -31,21 +34,21 @@ public class NetplayMatchUI : Entity {
 
         bool isP1 = this.isP1 ? true : false;
 
-        //RenderCooldowns();
+        RenderCooldowns();
 
-        // RenderPower(isP1, true);
-        // RenderPower(!isP1, false);
+        //RenderPower(isP1, true);
+        //RenderPower(!isP1, false);
 
         // RenderSmallPower(true);
         // RenderSmallPower(false);
 
-        // RenderSmallBombs(true);
+        //RenderSmallBombs(true);
         // RenderSmallBombs(false);
 
-        // RenderHearts(isP1, true);
-        // RenderHearts(!isP1, false);
+        RenderHearts(isP1, true);
+        RenderHearts(!isP1, false);
 
-        //RenderTimer();
+        RenderTimer();
     }
 
 
@@ -261,20 +264,20 @@ public class NetplayMatchUI : Entity {
 
 
 
-    // private void RenderHearts(bool isP1, bool isPlayer) {
+    private void RenderHearts(bool isP1, bool isPlayer) {
 
-    //     for (int i = 0; i < (isPlayer ? p1C.HeartCount : p2C.HeartCount); i++) {
+        for (int i = 0; i < (isP1 ? p1C.HeartCount : p2C.HeartCount); i++) {
 
-    //         var sprite = new Sprite("heart") {
-    //             Origin = new Vector2(isP1 ? -0.8f - 1.15f * i : 1.8f + 1.15f * i, -0.8f),
-    //             Alignment = new Vector2(isP1 ? -1f : 1f, -1f),
-    //             IsUI = true,
-    //         };
+            var sprite = new Sprite("heart") {
+                Origin = new Vector2(isP1 ? -0.8f - 1.15f * i : 1.8f + 1.15f * i, -0.8f),
+                Alignment = new Vector2(isP1 ? -1f : 1f, -1f),
+                IsUI = true,
+            };
 
-    //         Game.Draw(sprite, Layer.UI1);
-    //     }
+            Game.Draw(sprite, Layer.UI1);
+        }
 
-    // }
+    }
 
     private void RenderTimer() {
 

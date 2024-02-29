@@ -11,9 +11,19 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
     private Dictionary<PacketType, Action<Packet>> receiveCallbacks;
     private bool hasRemoteMatchStated;
 
+
+
+
+    private Vector2 basePosition;
+    private List<(Vector2 Offset, Timer Timer, Func<float, float> Easing)> interpolations = new();
+    private Vector2 knockbackStartPosition;
+    private Vector2 knockbackEndPosition;
+
+
     public RemoteCharacterController(T c) {
 
         this.c = c;
+        basePosition = c.Position;
 
         receiveCallbacks = new Dictionary<PacketType, Action<Packet>>() {
             {PacketType.MatchStarted, (_) => hasRemoteMatchStated = true},
@@ -30,9 +40,38 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
 
     }
 
+    public override void Update() {
+        if (c.State == CharacterState.Free) UpdateMovement();
+        if (c.State == CharacterState.Knockbacked) UpdateKnockback();
+    }
 
 
 
+    private void UpdateMovement() {
+
+        basePosition += c.Velocity * Game.Delta.AsSeconds();
+        basePosition = Vector2.Clamp(basePosition, -c.Match.Bounds, c.Match.Bounds);
+
+        var position = basePosition;
+
+        foreach (var interpolation in interpolations) {
+            position += interpolation.Offset * interpolation.Easing(interpolation.Timer.RemainingRatio);
+        }
+
+        position = Vector2.Clamp(position, -c.Match.Bounds, c.Match.Bounds);
+
+        c.SetPosition(position);
+    }
+
+
+
+    private void UpdateKnockback() {
+
+        float t = 1f - c.KnockbackedTimer.RemainingRatio;
+        c.SetPosition(knockbackStartPosition + (knockbackEndPosition - knockbackStartPosition) * Easing.Out(t, 5f));
+
+        c.SetPosition(Vector2.Clamp(c.Position, -c.Match.Bounds, c.Match.Bounds));
+    }
 
 
 
@@ -46,20 +85,25 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
     }
 
     private void VelocityChanged(Packet packet) {
+
+        c.SetState(CharacterState.Free);
+
         packet
         .Out(out Time time)
         .Out(out Vector2 position)
         .Out(out Vector2 velocity);
 
+        basePosition = position;
+
+
         var latency = Game.Network.Time - time;
-        var predictedPosition = position + velocity * latency.AsSeconds();
+        var predictedPosition = basePosition + velocity * latency.AsSeconds();
 
-        c.ResetInterpolations();
+        interpolations.Clear();
 
-        c.AddInterpolation(predictedPosition - position, Time.InSeconds(1f), e => Easing.InOut(1f - e, 2f));
-        c.AddInterpolation(c.Position - position, Time.InSeconds(0.25f), e => Easing.In(e, 2f));
+        interpolations.Add((predictedPosition - basePosition, new Timer(Time.InSeconds(1f)), e => Easing.InOut(1f - e, 2f)));
+        interpolations.Add((c.Position - basePosition, new Timer(Time.InSeconds(0.25f)), e => Easing.In(e, 2f)));
 
-        c.SetPosition(position);
         c.SetVelocity(velocity);
     }
 
@@ -92,6 +136,8 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
 
     private void Hit(Packet packet) {
 
+        c.SetState(CharacterState.Hit);
+
         packet.Out(out Time time).Out(out Vector2 position);
 
         var latency = Game.Network.Time - time;
@@ -108,19 +154,29 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
     }
 
     private void Knockbacked(Packet packet) {
+
+        c.SetState(CharacterState.Knockbacked);
+
         packet.Out(out Time time).Out(out Vector2 position).Out(out float angle);
 
         var latency = Game.Network.Time - time;
 
         c.Damage();
+        c.Knockback(Time.InSeconds(1f) - latency);
+
+        angle += MathF.PI;
+        float strength = 100f;
+
+        knockbackStartPosition = c.Position;
+        knockbackEndPosition = c.Position + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * strength;
 
         if (c.HeartCount == 1) Game.Sounds.Play("low_hearts");
-
-        c.Knockback(angle + MathF.PI, 100f, Time.InSeconds(1f) - latency);
-
     }
 
     private void Death(Packet packet) {
+
+        c.SetState(CharacterState.Dead);
+
         packet.Out(out Time deathTime).Out(out Vector2 position);
 
         c.Damage();

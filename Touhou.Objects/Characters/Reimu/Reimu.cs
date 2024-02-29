@@ -33,7 +33,7 @@ public class Reimu : Character {
         };
 
         var sprite = new Sprite(spriteName) {
-            Origin = new Vector2(0.5f, 0.5f),
+            Origin = new Vector2(0.45f, 0.45f),
             Position = Position,
             Scale = new Vector2(MathF.Sign(Position.X - Opponent.Position.X), 1f) * 0.09f,
             Color = new Color4(Color.R * invulnColor, Color.G * invulnColor, Color.B * invulnColor, 1f),

@@ -4,12 +4,12 @@ namespace Touhou.Debugging;
 public class Fields {
 
 
-    private Dictionary<string, float> fields = new();
+    private Dictionary<string, dynamic> fields = new();
 
     public void Add(string name) => fields.Add(name, 0f);
 
-    public bool TryGet(string name, out float value) {
-        if (fields.TryGetValue(name, out float _value)) {
+    public bool TryGet(string name, out dynamic value) {
+        if (fields.TryGetValue(name, out dynamic _value)) {
             value = _value;
             return true;
         } else {
@@ -18,7 +18,7 @@ public class Fields {
         }
     }
 
-    public void Set(string name, float value) {
+    public void Set(string name, dynamic value) {
         if (!fields.ContainsKey(name)) return;
         fields[name] = value;
     }

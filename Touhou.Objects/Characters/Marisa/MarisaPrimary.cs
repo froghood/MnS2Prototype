@@ -236,6 +236,7 @@ public class MarisaPrimary : Attack<Marisa> {
                 Rotation = aimAngle,
                 Scale = new Vector2(10000f, visualScale),
                 Color = new Color4(1f, 1f, 1f, 0.1f),
+                UVPaddingOffset = new Vector2(-0.5f, 0f),
                 UseColorSwapping = true,
             };
 
@@ -243,6 +244,7 @@ public class MarisaPrimary : Attack<Marisa> {
                 SpriteName = "laser_indicator_start",
                 Origin = new Vector2(1f, 0.5f),
                 Scale = new Vector2(visualScale),
+                UVPaddingOffset = Vector2.Zero
             };
 
             Game.Draw(laserPreviewStart, Layer.Player);
@@ -267,13 +269,15 @@ public class MarisaPrimary : Attack<Marisa> {
                 Rotation = unfocusedAngle,
                 Scale = new Vector2(10000f, visualScale),
                 Color = new Color4(1f, 1f, 1f, 0.1f),
+                UVPaddingOffset = new Vector2(-0.5f, 0f),
                 UseColorSwapping = true,
             };
 
             var laserPreviewStart = new Sprite(laserPreview) {
                 SpriteName = "laser_indicator_start",
                 Origin = new Vector2(1f, 0.5f),
-                Scale = new Vector2(visualScale)
+                Scale = new Vector2(visualScale),
+                UVPaddingOffset = Vector2.Zero
             };
 
             var line = new Rectangle() {

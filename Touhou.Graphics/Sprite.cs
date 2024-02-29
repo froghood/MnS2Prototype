@@ -9,6 +9,8 @@ public class Sprite : Renderable {
     public string SpriteName { get; set; }
     public Color4 Color { get; set; } = Color4.White;
 
+    public Vector2 UVPaddingOffset { get; set; } = Vector2.Zero;
+
     public bool UseColorSwapping { get; set; } = false;
 
     public Sprite(string spriteName) {
@@ -18,6 +20,7 @@ public class Sprite : Renderable {
     public Sprite(Sprite copy) : base(copy) {
         SpriteName = $"{copy.SpriteName}";
         Color = copy.Color;
+        UVPaddingOffset = copy.UVPaddingOffset;
         UseColorSwapping = copy.UseColorSwapping;
     }
 
@@ -36,12 +39,12 @@ public class Sprite : Renderable {
 
     public override void Render() {
 
-        var textureUV = Game.Renderer.TextureAtlas.GetUVTuple(SpriteName);
+        var textureUV = Game.Renderer.TextureAtlas.GetUVTuple(SpriteName, UVPaddingOffset);
         var textureSize = Game.Renderer.TextureAtlas.GetSize(SpriteName);
 
         // model + projection matrix
         var cameraPosition = IsUI ? Vector2.Zero : Game.Camera.Position;
-        var cameraScale = Game.Camera.GetCameraScale(IsUI);
+        var cameraScale = Game.Camera.GetCameraScale(IsUI) / 2f;
 
         var modelProjectionMatrix =
               Matrix4.CreateTranslation(-Origin.X, -Origin.Y, 0f)
@@ -49,10 +52,10 @@ public class Sprite : Renderable {
             * Matrix4.CreateRotationZ(Rotation)
             * Matrix4.CreateTranslation(Position.X - cameraPosition.X, Position.Y - cameraPosition.Y, 0f)
             * Matrix4.CreateOrthographicOffCenter(
-                Game.WindowSize.X * -cameraScale / 2f,
-                Game.WindowSize.X * cameraScale / 2f,
-                Game.WindowSize.Y * -cameraScale / 2f,
-                Game.WindowSize.Y * cameraScale / 2f,
+                Game.WindowSize.X * -cameraScale,
+                Game.WindowSize.X * cameraScale,
+                Game.WindowSize.Y * -cameraScale,
+                Game.WindowSize.Y * cameraScale,
                 -1f, 1f
             );
 

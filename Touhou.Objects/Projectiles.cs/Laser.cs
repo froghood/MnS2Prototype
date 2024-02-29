@@ -92,12 +92,14 @@ public class Laser : Projectile {
                     0.15f
                 ),
                 UseColorSwapping = true,
+                UVPaddingOffset = new Vector2(-0.5f, 0f),
                 BlendMode = BlendMode.Additive,
             };
 
             var indicatorStart = new Sprite(indicator) {
                 SpriteName = "laser_indicator_start",
                 Origin = new Vector2(1f, 0.5f),
+                UVPaddingOffset = Vector2.Zero,
                 Scale = new Vector2(visualScale, visualScale)
             };
 
@@ -133,12 +135,14 @@ public class Laser : Projectile {
                 Rotation = direction,
                 Color = new Color4(Color.R, Color.G, Color.B, Color.A * (1f - Easing.In(DestroyedFactor, 4f))),
                 UseColorSwapping = true,
+                UVPaddingOffset = new Vector2(-0.5f, 0f),
                 BlendMode = BlendMode.Additive,
             };
 
             var laserStart = new Sprite(laser) {
                 SpriteName = "laser_start",
                 Origin = new Vector2(1f, 0.5f),
+                UVPaddingOffset = Vector2.Zero,
                 Scale = new Vector2(visualScale, visualScale * scaleEasing),
             };
 

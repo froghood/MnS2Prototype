@@ -45,6 +45,8 @@ public class ReimuBomb : Bomb<Reimu> {
 
         c.ApplyInvulnerability(cooldown);
 
+        c.SpendBomb();
+
         if (Game.Network.IsConnected) {
             var packet = new Packet(PacketType.BombPressed)
             .In(Game.Network.Time - cooldownOverflow)
@@ -76,6 +78,9 @@ public class ReimuBomb : Bomb<Reimu> {
 
             c.Scene.AddEntity(projectile);
         }
+
+        c.SpendBomb();
+
     }
 
 
