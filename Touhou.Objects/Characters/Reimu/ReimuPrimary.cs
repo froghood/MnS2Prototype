@@ -121,20 +121,19 @@ public class ReimuPrimary : Attack<Reimu> {
         aimOffset = 0f;
         normalizedAimOffset = 0f;
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.Primary)
-        .In(Game.Network.Time - cooldownOverflow)
-        .In(c.Position)
-        .In(angle)
-        .In(focused);
-
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(
+            PacketType.AttackReleased,
+            PlayerActions.Primary,
+            Game.NetworkOld.Time - cooldownOverflow,
+            c.Position,
+            angle,
+            focused);
     }
 
     public override void RemoteRelease(Packet packet) {
 
         packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle).Out(out bool focused);
-        Time delta = Game.Network.Time - theirTime;
+        Time delta = Game.NetworkOld.Time - theirTime;
 
         //Game.Log("localprojectiles", $"@{(theirTime).AsSeconds()}: {this.GetType().Name}");
 

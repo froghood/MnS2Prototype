@@ -105,13 +105,12 @@ public class SakuyaSecondary : Attack<Sakuya> {
             PlayerActions.Super
         );
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.Secondary)
-        .In(Game.Network.Time - cooldownOverflow)
-        .In(c.Position)
-        .In(aimAngle);
-
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(
+            PacketType.AttackReleased,
+            PlayerActions.Secondary,
+            Game.NetworkOld.Time - cooldownOverflow,
+            c.Position,
+            aimAngle);
     }
 
 
@@ -123,7 +122,7 @@ public class SakuyaSecondary : Attack<Sakuya> {
         .Out(out Vector2 theirPosition)
         .Out(out float theirAngle);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.NetworkOld.Time - theirTime;
 
         // var isTimestopped = c.GetEffect<Timestop>(out var timestop);
 

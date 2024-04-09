@@ -76,14 +76,13 @@ public class MarisaSpecial : Attack<Marisa> {
 
 
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.Special)
-        .In(Game.Network.Time - cooldownOverflow)
-        .In(spawnPositionX)
-        .In(spawnAngle)
-        .In(seed);
-
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(
+            PacketType.AttackReleased,
+            PlayerActions.Special,
+            Game.NetworkOld.Time - cooldownOverflow,
+            spawnPositionX,
+            spawnAngle,
+            seed);
 
         isHeld = false;
 
@@ -112,7 +111,7 @@ public class MarisaSpecial : Attack<Marisa> {
         .Out(out float theirAngle)
         .Out(out int theirSeed);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.NetworkOld.Time - theirTime;
 
         var spawnPosition = new Vector2(theirPositionX, c.Match.Bounds.Y);
 

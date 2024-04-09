@@ -9,14 +9,12 @@ namespace Touhou.Scenes;
 
 public class HostingScene : Scene {
 
-    private readonly Text text;
+    private readonly Text displayText;
 
-    private int port;
 
     public HostingScene() {
-        this.port = Game.Settings.Port;
 
-        text = new Text {
+        displayText = new Text {
             DisplayedText = "Waiting for connection...",
             CharacterSize = 40f,
             Origin = Vector2.UnitY,
@@ -25,25 +23,38 @@ public class HostingScene : Scene {
         };
     }
 
+
     public override void OnInitialize() {
 
-        Game.Network.TimeOffset -= Game.Time;
-
-        if (Game.Settings.UseSteam) Game.Network.HostSteam();
-        else Game.Network.Host(port);
-
-        AddEntity(new ReceiveCallback(ReceiverCallback));
-
         AddEntity(new RenderCallback(() => {
-            Game.Draw(text, Layer.UI1);
+            Game.Draw(displayText, Layer.UI1);
         }));
+
+        Host();
     }
 
-    private void ReceiverCallback(Packet packet, IPEndPoint endPoint) {
-        if (packet.Type != PacketType.Connection) return;
 
-        if (!Game.Settings.UseSteam) Game.Network.Connect(endPoint);
+    private void Host() {
+        if (Game.Settings.UseSteam) {
 
-        Game.Scenes.ChangeScene<HostSyncingScene>();
+            Game.Network.WaitForConnection(HostSuccess, HostFailure);
+
+        } else {
+
+            Game.Network.WaitForConnection(
+                Game.Settings.Port,
+                HostSuccess,
+                HostFailure);
+        }
+    }
+
+
+    private void HostSuccess() {
+        Game.Scenes.ChangeScene<CharacterSelectScene>(false, true);
+    }
+
+
+    private void HostFailure() {
+        Game.Scenes.ChangeScene<MainScene>();
     }
 }

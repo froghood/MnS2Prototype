@@ -155,19 +155,24 @@ public class MarisaPrimary : Attack<Marisa> {
 
         isAiming = false;
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.Primary)
-        .In(Game.Network.Time - cooldownOverflow)
-        .In(focused)
-        .In(c.Position);
         if (!focused) {
-            packet.In(unfocusedLaserPosition);
+            Game.NetworkOld.Send(
+                PacketType.AttackReleased,
+                PlayerActions.Primary,
+                Game.NetworkOld.Time - cooldownOverflow,
+                focused,
+                c.Position,
+                unfocusedLaserPosition,
+                unfocusedAngle);
+        } else {
+            Game.NetworkOld.Send(
+                PacketType.AttackReleased,
+                PlayerActions.Primary,
+                Game.NetworkOld.Time - cooldownOverflow,
+                focused,
+                c.Position,
+                aimAngle);
         }
-        packet.In(focused ? aimAngle : unfocusedAngle);
-
-        Game.Network.Send(packet);
-
-
     }
 
 
@@ -177,7 +182,7 @@ public class MarisaPrimary : Attack<Marisa> {
         .Out(out Time theirTime)
         .Out(out bool focused);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.NetworkOld.Time - theirTime;
 
         if (focused) {
             packet

@@ -15,7 +15,7 @@ public class LocalTargetingAmuletGroup : Projectile {
     }
 
 
-    public override void Receive(Packet packet, IPEndPoint endPoint) {
+    public override void Receive(Packet packet) {
 
         //Log.Info("local group receive");
 

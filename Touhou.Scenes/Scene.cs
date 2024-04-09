@@ -105,9 +105,9 @@ public abstract class Scene {
         });
     }
 
-    public void Receive(Packet packet, IPEndPoint endPoint) {
+    public void Receive(Packet packet) {
         IterateEntites(e => {
-            if (e is IReceivable o) o.Receive(packet, endPoint);
+            if (e is IReceivable o) o.Receive(packet);
         });
     }
 

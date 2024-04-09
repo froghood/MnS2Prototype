@@ -81,12 +81,11 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
             previousVelocity = velocity;
 
-            if (Game.Network.IsConnected) {
-                var packet = new Packet(PacketType.VelocityChanged);
-                packet.In(Game.Network.Time).In(c.Position).In(c.Velocity);
-
-                Game.Network.Send(packet);
-            }
+            Game.NetworkOld.Send(
+                PacketType.VelocityChanged,
+                Game.NetworkOld.Time,
+                c.Position,
+                c.Velocity);
         }
 
         // output
@@ -114,10 +113,12 @@ public class LocalCharacterController<T> : Entity where T : Character {
             return;
         }
 
-        if (!Game.Network.IsConnected) return;
+        Game.NetworkOld.Send(
+            PacketType.Knockbacked,
+            Game.NetworkOld.Time,
+            c.Position,
+            c.AngleToOpponent);
 
-        var packet = new Packet(PacketType.Knockbacked).In(Game.Network.Time).In(c.Position).In(c.AngleToOpponent);
-        Game.Network.Send(packet);
     }
 
 
@@ -273,10 +274,7 @@ public class LocalCharacterController<T> : Entity where T : Character {
         projectile.Graze();
         c.Graze(projectile.GrazeAmount);
 
-        if (Game.Network.IsConnected) {
-            var packet = new Packet(PacketType.Grazed).In(projectile.GrazeAmount);
-            Game.Network.Send(packet);
-        }
+        Game.NetworkOld.Send(PacketType.Grazed, projectile.GrazeAmount);
     }
 
     private void Hit(Entity entity, Hitbox hitbox) {
@@ -292,20 +290,12 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
         Game.Sounds.Play("hit");
 
-        if (Game.Network.IsConnected) {
+        Game.NetworkOld.Send(PacketType.Hit, Game.NetworkOld.Time, c.Position);
 
-            var hitPacket = new Packet(PacketType.Hit).In(Game.Network.Time).In(c.Position);
-            Game.Network.Send(hitPacket);
+        if (hitbox.CollisionGroup == CollisionGroup.P1MinorProjectile ||
+            hitbox.CollisionGroup == CollisionGroup.P2MinorProjectile)
+            projectile.NetworkDestroy();
 
-            if (hitbox.CollisionGroup == CollisionGroup.P1MinorProjectile ||
-                hitbox.CollisionGroup == CollisionGroup.P2MinorProjectile)
-                projectile.NetworkDestroy();
-
-        } else {
-            if (hitbox.CollisionGroup == CollisionGroup.P1MinorProjectile ||
-                hitbox.CollisionGroup == CollisionGroup.P2MinorProjectile)
-                projectile.Destroy();
-        }
     }
 
     private void Knockback() {
@@ -322,7 +312,7 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
     private void Die() {
 
-        var deathTime = Game.Network.IsConnected ? Game.Network.Time : Game.Time;
+        var deathTime = Game.NetworkOld.IsConnected ? Game.NetworkOld.Time : Game.Time;
 
         c.ApplyInvulnerability();
         c.Die(deathTime);
@@ -331,10 +321,8 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
         Game.Sounds.Play("death");
 
-        if (Game.Network.IsConnected) {
-            var packet = new Packet(PacketType.Death).In(deathTime).In(c.Position);
-            Game.Network.Send(packet);
-        }
+        Game.NetworkOld.Send(PacketType.Death, deathTime, c.Position);
+
 
     }
 }

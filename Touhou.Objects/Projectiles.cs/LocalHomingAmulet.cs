@@ -77,9 +77,9 @@ public class LocalHomingAmulet : Homing {
     }
 
 
-    public override void Receive(Packet packet, IPEndPoint endPoint) {
+    public override void Receive(Packet packet) {
 
-        base.Receive(packet, endPoint);
+        base.Receive(packet);
 
 
         if (packet.Type != PacketType.UpdateProjectile) return;
@@ -101,7 +101,7 @@ public class LocalHomingAmulet : Homing {
             angle = theirAngle;
             side = theirSide;
 
-            var latency = Game.Network.Time - theirTime;
+            var latency = Game.NetworkOld.Time - theirTime;
 
             if (side == 0) {
                 Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * velocity * latency.AsSeconds();
@@ -125,7 +125,7 @@ public class LocalHomingAmulet : Homing {
             Position = theirPosition;
             angle = theirAngle;
 
-            var latency = Game.Network.Time - theirTime;
+            var latency = Game.NetworkOld.Time - theirTime;
 
             Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * velocity * latency.AsSeconds();
         }

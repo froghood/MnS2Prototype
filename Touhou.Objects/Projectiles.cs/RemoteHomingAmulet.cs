@@ -67,8 +67,8 @@ public class RemoteHomingAmulet : Homing {
         if (state == HomingState.Homing && LifeTime >= SpawnDuration + PreHomingDuration + HomingDuration) {
             state = HomingState.PostHoming;
 
-            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time).In(state).In(Position).In(angle);
-            Game.Network.Send(packet);
+            Game.NetworkOld.Send(PacketType.UpdateProjectile, Id ^ 0x80000000, Game.NetworkOld.Time, state, Position, angle);
+
         }
 
         if (state == HomingState.Spawning) return;
@@ -116,8 +116,15 @@ public class RemoteHomingAmulet : Homing {
         // prevents excessive packet spam
         if (side != prevSide) lastSideChange = side;
         if (lastSideChange.HasValue && LifeTime >= nextPacketTimeThreshold) {
-            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time).In(state).In(Position).In(angle).In(side);
-            Game.Network.Send(packet);
+
+            Game.NetworkOld.Send(
+                PacketType.UpdateProjectile,
+                Id ^ 0x80000000,
+                Game.NetworkOld.Time,
+                state,
+                Position,
+                angle,
+                side);
 
             lastSideChange = null;
             nextPacketTimeThreshold = LifeTime + Time.InSeconds(0.2f);//Game.Random.NextSingle() * 0.1f);

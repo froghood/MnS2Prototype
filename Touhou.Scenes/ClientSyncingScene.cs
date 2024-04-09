@@ -31,7 +31,7 @@ public class ClientSyncingScene : Scene {
     }
 
     public override void OnInitialize() {
-        AddEntity(new ReceiveCallback(ReceiveCallback));
+        AddEntity(new Objects.Generics.ReceiveCallback(ReceiveCallback));
         AddEntity(new UpdateCallback(UpdateCallback));
         AddEntity(new RenderCallback(RenderCallback));
 
@@ -40,12 +40,12 @@ public class ClientSyncingScene : Scene {
 
 
 
-    private void ReceiveCallback(Packet packet, IPEndPoint endPoint) {
+    private void ReceiveCallback(Packet packet) {
         if (packet.Type == PacketType.TimeResponse && timeResponses.Count < TOTAL_REQUESTS) {
 
             packet.Out(out Time ourTime).Out(out Time theirTime);
 
-            var roundTripTime = Game.Network.Time - ourTime;
+            var roundTripTime = Game.NetworkOld.Time - ourTime;
             var latency = Time.InSeconds(roundTripTime.AsSeconds() / 2f);
             var targetTime = ourTime + latency;
 
@@ -64,13 +64,13 @@ public class ClientSyncingScene : Scene {
 
                 // pick response with smallest RTT
                 var minResponse = timeResponses.MinBy(e => (long)e.RoundTripTime);
-                Game.Network.TimeOffset += minResponse.Offset;
+                Game.NetworkOld.TimeOffset += minResponse.Offset;
 
                 // var matchStartTime = Game.Network.Time + Time.InSeconds(3);
-                // Game.Network.Send(new Packet(PacketType.SyncFinished).In(matchStartTime));
+                // Game.Network.Send(new Packet(PacketType.SyncFinished),matchStartTime);
                 // Game.Scenes.ChangeScene<MatchScene>(false, false, matchStartTime);
 
-                Game.Network.Send(new Packet(PacketType.SyncFinished));
+                Game.NetworkOld.Send(PacketType.SyncFinished);
                 Game.Scenes.ChangeScene<CharacterSelectScene>(false, false);
             }
         }
@@ -89,15 +89,15 @@ public class ClientSyncingScene : Scene {
     private void Request() {
         //Console.ForegroundColor = ConsoleColor.DarkGray;
         //Console.WriteLine($"Requesting Time");
-        var packet = new Packet(PacketType.TimeRequest).In(Game.Network.Time);
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(PacketType.TimeRequest, Game.NetworkOld.Time);
+
         requestCount++;
         requestTimer.Restart();
     }
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Settings.UseSteam) Game.NetworkOld.DisconnectSteam();
+        else Game.NetworkOld.Disconnect();
 
         Log.Warn("Opponent disconnected");
 

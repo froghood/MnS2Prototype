@@ -23,21 +23,20 @@ public class HostSyncingScene : Scene {
     }
 
     public override void OnInitialize() {
-        Game.Network.Send(new Packet(PacketType.ConnectionResponse));
+        Game.NetworkOld.Send(PacketType.ConnectionResponse);
 
-        AddEntity(new ReceiveCallback(ReceiveCallback));
+        AddEntity(new Objects.Generics.ReceiveCallback(ReceiveCallback));
 
         AddEntity(new RenderCallback(() => Game.Draw(text, Layer.UI1)));
     }
 
-    private void ReceiveCallback(Packet packet, IPEndPoint endPoint) {
+    private void ReceiveCallback(Packet packet) {
         switch (packet.Type) {
             case PacketType.TimeRequest:
                 //_connectionResponseFlag = true;
                 packet.Out(out Time theirTime);
-                var responsePacket = new Packet(PacketType.TimeResponse).In(theirTime).In(Game.Network.Time);
                 //Console.WriteLine($"Received Time Request: {theirTime}");
-                Game.Network.Send(responsePacket);
+                Game.NetworkOld.Send(PacketType.TimeResponse, theirTime, Game.NetworkOld.Time);
                 break;
 
             case PacketType.SyncFinished:
@@ -51,8 +50,8 @@ public class HostSyncingScene : Scene {
     }
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Settings.UseSteam) Game.NetworkOld.DisconnectSteam();
+        else Game.NetworkOld.Disconnect();
 
         Log.Warn("Opponent disconnected");
 

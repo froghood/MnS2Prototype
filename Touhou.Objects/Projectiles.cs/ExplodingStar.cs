@@ -80,7 +80,7 @@ public class ExplodingStar : ParametricProjectile {
         Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 
-    public override void Receive(Packet packet, IPEndPoint endPoint) {
+    public override void Receive(Packet packet) {
         if (packet.Type != PacketType.DestroyProjectile) return;
 
         packet.Out(out uint id, true).Out(out float theirFuncTime);
@@ -113,7 +113,9 @@ public class ExplodingStar : ParametricProjectile {
     public override void NetworkDestroy() {
         Destroy();
 
-        var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000).In(FuncTimeWithSpawnOffset.AsSeconds());
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(
+            PacketType.DestroyProjectile,
+            Id ^ 0x80000000,
+            FuncTimeWithSpawnOffset.AsSeconds());
     }
 }

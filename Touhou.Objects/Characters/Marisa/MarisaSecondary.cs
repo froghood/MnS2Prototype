@@ -81,13 +81,12 @@ public class MarisaSecondary : Attack<Marisa> {
             PlayerActions.Super
         );
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.Secondary)
-        .In(Game.Network.Time - cooldownOverflow)
-        .In(c.Position)
-        .In(aimAngle);
-
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(
+            PacketType.AttackReleased,
+            PlayerActions.Secondary,
+            Game.NetworkOld.Time - cooldownOverflow,
+            c.Position,
+            aimAngle);
 
         isAiming = false;
 
@@ -102,7 +101,7 @@ public class MarisaSecondary : Attack<Marisa> {
         .Out(out Vector2 theirPosition)
         .Out(out float theirAngle);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.NetworkOld.Time - theirTime;
 
         var explodingStar = new ExplodingStar(250f, 150f, theirPosition, theirAngle, c.IsP1, c.IsPlayer, true) {
             SpawnDuration = Time.InSeconds(0.25f),

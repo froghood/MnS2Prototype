@@ -92,14 +92,12 @@ public class MarisaSuper : Attack<Marisa> {
 
         isAiming = false;
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.Super)
-        .In(Game.Network.Time)
-        .In(c.Position)
-        .In(aimAngle);
-
-        Game.Network.Send(packet);
-
+        Game.NetworkOld.Send(
+            PacketType.AttackReleased,
+            PlayerActions.Super,
+            Game.NetworkOld.Time,
+            c.Position,
+            aimAngle);
     }
 
 
@@ -111,7 +109,7 @@ public class MarisaSuper : Attack<Marisa> {
         .Out(out Vector2 theirPosition)
         .Out(out float theirAngle);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.NetworkOld.Time - theirTime;
 
         var laser = new Laser(theirPosition, theirAngle, laserWidth, startupTime, activeTime, c.IsP1, c.IsPlayer, true) {
             Color = new Color4(1f, 0f, 0f, 1f),

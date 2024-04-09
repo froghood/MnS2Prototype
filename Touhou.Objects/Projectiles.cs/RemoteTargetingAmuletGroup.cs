@@ -30,8 +30,8 @@ public class RemoteTargetingAmuletGroup : Projectile {
                 targetingAmulet.LocalTarget(character.Position, timeOverflow);
             }
 
-            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time - timeOverflow).In(character.Position);
-            Game.Network.Send(packet);
+            Game.NetworkOld.Send(PacketType.UpdateProjectile, Id ^ 0x80000000, Game.NetworkOld.Time - timeOverflow, character.Position);
+
         }
     }
 

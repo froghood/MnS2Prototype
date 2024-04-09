@@ -94,19 +94,15 @@ public class SakuyaPrimary : Attack<Sakuya> {
                 c.Scene.AddEntity(projectile);
             }
 
-
-
-            var packet = new Packet(PacketType.AttackReleased)
-            .In(PlayerActions.Primary)
-            .In(Game.Network.Time - cooldownOverflow + timeOffset)
-            .In((byte)fireCount)
-            .In(c.Position)
-            .In(angle);
+            Game.NetworkOld.Send(
+                PacketType.AttackReleased,
+                PlayerActions.Primary,
+                Game.NetworkOld.Time - cooldownOverflow + timeOffset,
+                fireCount,
+                c.Position,
+                angle);
 
             fireCount = (byte)((fireCount + 1) % 3);
-
-            Game.Network.Send(packet);
-
         }
     }
 
@@ -144,7 +140,7 @@ public class SakuyaPrimary : Attack<Sakuya> {
 
         //Log.Info($"{theirTime}, {fireCount}, {theirPosition}, {theirAngle}");
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.NetworkOld.Time - theirTime;
 
         var numShots = (fireCount) switch {
             0 => 1,

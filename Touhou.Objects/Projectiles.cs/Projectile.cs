@@ -144,7 +144,7 @@ public abstract class Projectile : Entity, IReceivable {
         }
     }
 
-    public virtual void Receive(Packet packet, IPEndPoint endPoint) {
+    public virtual void Receive(Packet packet) {
         if (packet.Type != PacketType.DestroyProjectile) return;
 
         packet.Out(out uint id, true);
@@ -177,7 +177,6 @@ public abstract class Projectile : Entity, IReceivable {
     public virtual void NetworkDestroy() {
         Destroy();
 
-        var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000);
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(PacketType.DestroyProjectile, Id ^ 0x80000000);
     }
 }

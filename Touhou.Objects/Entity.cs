@@ -10,6 +10,8 @@ public abstract class Entity {
 
     public event Action Destroyed;
     public bool IsDestroyed { get; private set; }
+    
+    public bool IsActive { get => Game.Scenes.Current == this.Scene; }
 
     public bool CanCollide { get; set; } = true;
     //public CollisionType CollisionType { get; protected set; }

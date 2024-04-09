@@ -45,13 +45,12 @@ public class ReimuSpecial : Attack<Reimu> {
         c.ApplyAttackCooldowns(Time.InSeconds(1f), PlayerActions.Special);
         c.ApplyAttackCooldowns(Time.InSeconds(0.25f), PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Super);
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.Special)
-        .In(Game.Network.Time - cooldownOverflow)
-        .In(c.Position)
-        .In(angle);
-
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(
+            PacketType.AttackReleased,
+            PlayerActions.Special,
+            Game.NetworkOld.Time - cooldownOverflow,
+            c.Position,
+            angle);
 
         c.SpendPower(Cost);
     }
@@ -70,7 +69,7 @@ public class ReimuSpecial : Attack<Reimu> {
     public override void RemoteRelease(Packet packet) {
 
         packet.Out(out Time time).Out(out Vector2 position).Out(out float angle);
-        var latency = Game.Network.Time - time;
+        var latency = Game.NetworkOld.Time - time;
 
 
         var remoteGroup = new RemoteTargetingAmuletGroup(Time.InSeconds(1.5f), c.IsP1, c.IsPlayer);

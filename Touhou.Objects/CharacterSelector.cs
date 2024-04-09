@@ -51,8 +51,8 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             localIndex = Math.Clamp(localIndex, 0, characterOptions.Length - 1);
 
             if (localIndex != prevPosition) {
-                var packet = new Packet(PacketType.ChangedCharacter).In(localIndex - prevPosition);
-                Game.Network.Send(packet);
+
+                Game.NetworkOld.Send(PacketType.ChangedCharacter, localIndex - prevPosition);
             }
         }
 
@@ -61,14 +61,9 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
         if (isP1 && playerSelected && opponentSelected && action == PlayerActions.Primary) {
 
 
-            var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
+            var matchStartTime = Game.NetworkOld.Time + Time.InSeconds(3f);
 
-            var packet = new Packet(PacketType.MatchReady)
-            .In(matchStartTime)
-            .In(localOption)
-            .In(remoteOption);
-
-            Game.Network.Send(packet);
+            Game.NetworkOld.Send(PacketType.MatchReady, matchStartTime, localOption, remoteOption);
 
             Game.Command(() => {
                 Game.Scenes.ChangeScene<NetplayMatchScene>(false, true, matchStartTime, localOption, remoteOption);
@@ -81,8 +76,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
 
             playerSelected = true;
 
-            var packet = new Packet(PacketType.SelectedCharacter);
-            Game.Network.Send(packet);
+            Game.NetworkOld.Send(PacketType.SelectedCharacter);
 
         }
 
@@ -90,15 +84,14 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
 
             playerSelected = false;
 
-            var packet = new Packet(PacketType.DeselectedCharacter);
-            Game.Network.Send(packet);
+            Game.NetworkOld.Send(PacketType.DeselectedCharacter);
         }
 
     }
 
     public void Release(PlayerActions action) { }
 
-    public void Receive(Packet packet, IPEndPoint endPoint) {
+    public void Receive(Packet packet) {
         if (receiveCallbacks.TryGetValue(packet.Type, out var callback)) {
             callback.Invoke(packet);
         }
