@@ -136,8 +136,8 @@ public class NetplayMatchScene : Scene {
 
         }));
 
-        Game.Network.ResetPing();
-        if (isP1) Game.Network.StartLatencyCorrection();
+        Game.NetworkOld.ResetPing();
+        if (isP1) Game.NetworkOld.StartLatencyCorrection();
 
         //var player = new PlayerReimu() { Position = new Vector2(80f, Game.Window.Size.Y / 2f) };
 
@@ -214,8 +214,8 @@ public class NetplayMatchScene : Scene {
 
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Settings.UseSteam) Game.NetworkOld.DisconnectSteam();
+        else Game.NetworkOld.Disconnect();
 
         Log.Warn("Opponent disconnected");
 

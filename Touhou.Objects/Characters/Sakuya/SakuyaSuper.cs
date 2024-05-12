@@ -21,7 +21,7 @@ public class SakuyaSuper : Attack<Sakuya> {
 
         //     c.Scene.AddEntity(vfx);
 
-        //     var packet = new Packet(PacketType.AttackReleased).In(PlayerActions.Super);
+        //     var packet = new Packet(PacketType.AttackReleased),PlayerActions.Super;
 
         //     Game.Network.Send(packet);
         // }

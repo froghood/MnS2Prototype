@@ -81,7 +81,7 @@ public class AuxiliaryStar : ParametricProjectile {
         Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 
-    public override void Receive(Packet packet, IPEndPoint endPoint) {
+    public override void Receive(Packet packet) {
 
         if (packet.Type != PacketType.DestroyProjectile) return;
 

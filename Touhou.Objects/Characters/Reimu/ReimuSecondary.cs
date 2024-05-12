@@ -89,14 +89,12 @@ public class ReimuSecondary : Attack<Reimu> {
             c.Scene.AddEntity(projectile);
         }
 
-        var packet = new Packet(PacketType.AttackReleased)
-        .In(PlayerActions.Secondary)
-        .In(Game.Network.Time)
-        .In(c.Position)
-        .In(c.AngleToOpponent + aimOffset);
-
-        Game.Network.Send(packet);
-
+        Game.NetworkOld.Send(
+            PacketType.AttackReleased,
+            PlayerActions.Secondary,
+            Game.NetworkOld.Time,
+            c.Position,
+            c.AngleToOpponent + aimOffset);
 
 
         c.ApplyAttackCooldowns(primaryCooldown - cooldownOverflow, PlayerActions.Primary);
@@ -115,7 +113,7 @@ public class ReimuSecondary : Attack<Reimu> {
 
     public override void RemoteRelease(Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2 theirPosition).Out(out float theirAngle);
-        var delta = Game.Network.Time - theirTime;
+        var delta = Game.NetworkOld.Time - theirTime;
 
         foreach (var angle in angles) {
             var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, turnRadius, velocity, hitboxRadius, c.IsP1, c.IsPlayer) {

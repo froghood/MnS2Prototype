@@ -5,10 +5,10 @@ using Touhou.Networking;
 namespace Touhou.Objects.Characters;
 
 
-public class RemoteCharacterController<T> : Entity, IReceivable where T : Character {
+public class RemoteCharacterController<T> : Entity where T : Character {
 
     private T c;
-    private Dictionary<PacketType, Action<Packet>> receiveCallbacks;
+    private Dictionary<PacketType, ReceiveCallback> receiveCallbacks;
     private bool hasRemoteMatchStated;
 
 
@@ -25,7 +25,7 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
         this.c = c;
         basePosition = c.Position;
 
-        receiveCallbacks = new Dictionary<PacketType, Action<Packet>>() {
+        receiveCallbacks = new Dictionary<PacketType, ReceiveCallback>() {
             {PacketType.MatchStarted, (_) => hasRemoteMatchStated = true},
             {PacketType.VelocityChanged, VelocityChanged},
             {PacketType.AttackReleased, AttackReleased},
@@ -75,7 +75,7 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
 
 
 
-    public void Receive(Packet packet, IPEndPoint endPoint) {
+    public void Receive(Packet packet) {
 
         if (!hasRemoteMatchStated && packet.Type != PacketType.MatchStarted) return;
 
@@ -96,7 +96,7 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
         basePosition = position;
 
 
-        var latency = Game.Network.Time - time;
+        var latency = Game.NetworkOld.Time - time;
         var predictedPosition = basePosition + velocity * latency.AsSeconds();
 
         interpolations.Clear();
@@ -140,7 +140,7 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
 
         packet.Out(out Time time).Out(out Vector2 position);
 
-        var latency = Game.Network.Time - time;
+        var latency = Game.NetworkOld.Time - time;
 
         c.SetPosition(position);
 
@@ -159,7 +159,7 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
 
         packet.Out(out Time time).Out(out Vector2 position).Out(out float angle);
 
-        var latency = Game.Network.Time - time;
+        var latency = Game.NetworkOld.Time - time;
 
         c.Damage();
         c.Knockback(Time.InSeconds(1f) - latency);

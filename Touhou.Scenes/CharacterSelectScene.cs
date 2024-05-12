@@ -14,8 +14,8 @@ public class CharacterSelectScene : Scene {
     }
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Settings.UseSteam) Game.NetworkOld.DisconnectSteam();
+        else Game.NetworkOld.Disconnect();
 
         Log.Warn("Opponent disconnected");
 

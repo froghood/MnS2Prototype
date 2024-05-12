@@ -1,5 +1,9 @@
 
+using System.Runtime.InteropServices;
+
 namespace Touhou;
+
+[StructLayout(LayoutKind.Sequential)]
 public struct Time {
 
     private long microseconds;

@@ -31,6 +31,8 @@ internal static class Game {
 
     public static InputManager Input { get => inputManager; }
     private static NativeWindow window;
+    public static NetworkOld NetworkOld { get => networkOld; }
+
     public static Network Network { get => network; }
     public static SceneManager Scenes { get => sceneManager; }
 
@@ -65,6 +67,7 @@ internal static class Game {
 
     private static Queue<float> frameTimes = new();
     private static InputManager inputManager = new();
+    private static NetworkOld networkOld = new();
     private static Network network = new();
     private static SceneManager sceneManager = new();
     private static SoundPlayer soundPlayer;
@@ -114,8 +117,8 @@ internal static class Game {
 
     public static void Init(string[] args) {
 
-        //SteamClient.Init(1456390);
-        SteamClient.Init(480);
+
+        if (Game.Settings.UseSteam) SteamClient.Init(480);
 
         window.Title = "MNS2 OPENGL";
 
@@ -135,7 +138,7 @@ internal static class Game {
         inputManager.ActionPressed += (actionData) => sceneManager.Current.Press(actionData);
         inputManager.ActionReleased += (action) => sceneManager.Current.Release(action);
 
-        network.PacketReceived += (packet, endPoint) => sceneManager.Current.Receive(packet, endPoint);
+        //network.PacketReceived += (packet, endPoint) => sceneManager.Current.Receive(packet, endPoint);
 
         renderer.ClearColor = new Color4(.1f, .1f, .16f, 1f);
 
@@ -204,11 +207,11 @@ internal static class Game {
 
         inputManager.Process(window);
 
-        network.Update();
+        networkOld.Update();
 
         sceneManager.Current.Update();
 
-        network.Flush();
+        networkOld.Flush();
     }
 
     private static void Render() {

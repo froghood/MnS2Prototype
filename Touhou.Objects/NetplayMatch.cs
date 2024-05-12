@@ -9,7 +9,7 @@ public class NetplayMatch : Match, IReceivable {
 
 
 
-    public override Time CurrentTime { get => currentTime = Time.Max(currentTime, Game.Network.Time - StartTime); protected set => currentTime = value; }
+    public override Time CurrentTime { get => currentTime = Time.Max(currentTime, Game.NetworkOld.Time - StartTime); protected set => currentTime = value; }
     private Time currentTime;
 
 
@@ -30,7 +30,7 @@ public class NetplayMatch : Match, IReceivable {
         this.localCharacter = localCharacter;
         this.remoteCharacter = remoteCharacter;
 
-        currentTime = Game.Network.Time - startTime;
+        currentTime = Game.NetworkOld.Time - startTime;
 
 
     }
@@ -38,7 +38,7 @@ public class NetplayMatch : Match, IReceivable {
     public override void Update() {
 
         if (!hasMatchStartedPacketBeenSent && HasStarted) {
-            Game.Network.Send(new Packet(PacketType.MatchStarted));
+            Game.NetworkOld.Send(PacketType.MatchStarted);
             hasMatchStartedPacketBeenSent = true;
         }
 
@@ -59,10 +59,9 @@ public class NetplayMatch : Match, IReceivable {
 
     private void LocalRematch() {
 
-        var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
+        var matchStartTime = Game.NetworkOld.Time + Time.InSeconds(3f);
 
-        var packet = new Packet(PacketType.Rematch).In(matchStartTime);
-        Game.Network.Send(packet);
+        Game.NetworkOld.Send(PacketType.Rematch, matchStartTime);
 
         Game.Command(() => {
             Game.Scenes.ChangeScene<NetplayMatchScene>(false, IsP1, matchStartTime, localOption, remoteOption);
@@ -97,7 +96,7 @@ public class NetplayMatch : Match, IReceivable {
 
 
 
-    public void Receive(Packet packet, IPEndPoint endPoint) {
+    public void Receive(Packet packet) {
         if (packet.Type != PacketType.MatchStarted && !hasRemoteMatchStarted) return;
 
         switch (packet.Type) {

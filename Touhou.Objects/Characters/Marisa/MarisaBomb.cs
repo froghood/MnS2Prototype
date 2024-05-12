@@ -45,12 +45,13 @@ public class MarisaBomb : Bomb<Marisa> {
 
         c.ApplyInvulnerability(cooldown);
 
-        if (Game.Network.IsConnected) {
-            var packet = new Packet(PacketType.BombPressed)
-            .In(Game.Network.Time - cooldownOverflow)
-            .In(c.Position);
+        if (Game.NetworkOld.IsConnected) {
 
-            Game.Network.Send(packet);
+            Game.NetworkOld.Send(
+                PacketType.BombPressed,
+                Game.NetworkOld.Time - cooldownOverflow,
+                c.Position);
+
         }
 
 
@@ -62,7 +63,7 @@ public class MarisaBomb : Bomb<Marisa> {
     public override void RemotePress(Packet packet) {
 
         packet.Out(out Time theirTime).Out(out Vector2 position);
-        Time delta = Game.Network.Time - theirTime;
+        Time delta = Game.NetworkOld.Time - theirTime;
 
         Log.Info(delta.AsSeconds());
 

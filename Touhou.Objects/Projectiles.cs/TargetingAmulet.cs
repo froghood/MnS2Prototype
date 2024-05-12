@@ -74,7 +74,7 @@ public class TargetingAmulet : ParametricProjectile {
         Destroy();
 
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.NetworkOld.Time - theirTime;
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
         var projectile = new SpecialAmulet(Position, angle, IsP1Owned, IsPlayerOwned, true) {

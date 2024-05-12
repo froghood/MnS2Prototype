@@ -10,14 +10,12 @@ namespace Touhou.Scenes;
 
 public class ConnectingScene : Scene {
 
-    private readonly Text text;
+    private readonly Text displayText;
 
-    private IPEndPoint endPoint;
 
     public ConnectingScene() {
-        endPoint = new IPEndPoint(IPAddress.Parse(Game.Settings.Address), Game.Settings.Port);
 
-        text = new Text {
+        displayText = new Text {
             DisplayedText = "Connecting...",
             CharacterSize = 40f,
             Origin = Vector2.UnitY,
@@ -26,41 +24,33 @@ public class ConnectingScene : Scene {
         };
     }
 
+
     public override void OnInitialize() {
-        Game.Network.TimeOffset -= Game.Time;
-
-        AddEntity(new UpdateCallback(OnUpdate));
-
-
-        AddEntity(new ReceiveCallback((packet, endPoint) => {
-            if (packet.Type != PacketType.ConnectionResponse) return;
-            Game.Scenes.ChangeScene<ClientSyncingScene>();
-        }));
 
         AddEntity(new RenderCallback(() => {
-            Game.Draw(text, Layer.UI1);
+            Game.Draw(displayText, Layer.UI1);
         }));
+
+        Connect();
     }
 
-    private void OnUpdate() {
-        if (!Game.Network.IsConnected) {
-            Connect();
-        }
-    }
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        Game.Scenes.ChangeScene<MainScene>();
     }
 
+
     private void Connect() {
-        if (Game.Settings.UseSteam) Game.Network.ConnectSteam(Game.Settings.SteamID);
-        else Game.Network.Connect(endPoint);
 
+        if (Game.Settings.UseSteam) {
 
+            Game.Network.Connect(Game.Settings.SteamID);
 
-        Game.Network.Send(new Packet(PacketType.Connection));
+        } else {
 
-        Log.Info($"Attempting to connect to {Game.Settings.SteamID}");
+            Game.Network.Connect(new IPEndPoint(IPAddress.Parse(Game.Settings.Address), Game.Settings.Port));
+        }
+
+        Game.Network.Send(PacketType.Connection);
     }
 }
