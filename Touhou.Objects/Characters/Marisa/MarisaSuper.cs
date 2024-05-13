@@ -138,6 +138,7 @@ public class MarisaSuper : Attack<Marisa> {
             Rotation = aimAngle,
             Scale = new Vector2(10000f, visualScale),
             Color = new Color4(1f, 1f, 1f, 0.1f),
+            UVPaddingOffset = new Vector2(-0.5f, 0f),
             UseColorSwapping = true,
         };
 

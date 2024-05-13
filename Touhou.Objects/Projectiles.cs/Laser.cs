@@ -99,7 +99,6 @@ public class Laser : Projectile {
             var indicatorStart = new Sprite(indicator) {
                 SpriteName = "laser_indicator_start",
                 Origin = new Vector2(1f, 0.5f),
-                UVPaddingOffset = Vector2.Zero,
                 Scale = new Vector2(visualScale, visualScale)
             };
 
@@ -142,7 +141,6 @@ public class Laser : Projectile {
             var laserStart = new Sprite(laser) {
                 SpriteName = "laser_start",
                 Origin = new Vector2(1f, 0.5f),
-                UVPaddingOffset = Vector2.Zero,
                 Scale = new Vector2(visualScale, visualScale * scaleEasing),
             };
 

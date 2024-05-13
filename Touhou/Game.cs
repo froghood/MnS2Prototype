@@ -114,8 +114,7 @@ internal static class Game {
 
     public static void Init(string[] args) {
 
-        //SteamClient.Init(1456390);
-        SteamClient.Init(480);
+        if (Settings.UseSteam) SteamClient.Init(480);
 
         window.Title = "MNS2 OPENGL";
 
