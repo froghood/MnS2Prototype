@@ -7,9 +7,20 @@ public class SakuyaSuper : Attack<Sakuya> {
 
     public SakuyaSuper(Sakuya c) : base(c) {
         Cost = 12;
-    }
 
+
+    }
     public override void LocalPress(Time cooldownOverflow, bool focused) {
+
+        if (c.IsTimestopped) {
+            c.DisableTimestop(0L, false);
+        } else {
+            c.EnableTimestop(Cost);
+        }
+
+        var packet = new Packet(PacketType.AttackReleased).In(PlayerActions.Super);
+        Game.Network.Send(packet);
+
 
         // if (c.HasEffect<Timestop>()) {
         //     c.CancelEffect<Timestop>();
@@ -34,7 +45,6 @@ public class SakuyaSuper : Attack<Sakuya> {
 
 
     public override void LocalHold(Time cooldownOverflow, Time holdTime, bool focused) {
-
     }
 
 

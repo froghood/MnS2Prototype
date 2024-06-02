@@ -11,7 +11,7 @@ namespace Touhou.Objects.Characters;
 public class LocalCharacterController<T> : Entity where T : Character {
 
 
-    private T c;
+    protected T c;
 
     private Vector2 previousVelocity;
 

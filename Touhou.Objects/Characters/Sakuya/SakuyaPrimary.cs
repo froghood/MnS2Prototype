@@ -78,7 +78,7 @@ public class SakuyaPrimary : Attack<Sakuya> {
 
             //bool isTimestopped = c.GetEffect<Timestop>(out var timestop);
 
-            bool isTimestopped = false;
+            bool isTimestopped = c.IsTimestopped;
 
             for (int i = 0; i < numShots; i++) {
                 var offset = new Vector2(MathF.Cos(angle + MathF.PI / 2f), MathF.Sin(angle + MathF.PI / 2f)) * (spacing * fireCount * i - spacing * fireCount / 2f * (numShots - 1));
@@ -87,9 +87,12 @@ public class SakuyaPrimary : Attack<Sakuya> {
                     CanCollide = false,
                     Color = new Color4(0f, 1f, 0f, 0.4f),
                 };
-                if (!isTimestopped) projectile.IncreaseTime(cooldownOverflow + timeOffset, false);
 
-                //timestop?.AddProjectile(projectile);
+                if (!isTimestopped) {
+                    projectile.IncreaseTime(cooldownOverflow + timeOffset, false);
+                } else {
+                    c.TimestoppedProjectiles.Enqueue(projectile);
+                }
 
                 c.Scene.AddEntity(projectile);
             }

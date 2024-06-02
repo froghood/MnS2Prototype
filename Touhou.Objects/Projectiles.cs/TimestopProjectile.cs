@@ -99,7 +99,7 @@ public abstract class TimestopProjectile : Projectile {
 
     protected Vector2 SamplePosition(float t) => Origin + PositionFunction(t) * orientationMatrix;
 
-    public void Unfreeze(Time timeIncrease, bool interpolate) {
+    public void Unfreeze(Time timeIncrease = default, bool interpolate = false) {
         isTimestopped = false;
         SetTime(Time.Min(LifeTime, SpawnDelay), false);
         IncreaseTime(timeIncrease, interpolate);

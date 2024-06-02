@@ -1,9 +1,20 @@
 using OpenTK.Mathematics;
+using Touhou.Debugging;
 using Touhou.Graphics;
+using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
 public class Sakuya : Character {
+
+    public bool IsTimestopped { get; private set; }
+    public Queue<TimestopProjectile> TimestoppedProjectiles { get; private set; } = new();
+    public Timer TimestopTimer { get; private set; }
+
+    public int TimestopSpendCost { get; private set; }
+    public Time TimestopSpendTime { get; set; }
+
+
     public Sakuya(bool isP1, bool isPlayer, Color4 color) : base(isP1, isPlayer, color) {
 
         Speed = 350f;
@@ -17,6 +28,24 @@ public class Sakuya : Character {
             new SakuyaBomb(this)
         );
 
+    }
+
+    public void EnableTimestop(int cost) {
+        IsTimestopped = true;
+        TimestopTimer = new Timer();
+        TimestopSpendCost = cost;
+        TimestopSpendTime = 0L;
+    }
+
+    public void DisableTimestop(Time timeIncrease, bool interpolate) {
+
+        IsTimestopped = false;
+        while (TimestoppedProjectiles.Count > 0) {
+
+            Log.Warn(TimestoppedProjectiles.Count);
+
+            TimestoppedProjectiles.Dequeue().Unfreeze(timeIncrease, interpolate);
+        }
     }
 
     public override void Render() {

@@ -83,7 +83,7 @@ public class TextureAtlas {
             new Vector2(right + paddingOffset.X, top + paddingOffset.Y) / size
         );
 
-        if (name == "aimarrow2") System.Console.WriteLine(uv);
+        //if (name == "aimarrow2") System.Console.WriteLine(uv);
 
         return uv;
 
