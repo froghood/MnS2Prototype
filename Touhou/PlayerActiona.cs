@@ -13,6 +13,6 @@ public enum PlayerActions : uint {
     Primary = 32,
     Secondary = 64,
     Special = 128,
-    Super = 256,
+    Charge = 256,
     Bomb = 512
 }

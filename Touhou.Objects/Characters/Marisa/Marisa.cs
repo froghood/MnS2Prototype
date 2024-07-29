@@ -3,19 +3,31 @@ using Touhou.Graphics;
 
 namespace Touhou.Objects.Characters;
 
-public class Marisa : Character {
+public partial class Marisa : Character {
     public Marisa(bool isP1, bool isPlayer, Color4 color) : base(isP1, isPlayer, color) {
 
         Speed = 350f;
         FocusedSpeed = 150f;
 
-        InitMoveset(
-            new MarisaPrimary(this),
-            new MarisaSecondary(this),
-            new MarisaSpecial(this),
-            new MarisaSuper(this),
-            new MarisaBomb(this)
+        // TODO: implement other attack levels
+        Primary = new Ability(
+            new PrimaryLvl1(this),
+            new PrimaryLvl2(this),
+            new PrimaryLvl2(this)
         );
+
+        Secondary = new Ability(
+            new SecondaryLvl1(this),
+            new SecondaryLvl1(this),
+            new SecondaryLvl1(this)
+        );
+
+        Special = new Ability(
+            new SpecialLvl1(this),
+            new SpecialLvl1(this),
+            new SpecialLvl1(this)
+        );
+
     }
 
     public override void Render() {

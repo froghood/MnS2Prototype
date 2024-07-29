@@ -44,7 +44,7 @@ public class LocalCharacterController<T> : Entity where T : Character {
             return;
         }
 
-        foreach (var action in Game.Input.GetActionOrder().Where(e => (e & (PlayerActions.Primary | PlayerActions.Secondary | PlayerActions.Special | PlayerActions.Super | PlayerActions.Bomb)) != 0)) {
+        foreach (var action in Game.Input.GetActionOrder().Where(e => (e & (PlayerActions.Primary | PlayerActions.Secondary | PlayerActions.Special | PlayerActions.Bomb | PlayerActions.Charge)) != 0)) {
             UpdateAttackPress(action);
             UpdateBomb(action);
             UpdateAttackHold(action);
@@ -143,7 +143,7 @@ public class LocalCharacterController<T> : Entity where T : Character {
         if (c.State == CharacterState.Hit) return;
 
 
-        if (!c.IsAttackAvailable(action)) return;
+        if (!c.IsAbilityAvailable(action)) return;
 
         if (c.IsAttackHoldable(action) && !c.IsAttackHeld(action)) { // holdable
             ProcessHoldable(action);
@@ -231,7 +231,7 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
     private void UpdateAttackHold(PlayerActions action) {
 
-        if (action != PlayerActions.Primary && action != PlayerActions.Secondary && action != PlayerActions.Special && action != PlayerActions.Super) return;
+        if (action != PlayerActions.Primary && action != PlayerActions.Secondary && action != PlayerActions.Special && action != PlayerActions.Charge) return;
 
 
         if (c.GetAttackCooldownTimer(action).HasFinished) c.HoldLocalAttack(action);

@@ -79,14 +79,14 @@ public class NetplayMatchUI : Entity {
     private void RenderCooldowns() {
 
 
-        var attackActions = Enum.GetValues(typeof(PlayerActions)).OfType<PlayerActions>().Where(e => (e & (PlayerActions.Primary | PlayerActions.Secondary | PlayerActions.Special | PlayerActions.Super)) != 0).ToArray();
+        var attackActions = Enum.GetValues(typeof(PlayerActions)).OfType<PlayerActions>().Where(e => (e & (PlayerActions.Primary | PlayerActions.Secondary | PlayerActions.Special | PlayerActions.Charge)) != 0).ToArray();
 
         int i = 0;
         foreach (var action in attackActions) {
 
-            var attackCost = localC.GetAttackCost(action);
 
-            var fillColor = localC.Power < attackCost ? new Color4(230, 180, 190, 255) : (localC.IsAttackAvailable(action) ? Color4.White : Color4.Gray);
+
+            var fillColor = localC.IsAbilityAvailable(action) ? Color4.White : Color4.Gray;
 
 
 
@@ -98,7 +98,7 @@ public class NetplayMatchUI : Entity {
                 StrokeWidth = 4f,
                 FillColor = Color4.Black,
                 IsUI = true,
-                Alignment = new Vector2(0f, localC.IsAttackAvailable(action) ? -1f : -1.01f),
+                Alignment = new Vector2(0f, localC.IsAbilityAvailable(action) ? -1f : -1.01f),
             };
 
             Game.Draw(rectangle, Layer.UI1);
@@ -140,7 +140,7 @@ public class NetplayMatchUI : Entity {
                     Origin = new Vector2(0.5f),
                     Position = new Vector2(150f * i - (attackActions.Length - 1) / 2f * 140f, 80f),
                     IsUI = true,
-                    Alignment = new Vector2(0f, localC.IsAttackAvailable(action) ? -1f : -1.01f),
+                    Alignment = new Vector2(0f, localC.IsAbilityAvailable(action) ? -1f : -1.01f),
                     Color = localC.Color,
                     UseColorSwapping = true,
                 };

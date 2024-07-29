@@ -30,13 +30,12 @@ public class YukariSpecial : Attack<Character> {
 
     public YukariSpecial(Character c) : base(c) {
         IsHoldable = true;
-        Cost = 8;
     }
 
 
 
     public override void LocalPress(Time cooldownOverflow, bool focused) {
-        startingAngle = c.AngleToOpponent;
+        startingAngle = C.AngleToOpponent;
 
         Log.Info(startingAngle);
 
@@ -44,9 +43,9 @@ public class YukariSpecial : Attack<Character> {
         angleOffset = 0f;
         timeThreshold = Game.Time - cooldownOverflow;
 
-        c.ApplyMovespeedModifier(0.2f);
+        C.ApplyMovespeedModifier(0.2f);
 
-        c.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Super);
+        C.DisableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Charge);
     }
 
 
@@ -61,7 +60,7 @@ public class YukariSpecial : Attack<Character> {
             float angle = startingAngle + angleOffset / 360f * MathF.Tau + MathF.PI;
 
             for (int i = 0; i < numShots; i++) {
-                var projectile = new Amulet(c.Position, angle + MathF.Tau / numShots * i, c.IsP1, c.IsPlayer, false) {
+                var projectile = new Amulet(C.Position, angle + MathF.Tau / numShots * i, C.IsP1, C.IsPlayer, false) {
                     CanCollide = false,
                     Color = new Color4(0, 1f, 0, 0.4f),
                     StartingVelocity = velocity * startingVelocityModifier,
@@ -70,15 +69,14 @@ public class YukariSpecial : Attack<Character> {
                 };
                 projectile.ForwardTime(cooldownOverflow + timeOffset, false);
 
-                c.Scene.AddEntity(projectile);
+                C.Scene.AddEntity(projectile);
 
             }
-            c.SpendPower(Cost);
 
             var packet = new Packet(PacketType.AttackReleased)
             .In(PlayerActions.Special)
             .In(Game.Network.Time - cooldownOverflow + timeOffset)
-            .In(c.Position)
+            .In(C.Position)
             .In(angle);
 
             Game.Network.Send(packet);
@@ -91,12 +89,12 @@ public class YukariSpecial : Attack<Character> {
 
 
     public override void LocalRelease(Time cooldownOverflow, Time heldTime, bool focused) {
-        c.ApplyMovespeedModifier(1f);
+        C.ApplyMovespeedModifier(1f);
 
-        c.ApplyAttackCooldowns(specialCooldown, PlayerActions.Special);
-        c.ApplyAttackCooldowns(globalCooldown, PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Super);
+        C.ApplyAbilityLock(specialCooldown, PlayerActions.Special);
+        C.ApplyAbilityLock(globalCooldown, PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Charge);
 
-        c.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Super);
+        C.EnableAttacks(PlayerActions.Primary, PlayerActions.Secondary, PlayerActions.Charge);
     }
 
 
@@ -106,7 +104,7 @@ public class YukariSpecial : Attack<Character> {
         var latency = Game.Network.Time - theirTime;
 
         for (int i = 0; i < numShots; i++) {
-            var projectile = new Amulet(position, angle + MathF.Tau / numShots * i, c.IsP1, c.IsPlayer, true) {
+            var projectile = new Amulet(position, angle + MathF.Tau / numShots * i, C.IsP1, C.IsPlayer, true) {
                 Color = new Color4(1f, 0f, 0f, 1f),
                 GrazeAmount = grazeAmount,
                 StartingVelocity = velocity * startingVelocityModifier,
@@ -115,7 +113,7 @@ public class YukariSpecial : Attack<Character> {
             };
             projectile.ForwardTime(latency, true);
 
-            c.Scene.AddEntity(projectile);
+            C.Scene.AddEntity(projectile);
         }
     }
 }

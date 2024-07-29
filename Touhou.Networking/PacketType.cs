@@ -16,6 +16,7 @@ public enum PacketType : byte {
     AttackPressed,
     AttackReleased,
     BombPressed,
+    Charged,
     SpentPower,
     EffectApplied,
     EffectCancelled,

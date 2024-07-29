@@ -5,7 +5,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Objects.Characters;
 
-public class Sakuya : Character {
+public partial class Sakuya : Character {
 
     public bool IsTimestopped { get; private set; }
     public Queue<TimestopProjectile> TimestoppedProjectiles { get; private set; } = new();
@@ -20,32 +20,36 @@ public class Sakuya : Character {
         Speed = 350f;
         FocusedSpeed = 250f;
 
-        InitMoveset(
-            new SakuyaPrimary(this),
-            new SakuyaSecondary(this),
-            new SakuyaSpecial(this),
-            new SakuyaSuper(this),
-            new SakuyaBomb(this)
+        // TODO: implement other attack levels
+        Primary = new Ability(
+            new PrimaryLvl1(this),
+            new PrimaryLvl2(this),
+            new PrimaryLvl2(this)
+        );
+
+        Secondary = new Ability(
+            new SecondaryLvl1(this),
+            new SecondaryLvl1(this),
+            new SecondaryLvl1(this)
+        );
+
+        Special = new Ability(
+            new SpecialLvl1(this),
+            new SpecialLvl1(this),
+            new SpecialLvl1(this)
         );
 
     }
 
-    public void EnableTimestop(int cost) {
+    public void EnableTimestop(Time duration) {
         IsTimestopped = true;
-        TimestopTimer = new Timer();
-        TimestopSpendCost = cost;
-        TimestopSpendTime = 0L;
+        TimestopTimer = new Timer(duration);
     }
 
     public void DisableTimestop(Time timeIncrease, bool interpolate) {
 
         IsTimestopped = false;
-        while (TimestoppedProjectiles.Count > 0) {
 
-            Log.Warn(TimestoppedProjectiles.Count);
-
-            TimestoppedProjectiles.Dequeue().Unfreeze(timeIncrease, interpolate);
-        }
     }
 
     public override void Render() {

@@ -13,7 +13,7 @@ public class LocalSakuyaController : LocalCharacterController<Sakuya> {
                 c.TimestopSpendTime += Time.InSeconds(0.25f);
                 c.SpendPower(c.TimestopSpendCost);
             } else {
-                c.DisableTimestop(0L, false);
+                //c.DisableTimestop(0L, false);
             }
 
         }

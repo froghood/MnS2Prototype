@@ -3,18 +3,33 @@ using Touhou.Graphics;
 
 namespace Touhou.Objects.Characters;
 
-public class Reimu : Character {
+public partial class Reimu : Character {
+
+
+
     public Reimu(bool isP1, bool isPlayer, Color4 color) : base(isP1, isPlayer, color) {
 
         Speed = 350f;
         FocusedSpeed = 150f;
 
-        InitMoveset(
-            new ReimuPrimary(this),
-            new ReimuSecondary(this),
-            new ReimuSpecial(this),
-            new ReimuSuper(this),
-            new ReimuBomb(this));
+        // TODO: implement other attack levels
+        Primary = new Ability(
+            new PrimaryLvl1(this),
+            new PrimaryLvl2(this),
+            new PrimaryLvl2(this)
+        );
+
+        Secondary = new Ability(
+            new SecondaryLvl1(this),
+            new SecondaryLvl1(this),
+            new SecondaryLvl1(this)
+        );
+
+        Special = new Ability(
+            new SpecialLvl1(this),
+            new SpecialLvl1(this),
+            new SpecialLvl1(this)
+        );
 
     }
 

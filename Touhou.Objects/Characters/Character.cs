@@ -8,7 +8,7 @@ namespace Touhou.Objects.Characters;
 
 
 
-public class Character : Entity {
+public partial class Character : Entity {
 
 
 
@@ -78,11 +78,16 @@ public class Character : Entity {
 
 
 
-    private Dictionary<PlayerActions, Attack> attacks = new();
+    private Dictionary<PlayerActions, AttackOlder> attacks = new();
     private Dictionary<PlayerActions, (Time CooldownOverflow, Time HoldTime, bool IsFocused)> heldAttacks = new();
     private Bomb bomb;
 
 
+    protected Ability Primary { get; set; }
+    protected Ability Secondary { get; set; }
+    protected Ability Special { get; set; }
+    protected Bomb Bomb { get; set; }
+    public int ChargeLevel { get; protected set; }
 
     public Character(bool isP1, bool isPlayer, Color4 color) {
         IsP1 = isP1;
@@ -191,14 +196,10 @@ public class Character : Entity {
 
 
 
-    public bool IsAttackAvailable(PlayerActions action) {
-        var attack = attacks[action];
-
-        return (Power >= attack.Cost && attack.CooldownTimer.HasFinished && !attack.IsDisabled);
-
+    public bool IsAbilityAvailable(PlayerActions action) {
+        return GetAbility(action).IsAvailable;
     }
 
-    public bool IsAttackHoldable(PlayerActions action) => attacks[action].IsHoldable;
 
     public bool IsAttackHeld(PlayerActions action) => heldAttacks.ContainsKey(action);
 
@@ -211,13 +212,14 @@ public class Character : Entity {
         return false;
     }
 
-    public Timer GetAttackCooldownTimer(PlayerActions action) => attacks[action].CooldownTimer;
-    public int GetAttackCost(PlayerActions action) => attacks[action].Cost;
-    public bool IsAttackFocusable(PlayerActions action) => attacks[action].HasFocusVariant;
+    public Timer GetAbilityLockTimer(PlayerActions action) => GetAbility(action).LockTimer;
+    public Timer GetAbilityCooldownTimer(PlayerActions action) => GetAbility(action).CooldownTimer;
+    public bool IsAttackFocusable(PlayerActions action, int charge) => GetAbility(action).GetAttack(charge).IsFocusable;
 
-    public string GetAttackIconName(PlayerActions action, bool isFocused) {
-        var attack = attacks[action];
-        return isFocused && attack.HasFocusVariant ? attack.FocusedIcon : attack.Icon;
+    public bool IsAttackHoldable(PlayerActions action, int charge) => GetAbility(action).GetAttack(charge).IsHoldable;
+    public string GetAttackIconSpriteName(PlayerActions action, int charge, bool isFocused) {
+        var attack = GetAbility(action).GetAttack(charge);
+        return isFocused && attack.IsFocusable ? attack.FocusedIconSpriteName : attack.IconSpriteName;
     }
 
     public void PressLocalAttack(PlayerActions action, Time cooldownOverflow, bool isFocused) {
@@ -285,35 +287,60 @@ public class Character : Entity {
     public void PressRemoteBomb(Packet packet) => bomb.RemotePress(packet);
 
 
+    public void Charge(bool send = false) {
+        if (ChargeLevel >= 2) return;
 
+        ChargeLevel++;
 
-    public void ApplyAttackCooldowns(Time duration, params PlayerActions[] actions) {
-        foreach (var action in actions) attacks[action].ApplyCooldown(duration);
+        if (send) {
+            var packet = new Packet(PacketType.Charged);
+            Game.Network.Send(packet);
+        }
+    }
+
+    public void SpendCharge() {
+        ChargeLevel = 0;
+    }
+
+    public void ApplyAbilityLock(Time duration, params PlayerActions[] actions) {
+        for (int i = 0; i < actions.Length; i++) {
+            GetAbility(actions[i]).ApplyLock(duration);
+        }
+    }
+
+    public void ApplyAbilityCooldown(Time duration, params PlayerActions[] actions) {
+        for (int i = 0; i < actions.Length; i++) {
+            GetAbility(actions[i]).ApplyCooldown(duration);
+        }
     }
 
     public void DisableAttacks(params PlayerActions[] actions) {
-        foreach (var action in actions) attacks[action].Disable();
+        for (int i = 0; i < actions.Length; i++) {
+            GetAbility(actions[i]).Disable();
+        }
     }
 
     public void EnableAttacks(params PlayerActions[] actions) {
-        foreach (var action in actions) attacks[action].Enable();
-    }
-
-
-
-    public int SpendPower(int amount, bool overflow = true) {
-
-        int amountActuallySpent = amount;
-
-        if (overflow) {
-            var powerOverflow = Math.Max((int)((Match.TotalPowerGenerated + PowerGainedFromGrazing - PowerSpent) - 400), 0);
-            amountActuallySpent += powerOverflow;
+        for (int i = 0; i < actions.Length; i++) {
+            GetAbility(actions[i]).Enable();
         }
-
-        PowerSpent += amountActuallySpent;
-
-        return amountActuallySpent;
     }
+
+
+
+    // public int SpendPower(int amount, bool overflow = true) {
+
+    //     int amountActuallySpent = amount;
+
+    //     if (overflow) {
+    //         var powerOverflow = Math.Max((int)((Match.TotalPowerGenerated + PowerGainedFromGrazing - PowerSpent) - 400), 0);
+    //         amountActuallySpent += powerOverflow;
+    //     }
+
+    //     PowerSpent += amountActuallySpent;
+
+    //     return amountActuallySpent;
+    // }
 
     public void SpendBomb(int amount = 1) {
         BombCount -= amount;
@@ -362,23 +389,12 @@ public class Character : Entity {
         };
     }
 
-
-
-
-
-    protected void InitMoveset(
-        Attack primary,
-        Attack secondary,
-        Attack special,
-        Attack super,
-        Bomb bomb) {
-
-        attacks[PlayerActions.Primary] = primary;
-        attacks[PlayerActions.Secondary] = secondary;
-        attacks[PlayerActions.Special] = special;
-        attacks[PlayerActions.Super] = super;
-
-        this.bomb = bomb;
+    protected Ability GetAbility(PlayerActions action) {
+        return (action) switch {
+            PlayerActions.Primary => Primary,
+            PlayerActions.Secondary => Secondary,
+            PlayerActions.Special => Special,
+            _ => null
+        };
     }
-
 }

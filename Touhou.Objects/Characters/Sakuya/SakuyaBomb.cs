@@ -38,10 +38,10 @@ public class SakuyaBomb : Bomb<Sakuya> {
 
         CooldownTimer = new Timer(cooldown);
 
-        c.ApplyAttackCooldowns(cooldown, PlayerActions.Primary);
-        c.ApplyAttackCooldowns(cooldown, PlayerActions.Secondary);
-        c.ApplyAttackCooldowns(cooldown, PlayerActions.Special);
-        c.ApplyAttackCooldowns(cooldown, PlayerActions.Super);
+        c.ApplyAbilityLock(cooldown, PlayerActions.Primary);
+        c.ApplyAbilityLock(cooldown, PlayerActions.Secondary);
+        c.ApplyAbilityLock(cooldown, PlayerActions.Special);
+        c.ApplyAbilityLock(cooldown, PlayerActions.Charge);
 
         c.ApplyInvulnerability(cooldown);
 
