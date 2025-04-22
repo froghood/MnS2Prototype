@@ -1,11 +1,12 @@
 
+using FrogLib;
 using NAudio;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
 namespace Touhou.Sound;
 
-public class SoundPlayer {
+public class SoundPlayer : GameSystem {
 
     public float Volume { get => player.Volume; set => player.Volume = value; }
 

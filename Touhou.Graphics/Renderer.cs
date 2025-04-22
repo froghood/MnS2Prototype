@@ -1,4 +1,5 @@
 
+using FrogLib;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -7,7 +8,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Touhou.Graphics;
 
-public class Renderer {
+public class Renderer : GameSystem {
 
     public Color4 ClearColor {
         get {

@@ -1,8 +1,9 @@
+using FrogLib;
 using Newtonsoft.Json;
 
 namespace Touhou;
 
-public class Settings {
+public class Settings : GameSystem {
 
     public Settings(string settingsPath) {
         var jsonSource = File.ReadAllText(settingsPath);

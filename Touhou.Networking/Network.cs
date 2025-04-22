@@ -1,12 +1,13 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using FrogLib;
 using Steamworks;
 using Steamworks.Data;
 
 namespace Touhou.Networking;
 
-public class Network {
+public class Network : GameSystem {
 
 
 
