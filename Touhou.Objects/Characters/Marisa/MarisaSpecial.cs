@@ -70,7 +70,7 @@ public class MarisaSpecial : Attack<Marisa> {
             CanCollide = false,
             Color = new Color4(0f, 1f, 0f, 0.4f),
         };
-        c.Scene.AddEntity(shootingStar);
+        c.TScene.AddEntity(shootingStar);
 
         shootingStar.ForwardTime(cooldownOverflow, false);
 
@@ -78,12 +78,12 @@ public class MarisaSpecial : Attack<Marisa> {
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Special)
-        .In(Game.Network.Time - cooldownOverflow)
+        .In(Game.Get<Network>().Time - cooldownOverflow)
         .In(spawnPositionX)
         .In(spawnAngle)
         .In(seed);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
         isHeld = false;
 
@@ -112,7 +112,7 @@ public class MarisaSpecial : Attack<Marisa> {
         .Out(out float theirAngle)
         .Out(out int theirSeed);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.Get<Network>().Time - theirTime;
 
         var spawnPosition = new Vector2(theirPositionX, c.Match.Bounds.Y);
 
@@ -122,7 +122,7 @@ public class MarisaSpecial : Attack<Marisa> {
             GrazeAmount = grazeAmount,
             TrailGrazeAmount = trailGrazeAmount,
         };
-        c.Scene.AddEntity(shootingStar);
+        c.TScene.AddEntity(shootingStar);
 
         shootingStar.ForwardTime(latency, true);
 
@@ -152,7 +152,7 @@ public class MarisaSpecial : Attack<Marisa> {
 
 
 
-        Game.Draw(preview, Layer.Player);
-        Game.Draw(positionPreview, Layer.Player);
+        Game.Get<Renderer>().Queue(preview, Layer.Player);
+        Game.Get<Renderer>().Queue(positionPreview, Layer.Player);
     }
 }

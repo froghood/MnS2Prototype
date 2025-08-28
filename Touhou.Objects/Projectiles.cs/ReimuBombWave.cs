@@ -49,7 +49,7 @@ public class BombWave : ParametricProjectile {
 
 
 
-        Game.Draw(sprite, Layer.PlayerProjectiles);
+        Game.Get<Renderer>().Queue(sprite, Layer.PlayerProjectiles);
 
 
         var hitbox = new Rectangle() {

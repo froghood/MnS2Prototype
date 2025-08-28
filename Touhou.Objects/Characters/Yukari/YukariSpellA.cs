@@ -70,18 +70,18 @@ public class YukariSpecial : Attack<Character> {
                 };
                 projectile.ForwardTime(cooldownOverflow + timeOffset, false);
 
-                c.Scene.AddEntity(projectile);
+                c.TScene.AddEntity(projectile);
 
             }
             c.SpendPower(Cost);
 
             var packet = new Packet(PacketType.AttackReleased)
             .In(PlayerActions.Special)
-            .In(Game.Network.Time - cooldownOverflow + timeOffset)
+            .In(Game.Get<Network>().Time - cooldownOverflow + timeOffset)
             .In(c.Position)
             .In(angle);
 
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
 
             angleOffsetVelocity += angleOffsetAcceleration;
             angleOffset += angleOffsetVelocity;
@@ -103,7 +103,7 @@ public class YukariSpecial : Attack<Character> {
 
     public override void RemoteRelease(Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle);
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.Get<Network>().Time - theirTime;
 
         for (int i = 0; i < numShots; i++) {
             var projectile = new Amulet(position, angle + MathF.Tau / numShots * i, c.IsP1, c.IsPlayer, true) {
@@ -115,7 +115,7 @@ public class YukariSpecial : Attack<Character> {
             };
             projectile.ForwardTime(latency, true);
 
-            c.Scene.AddEntity(projectile);
+            c.TScene.AddEntity(projectile);
         }
     }
 }

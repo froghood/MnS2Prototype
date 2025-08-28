@@ -101,7 +101,7 @@ public class LocalHomingAmulet : Homing {
             angle = theirAngle;
             side = theirSide;
 
-            var latency = Game.Network.Time - theirTime;
+            var latency = Game.Get<Network>().Time - theirTime;
 
             if (side == 0) {
                 Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * velocity * latency.AsSeconds();
@@ -125,7 +125,7 @@ public class LocalHomingAmulet : Homing {
             Position = theirPosition;
             angle = theirAngle;
 
-            var latency = Game.Network.Time - theirTime;
+            var latency = Game.Get<Network>().Time - theirTime;
 
             Position += new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * velocity * latency.AsSeconds();
         }
@@ -151,7 +151,7 @@ public class LocalHomingAmulet : Homing {
              Color.B,
              Color.A * spawnRatio);
 
-        Game.Draw(sprite, Layer.PlayerProjectiles);
+        Game.Get<Renderer>().Queue(sprite, Layer.PlayerProjectiles);
     }
 
     public override void PostRender() {

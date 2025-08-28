@@ -23,8 +23,8 @@ public class Renderer : GameSystem {
     }
 
     public TextureAtlas TextureAtlas { get => textureAtlas; }
-    public TextureLibrary TextureLibrary { get => textureLibrary; }
-    public ShaderLibrary ShaderLibrary { get => shaderLibrary; }
+    public TTextureLibrary TextureLibrary { get => textureLibrary; }
+    public TShaderLibrary ShaderLibrary { get => TShaderLibrary; }
 
     public FontLibrary FontLibrary { get => fontLibrary; }
 
@@ -38,9 +38,9 @@ public class Renderer : GameSystem {
     //private Queue<(RenderableType Type, string Shader, List<Renderable> Renderables)> renderableGroups = new();
 
 
-    private TextureLibrary textureLibrary;
+    private TTextureLibrary textureLibrary;
     private TextureAtlas textureAtlas;
-    private ShaderLibrary shaderLibrary;
+    private TShaderLibrary TShaderLibrary;
     private FontLibrary fontLibrary;
 
     public Renderer(IGLFWGraphicsContext context) {
@@ -50,28 +50,28 @@ public class Renderer : GameSystem {
         textureAtlas = new TextureAtlas();
         textureAtlas.Load("./assets/sprites/sprites.json");
 
-        textureLibrary = new TextureLibrary();
+        textureLibrary = new TTextureLibrary();
         textureLibrary.LoadTexture("./assets/sprites/sprites.png");
         textureLibrary.LoadTexture("./assets/sprites/spritebleedtest.png");
 
-        shaderLibrary = new ShaderLibrary();
-        shaderLibrary.LoadShader("./assets/shaders/sprite.vert", ShaderType.VertexShader);
-        shaderLibrary.LoadShader("./assets/shaders/sprite.frag", ShaderType.FragmentShader);
+        TShaderLibrary = new TShaderLibrary();
+        TShaderLibrary.LoadShader("./assets/shaders/sprite.vert", ShaderType.VertexShader);
+        TShaderLibrary.LoadShader("./assets/shaders/sprite.frag", ShaderType.FragmentShader);
 
-        shaderLibrary.LoadShader("./assets/shaders/text.vert", ShaderType.VertexShader);
-        shaderLibrary.LoadShader("./assets/shaders/text.frag", ShaderType.FragmentShader);
+        TShaderLibrary.LoadShader("./assets/shaders/text.vert", ShaderType.VertexShader);
+        TShaderLibrary.LoadShader("./assets/shaders/text.frag", ShaderType.FragmentShader);
 
-        shaderLibrary.LoadShader("./assets/shaders/rectangle.vert", ShaderType.VertexShader);
-        shaderLibrary.LoadShader("./assets/shaders/rectangle.frag", ShaderType.FragmentShader);
+        TShaderLibrary.LoadShader("./assets/shaders/rectangle.vert", ShaderType.VertexShader);
+        TShaderLibrary.LoadShader("./assets/shaders/rectangle.frag", ShaderType.FragmentShader);
 
-        shaderLibrary.LoadShader("./assets/shaders/graph.vert", ShaderType.VertexShader);
-        shaderLibrary.LoadShader("./assets/shaders/graph.frag", ShaderType.FragmentShader);
+        TShaderLibrary.LoadShader("./assets/shaders/graph.vert", ShaderType.VertexShader);
+        TShaderLibrary.LoadShader("./assets/shaders/graph.frag", ShaderType.FragmentShader);
 
-        shaderLibrary.LoadShader("./assets/shaders/circle.vert", ShaderType.VertexShader);
-        shaderLibrary.LoadShader("./assets/shaders/circle.frag", ShaderType.FragmentShader);
+        TShaderLibrary.LoadShader("./assets/shaders/circle.vert", ShaderType.VertexShader);
+        TShaderLibrary.LoadShader("./assets/shaders/circle.frag", ShaderType.FragmentShader);
 
-        shaderLibrary.LoadShader("./assets/shaders/spriteb.vert", ShaderType.VertexShader);
-        shaderLibrary.LoadShader("./assets/shaders/spriteb.frag", ShaderType.FragmentShader);
+        TShaderLibrary.LoadShader("./assets/shaders/spriteb.vert", ShaderType.VertexShader);
+        TShaderLibrary.LoadShader("./assets/shaders/spriteb.frag", ShaderType.FragmentShader);
 
 
         fontLibrary = new FontLibrary();

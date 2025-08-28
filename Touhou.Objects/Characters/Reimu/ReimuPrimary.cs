@@ -76,7 +76,7 @@ public class ReimuPrimary : Attack<Reimu> {
     public override void LocalRelease(Time cooldownOverflow, Time heldTime, bool focused) {
         float angle = c.AngleToOpponent + aimOffset;
 
-        //Game.Log("localprojectiles", $"@{(Game.Network.Time - cooldownOverflow).AsSeconds()}: {this.GetType().Name}");
+        //Game.Log("localprojectiles", $"@{(Game.Get<Network>().Time - cooldownOverflow).AsSeconds()}: {this.GetType().Name}");
 
         if (focused) {
             for (int index = 0; index < numShots; index++) {
@@ -90,7 +90,7 @@ public class ReimuPrimary : Attack<Reimu> {
                 };
                 projectile.ForwardTime(cooldownOverflow, false);
 
-                c.Scene.AddEntity(projectile);
+                c.TScene.AddEntity(projectile);
 
                 c.ApplyMovespeedModifier(0.6f, Time.InSeconds(0.4f) - cooldownOverflow);
             }
@@ -106,7 +106,7 @@ public class ReimuPrimary : Attack<Reimu> {
                 };
                 projectile.ForwardTime(cooldownOverflow, false);
 
-                c.Scene.AddEntity(projectile);
+                c.TScene.AddEntity(projectile);
             }
         }
 
@@ -123,18 +123,18 @@ public class ReimuPrimary : Attack<Reimu> {
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Primary)
-        .In(Game.Network.Time - cooldownOverflow)
+        .In(Game.Get<Network>().Time - cooldownOverflow)
         .In(c.Position)
         .In(angle)
         .In(focused);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
     }
 
     public override void RemoteRelease(Packet packet) {
 
         packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle).Out(out bool focused);
-        Time delta = Game.Network.Time - theirTime;
+        Time delta = Game.Get<Network>().Time - theirTime;
 
         //Game.Log("localprojectiles", $"@{(theirTime).AsSeconds()}: {this.GetType().Name}");
 
@@ -148,7 +148,7 @@ public class ReimuPrimary : Attack<Reimu> {
                     GrazeAmount = grazeAmount,
                 };
                 projectile.ForwardTime(delta, true);
-                c.Scene.AddEntity(projectile);
+                c.TScene.AddEntity(projectile);
             }
         } else {
             for (int index = 0; index < numShots; index++) {
@@ -161,7 +161,7 @@ public class ReimuPrimary : Attack<Reimu> {
                     VelocityFalloff = velocityFalloff,
                 };
                 projectile.ForwardTime(delta, true);
-                c.Scene.AddEntity(projectile);
+                c.TScene.AddEntity(projectile);
             }
         }
     }
@@ -180,7 +180,7 @@ public class ReimuPrimary : Attack<Reimu> {
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layer.Player);
+        Game.Get<Renderer>().Queue(aimArrowSprite, Layer.Player);
     }
 
 

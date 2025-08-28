@@ -81,11 +81,11 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
             previousVelocity = velocity;
 
-            if (Game.Network.IsConnected) {
+            if (Game.Get<Network>().IsConnected) {
                 var packet = new Packet(PacketType.VelocityChanged);
-                packet.In(Game.Network.Time).In(c.Position).In(c.Velocity);
+                packet.In(Game.Get<Network>().Time).In(c.Position).In(c.Velocity);
 
-                Game.Network.Send(packet);
+                Game.Get<Network>().Send(packet);
             }
         }
 
@@ -114,10 +114,10 @@ public class LocalCharacterController<T> : Entity where T : Character {
             return;
         }
 
-        if (!Game.Network.IsConnected) return;
+        if (!Game.Get<Network>().IsConnected) return;
 
-        var packet = new Packet(PacketType.Knockbacked).In(Game.Network.Time).In(c.Position).In(c.AngleToOpponent);
-        Game.Network.Send(packet);
+        var packet = new Packet(PacketType.Knockbacked).In(Game.Get<Network>().Time).In(c.Position).In(c.AngleToOpponent);
+        Game.Get<Network>().Send(packet);
     }
 
 
@@ -273,9 +273,9 @@ public class LocalCharacterController<T> : Entity where T : Character {
         projectile.Graze();
         c.Graze(projectile.GrazeAmount);
 
-        if (Game.Network.IsConnected) {
+        if (Game.Get<Network>().IsConnected) {
             var packet = new Packet(PacketType.Grazed).In(projectile.GrazeAmount);
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
         }
     }
 
@@ -288,14 +288,14 @@ public class LocalCharacterController<T> : Entity where T : Character {
         c.ApplyInvulnerability(Time.InSeconds(2.5f));
         c.Hit(Time.InSeconds(8f / 60f)); // 8 frames
 
-        Scene.AddEntity(new HitExplosion(c.Position, 0.5f, 100f, c.Color));
+        TScene.AddEntity(new HitExplosion(c.Position, 0.5f, 100f, c.Color));
 
         Game.Sounds.Play("hit");
 
-        if (Game.Network.IsConnected) {
+        if (Game.Get<Network>().IsConnected) {
 
-            var hitPacket = new Packet(PacketType.Hit).In(Game.Network.Time).In(c.Position);
-            Game.Network.Send(hitPacket);
+            var hitPacket = new Packet(PacketType.Hit).In(Game.Get<Network>().Time).In(c.Position);
+            Game.Get<Network>().Send(hitPacket);
 
             if (hitbox.CollisionGroup == CollisionGroup.P1MinorProjectile ||
                 hitbox.CollisionGroup == CollisionGroup.P2MinorProjectile)
@@ -322,18 +322,18 @@ public class LocalCharacterController<T> : Entity where T : Character {
 
     private void Die() {
 
-        var deathTime = Game.Network.IsConnected ? Game.Network.Time : Game.Time;
+        var deathTime = Game.Get<Network>().IsConnected ? Game.Get<Network>().Time : Game.Time;
 
         c.ApplyInvulnerability();
         c.Die(deathTime);
 
-        Scene.AddEntity(new HitExplosion(c.Position, 1f, 500f, c.Color));
+        TScene.AddEntity(new HitExplosion(c.Position, 1f, 500f, c.Color));
 
         Game.Sounds.Play("death");
 
-        if (Game.Network.IsConnected) {
+        if (Game.Get<Network>().IsConnected) {
             var packet = new Packet(PacketType.Death).In(deathTime).In(c.Position);
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
         }
 
     }

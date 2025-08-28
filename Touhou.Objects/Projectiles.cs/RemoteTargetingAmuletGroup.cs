@@ -20,7 +20,7 @@ public class RemoteTargetingAmuletGroup : Projectile {
         if (LifeTime >= targetTime) {
             Destroy();
 
-            var character = Scene.GetFirstEntityWhere<Character>(e => e.IsP1 != IsP1Owned);
+            var character = TScene.GetFirstEntityWhere<Character>(e => e.IsP1 != IsP1Owned);
             var timeOverflow = LifeTime - targetTime;
 
             foreach (var targetingAmulet in targetingAmulets) {
@@ -30,8 +30,8 @@ public class RemoteTargetingAmuletGroup : Projectile {
                 targetingAmulet.LocalTarget(character.Position, timeOverflow);
             }
 
-            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time - timeOverflow).In(character.Position);
-            Game.Network.Send(packet);
+            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Get<Network>().Time - timeOverflow).In(character.Position);
+            Game.Get<Network>().Send(packet);
         }
     }
 

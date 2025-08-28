@@ -60,7 +60,7 @@
 //         rectangle.StrokeWidth = 1f;
 //         rectangle.StrokeColor = new Color4(255, 255, 255, 60);
 
-//         Game.Draw(rectangle);
+//         Game.Get<Renderer>().Queue(rectangle);
 
 
 
@@ -75,17 +75,17 @@
 //         leftText.DisplayedText = $"{-largestSample}";
 //         leftText.Origin = new Vector2(0f, 0f);
 //         leftText.Position = Position + new Vector2(Size.X / 2f, 0f);
-//         Game.Draw(leftText);
+//         Game.Get<Renderer>().Queue(leftText);
 
 //         middleText.DisplayedText = "0";
 //         middleText.Origin = new Vector2(0.5f, 0f);
 //         middleText.Position = Position + new Vector2(Size.X, 0f);
-//         Game.Draw(middleText);
+//         Game.Get<Renderer>().Queue(middleText);
 
 //         rightText.DisplayedText = $"{largestSample}";
 //         rightText.Origin = new Vector2(1, 0f);
 //         rightText.Position = Position;
-//         //Game.Draw(text, 0);
+//         //Game.Get<Renderer>().Queue(text, 0);
 
 
 //         // samples
@@ -101,7 +101,7 @@
 //                     Y = Size.Y * 0.75f
 //                 };
 
-//                 //Game.Draw(rectangle, 0);
+//                 //Game.Get<Renderer>().Queue(rectangle, 0);
 //             }
 //         }
 
@@ -111,14 +111,14 @@
 //             X = Size.X / 2f + GetAverage(graphs.First().Value) / largestSample * Size.X / 2f,
 //             Y = Size.Y * 0.25f
 //         };
-//         //Game.Draw(rectangle, 0);
+//         //Game.Get<Renderer>().Queue(rectangle, 0);
 
 //         rectangle.FillColor = new Color4(255, 200, 0, 200);
 //         rectangle.Position = Position + new Vector2() {
 //             X = Size.X / 2f + GetPrunedAverage(graphs.First().Value, 50) / largestSample * Size.X / 2f,
 //             Y = Size.Y * 0.25f
 //         };
-//         //Game.Draw(rectangle, 0);
+//         //Game.Get<Renderer>().Queue(rectangle, 0);
 
 
 
@@ -131,7 +131,7 @@
 //             Y = Size.Y - 4f
 //         };
 
-//         //Game.Draw(rectangle, 0);
+//         //Game.Get<Renderer>().Queue(rectangle, 0);
 
 //         int markerCount = 1;
 //         while (markerCount < largestSample) {
@@ -140,14 +140,14 @@
 //                 Y = Size.Y - 2f
 //             };
 
-//             //Game.Draw(rectangle, 0);
+//             //Game.Get<Renderer>().Queue(rectangle, 0);
 
 //             rectangle.Position = Position + new Vector2() {
 //                 X = Size.X / 2f + -markerCount / largestSample * Size.X / 2f,
 //                 Y = Size.Y - 2f
 //             };
 
-//             //Game.Draw(rectangle, 0);
+//             //Game.Get<Renderer>().Queue(rectangle, 0);
 
 //             markerCount++;
 //         }

@@ -3,7 +3,7 @@ using OpenTK.Mathematics;
 
 namespace Touhou.Graphics;
 
-public class ShaderLibrary {
+public class TShaderLibrary {
 
 
     private Dictionary<string, int> programs = new();

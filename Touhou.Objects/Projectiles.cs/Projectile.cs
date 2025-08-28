@@ -40,7 +40,7 @@ public abstract class Projectile : Entity, IReceivable {
 
     public float DestroyedFactor { get => isDelayDestroyed ? 1f - destroyTimer.Remaining.AsSeconds() / destroyTimer.Duration.AsSeconds() : 0f; }
 
-    protected Match Match => match is null ? match = Scene.GetFirstEntity<Match>() : match;
+    protected Match Match => match is null ? match = TScene.GetFirstEntity<Match>() : match;
     private Match match;
 
     private static int lastLocalFrame = 0;
@@ -178,6 +178,6 @@ public abstract class Projectile : Entity, IReceivable {
         Destroy();
 
         var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000);
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
     }
 }

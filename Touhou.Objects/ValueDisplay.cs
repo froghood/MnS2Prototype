@@ -40,7 +40,7 @@ public class ValueDisplay<T> : Entity {
         text.Position = Position;
         text.DisplayedText = value.ToString();
 
-        Game.Draw(text, Layer.UI1);
+        Game.Get<Renderer>().Queue(text, Layer.UI1);
     }
 
     public override void PostRender() { }
@@ -73,7 +73,7 @@ public class ValueDisplay<T> : Entity {
 //     public override void Render() {
 //         text.Position = Position;
 //         text.DisplayedString = $"{value}";
-//         Game.Draw(text, 0);
+//         Game.Get<Renderer>().Queue(text, 0);
 //     }
 
 //     public override void PostRender() { }

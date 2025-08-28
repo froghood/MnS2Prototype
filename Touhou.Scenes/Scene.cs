@@ -4,7 +4,7 @@ using Touhou.Objects;
 
 namespace Touhou.Scenes;
 
-public abstract class Scene {
+public abstract class TScene {
 
     private List<Entity> entities = new();
 
@@ -62,7 +62,7 @@ public abstract class Scene {
 
 
     public void AddEntity(Entity entity) {
-        entity.Scene = this;
+        entity.TScene = this;
         entity.Destroyed += () => {
 
         };

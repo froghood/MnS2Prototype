@@ -40,7 +40,7 @@ public class YinYang : ParametricProjectile {
            Color.B,
            Color.A * Easing.Out(SpawnFactor, 3f));
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerBackgroundProjectiles : Layer.OpponentBackgroundProjectiles);
+        Game.Get<Renderer>().Queue(sprite, IsPlayerOwned ? Layer.PlayerBackgroundProjectiles : Layer.OpponentBackgroundProjectiles);
 
     }
 

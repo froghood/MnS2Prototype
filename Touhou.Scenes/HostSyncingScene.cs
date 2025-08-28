@@ -7,11 +7,12 @@ using Touhou.Objects.Generics;
 using Touhou.Scenes;
 
 namespace Touhou.Scenes;
-public class HostSyncingScene : Scene {
+
+public class HostSyncingTScene : TScene {
 
     private readonly Text text;
 
-    public HostSyncingScene() {
+    public HostSyncingTScene() {
 
         text = new Text {
             DisplayedText = "Syncing...",
@@ -23,11 +24,11 @@ public class HostSyncingScene : Scene {
     }
 
     public override void OnInitialize() {
-        Game.Network.Send(new Packet(PacketType.ConnectionResponse));
+        Game.Get<Network>().Send(new Packet(PacketType.ConnectionResponse));
 
         AddEntity(new ReceiveCallback(ReceiveCallback));
 
-        AddEntity(new RenderCallback(() => Game.Draw(text, Layer.UI1)));
+        AddEntity(new RenderCallback(() => Game.Get<Renderer>().Queue(text, Layer.UI1)));
     }
 
     private void ReceiveCallback(Packet packet, IPEndPoint endPoint) {
@@ -35,28 +36,28 @@ public class HostSyncingScene : Scene {
             case PacketType.TimeRequest:
                 //_connectionResponseFlag = true;
                 packet.Out(out Time theirTime);
-                var responsePacket = new Packet(PacketType.TimeResponse).In(theirTime).In(Game.Network.Time);
+                var responsePacket = new Packet(PacketType.TimeResponse).In(theirTime).In(Game.Get<Network>().Time);
                 //Console.WriteLine($"Received Time Request: {theirTime}");
-                Game.Network.Send(responsePacket);
+                Game.Get<Network>().Send(responsePacket);
                 break;
 
             case PacketType.SyncFinished:
                 // packet.Out(out Time gameStartTime);
-                // Game.Scenes.ChangeScene<MatchScene>(false, true, gameStartTime);
+                // Game.Get<SceneManager>().ChangeTScene<MatchTScene>(false, true, gameStartTime);
                 // break;
 
-                Game.Scenes.ChangeScene<CharacterSelectScene>(false, true);
+                Game.Get<SceneManager>().ChangeScene<CharacterSelecTScene>(false, true);
                 break;
         }
     }
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Get<Settings>().UseSteam) Game.Get<Network>().DisconnectSteam();
+        else Game.Get<Network>().Disconnect();
 
         Log.Warn("Opponent disconnected");
 
-        Game.Scenes.ChangeScene<MainScene>();
+        Game.Get<SceneManager>().ChangeScene<MainTScene>();
     }
 
 }

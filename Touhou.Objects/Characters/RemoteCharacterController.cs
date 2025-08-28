@@ -96,7 +96,7 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
         basePosition = position;
 
 
-        var latency = Game.Network.Time - time;
+        var latency = Game.Get<Network>().Time - time;
         var predictedPosition = basePosition + velocity * latency.AsSeconds();
 
         interpolations.Clear();
@@ -140,14 +140,14 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
 
         packet.Out(out Time time).Out(out Vector2 position);
 
-        var latency = Game.Network.Time - time;
+        var latency = Game.Get<Network>().Time - time;
 
         c.SetPosition(position);
 
         c.ApplyInvulnerability(Time.InSeconds(2.5f) - latency);
         c.Hit();
 
-        Scene.AddEntity(new HitExplosion(c.Position, 0.5f, 100f, c.Color));
+        TScene.AddEntity(new HitExplosion(c.Position, 0.5f, 100f, c.Color));
 
         Game.Sounds.Play("hit");
 
@@ -159,7 +159,7 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
 
         packet.Out(out Time time).Out(out Vector2 position).Out(out float angle);
 
-        var latency = Game.Network.Time - time;
+        var latency = Game.Get<Network>().Time - time;
 
         c.Damage();
         c.Knockback(Time.InSeconds(1f) - latency);
@@ -183,7 +183,7 @@ public class RemoteCharacterController<T> : Entity, IReceivable where T : Charac
 
         c.Die(deathTime);
 
-        Scene.AddEntity(new HitExplosion(c.Position, 1f, 500f, c.Color));
+        TScene.AddEntity(new HitExplosion(c.Position, 1f, 500f, c.Color));
 
         Game.Sounds.Play("death");
     }

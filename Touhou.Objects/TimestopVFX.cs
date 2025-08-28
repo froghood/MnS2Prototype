@@ -38,7 +38,7 @@ public class TimestopVFX : Entity {
             ),
         };
 
-        Game.Draw(sprite, layer);
+        Game.Get<Renderer>().Queue(sprite, layer);
     }
 
     public override void Destroy() {

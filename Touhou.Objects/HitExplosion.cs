@@ -34,7 +34,7 @@ namespace Touhou.Objects {
                 FillColor = new Color4(color.R, color.G, color.B, color.A * transparency)
             };
 
-            Game.Draw(circle, Layer.Foreground1);
+            Game.Get<Renderer>().Queue(circle, Layer.Foreground1);
 
         }
     }

@@ -2,10 +2,10 @@ using Touhou.Objects;
 
 namespace Touhou.Scenes;
 
-public class CharacterSelectScene : Scene {
+public class CharacterSelecTScene : TScene {
     private CharacterSelector characterSelector;
 
-    public CharacterSelectScene(bool isP1) {
+    public CharacterSelecTScene(bool isP1) {
         characterSelector = new CharacterSelector(isP1);
     }
 
@@ -14,11 +14,11 @@ public class CharacterSelectScene : Scene {
     }
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Get<Settings>().UseSteam) Game.Get<Network>().DisconnectSteam();
+        else Game.Get<Network>().Disconnect();
 
         Log.Warn("Opponent disconnected");
 
-        Game.Scenes.ChangeScene<MainScene>();
+        Game.Get<SceneManager>().ChangeScene<MainTScene>();
     }
 }

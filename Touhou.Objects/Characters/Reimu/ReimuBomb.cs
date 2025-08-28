@@ -28,7 +28,7 @@ public class ReimuBomb : Bomb<Reimu> {
             };
             projectile.ForwardTime(cooldownOverflow, false);
 
-            c.Scene.AddEntity(projectile);
+            c.TScene.AddEntity(projectile);
 
         }
 
@@ -47,12 +47,12 @@ public class ReimuBomb : Bomb<Reimu> {
 
         c.SpendBomb();
 
-        if (Game.Network.IsConnected) {
+        if (Game.Get<Network>().IsConnected) {
             var packet = new Packet(PacketType.BombPressed)
-            .In(Game.Network.Time - cooldownOverflow)
+            .In(Game.Get<Network>().Time - cooldownOverflow)
             .In(c.Position);
 
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
         }
 
 
@@ -63,7 +63,7 @@ public class ReimuBomb : Bomb<Reimu> {
     public override void RemotePress(Packet packet) {
 
         packet.Out(out Time theirTime).Out(out Vector2 position);
-        Time delta = Game.Network.Time - theirTime;
+        Time delta = Game.Get<Network>().Time - theirTime;
 
         Log.Info(delta.AsSeconds());
 
@@ -76,7 +76,7 @@ public class ReimuBomb : Bomb<Reimu> {
                 Color = (i % 2 == 0) ? new Color4(1f, 0.5f, 0.5f, 1f) : new Color4(0.5f, 0.5f, 1f, 1f),
             };
 
-            c.Scene.AddEntity(projectile);
+            c.TScene.AddEntity(projectile);
         }
 
         c.SpendBomb();

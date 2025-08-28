@@ -63,7 +63,7 @@ public class MarisaSecondary : Attack<Marisa> {
             Color = new Color4(0f, 1f, 0f, 0.4f)
         };
 
-        c.Scene.AddEntity(explodingStar);
+        c.TScene.AddEntity(explodingStar);
         explodingStar.ForwardTime(cooldownOverflow, false);
 
         var refundTime = Time.Min(heldTime, Time.InSeconds(0.3f));
@@ -83,11 +83,11 @@ public class MarisaSecondary : Attack<Marisa> {
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Secondary)
-        .In(Game.Network.Time - cooldownOverflow)
+        .In(Game.Get<Network>().Time - cooldownOverflow)
         .In(c.Position)
         .In(aimAngle);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
         isAiming = false;
 
@@ -102,7 +102,7 @@ public class MarisaSecondary : Attack<Marisa> {
         .Out(out Vector2 theirPosition)
         .Out(out float theirAngle);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.Get<Network>().Time - theirTime;
 
         var explodingStar = new ExplodingStar(250f, 150f, theirPosition, theirAngle, c.IsP1, c.IsPlayer, true) {
             SpawnDuration = Time.InSeconds(0.25f),
@@ -112,7 +112,7 @@ public class MarisaSecondary : Attack<Marisa> {
             ExplosionGrazeAmount = explosionGrazeAmount,
         };
 
-        c.Scene.AddEntity(explodingStar);
+        c.TScene.AddEntity(explodingStar);
 
         explodingStar.ForwardTime(latency, true);
 
@@ -130,6 +130,6 @@ public class MarisaSecondary : Attack<Marisa> {
             Color = new Color4(1f, 1f, 1f, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layer.Player);
+        Game.Get<Renderer>().Queue(aimArrowSprite, Layer.Player);
     }
 }

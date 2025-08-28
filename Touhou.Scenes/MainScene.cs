@@ -7,11 +7,11 @@ using Touhou.Graphics;
 
 namespace Touhou.Scenes;
 
-public class MainScene : Scene {
+public class MainTScene : TScene {
 
     private readonly Text text;
 
-    public MainScene() {
+    public MainTScene() {
 
         text = new Text {
             DisplayedText = $"Press {PlayerActions.Primary} to host, {PlayerActions.Secondary} to connect",
@@ -29,17 +29,17 @@ public class MainScene : Scene {
     public override void OnInitialize() {
         AddEntity(new Controller((action) => {
             if (action == PlayerActions.Primary) {
-                Game.Scenes.ChangeScene<HostingScene>();
+                Game.Get<SceneManager>().ChangeScene<HostingTScene>();
             }
 
             if (action == PlayerActions.Secondary) {
-                Game.Scenes.ChangeScene<ConnectingScene>();
+                Game.Get<SceneManager>().ChangeScene<ConnectingTScene>();
             }
         }, (_) => { }));
 
         AddEntity(new RenderCallback(() => {
 
-            Game.Draw(text, Layer.UI1);
+            Game.Get<Renderer>().Queue(text, Layer.UI1);
 
         }));
 

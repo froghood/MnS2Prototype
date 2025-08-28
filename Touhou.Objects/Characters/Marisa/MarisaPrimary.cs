@@ -111,7 +111,7 @@ public class MarisaPrimary : Attack<Marisa> {
                 CanCollide = false
             };
 
-            c.Scene.AddEntity(laser);
+            c.TScene.AddEntity(laser);
             laser.FowardTime(cooldownOverflow);
 
             c.ApplyMovespeedModifier(0.3f, Time.InSeconds(0.3f));
@@ -130,10 +130,10 @@ public class MarisaPrimary : Attack<Marisa> {
                 Color = new Color4(0f, 1f, 0f, 0.4f),
             };
 
-            c.Scene.AddEntity(laser);
+            c.TScene.AddEntity(laser);
             laser.FowardTime(cooldownOverflow);
 
-            c.Scene.AddEntity(sigil);
+            c.TScene.AddEntity(sigil);
             sigil.ForwardTime(cooldownOverflow, false);
         }
 
@@ -157,7 +157,7 @@ public class MarisaPrimary : Attack<Marisa> {
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Primary)
-        .In(Game.Network.Time - cooldownOverflow)
+        .In(Game.Get<Network>().Time - cooldownOverflow)
         .In(focused)
         .In(c.Position);
         if (!focused) {
@@ -165,7 +165,7 @@ public class MarisaPrimary : Attack<Marisa> {
         }
         packet.In(focused ? aimAngle : unfocusedAngle);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
 
     }
@@ -177,7 +177,7 @@ public class MarisaPrimary : Attack<Marisa> {
         .Out(out Time theirTime)
         .Out(out bool focused);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.Get<Network>().Time - theirTime;
 
         if (focused) {
             packet
@@ -190,7 +190,7 @@ public class MarisaPrimary : Attack<Marisa> {
                 GrazeAmount = grazeAmount
             };
 
-            c.Scene.AddEntity(laser);
+            c.TScene.AddEntity(laser);
             laser.FowardTime(latency);
 
         } else {
@@ -210,10 +210,10 @@ public class MarisaPrimary : Attack<Marisa> {
                 Color = new Color4(1f, 0f, 0f, 0.7f),
             };
 
-            c.Scene.AddEntity(laser);
+            c.TScene.AddEntity(laser);
             laser.FowardTime(latency);
 
-            c.Scene.AddEntity(sigil);
+            c.TScene.AddEntity(sigil);
             sigil.ForwardTime(latency, true);
         }
 
@@ -247,8 +247,8 @@ public class MarisaPrimary : Attack<Marisa> {
                 UVPaddingOffset = Vector2.Zero
             };
 
-            Game.Draw(laserPreviewStart, Layer.Player);
-            Game.Draw(laserPreview, Layer.Player);
+            Game.Get<Renderer>().Queue(laserPreviewStart, Layer.Player);
+            Game.Get<Renderer>().Queue(laserPreview, Layer.Player);
 
         } else {
 
@@ -290,10 +290,10 @@ public class MarisaPrimary : Attack<Marisa> {
                 FillColor = new Color4(1f, 1f, 1f, 0.25f),
             };
 
-            Game.Draw(line, Layer.Player);
-            Game.Draw(laserPreviewStart, Layer.Player);
-            Game.Draw(laserPreview, Layer.Player);
-            Game.Draw(laserPositionPreview, Layer.Player);
+            Game.Get<Renderer>().Queue(line, Layer.Player);
+            Game.Get<Renderer>().Queue(laserPreviewStart, Layer.Player);
+            Game.Get<Renderer>().Queue(laserPreview, Layer.Player);
+            Game.Get<Renderer>().Queue(laserPositionPreview, Layer.Player);
 
         }
     }

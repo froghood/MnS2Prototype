@@ -69,7 +69,7 @@ public class MarisaSuper : Attack<Marisa> {
             CanCollide = false
         };
 
-        c.Scene.AddEntity(laser);
+        c.TScene.AddEntity(laser);
         laser.FowardTime(cooldownOverflow);
 
         c.SpendPower(cost);
@@ -94,11 +94,11 @@ public class MarisaSuper : Attack<Marisa> {
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Super)
-        .In(Game.Network.Time)
+        .In(Game.Get<Network>().Time)
         .In(c.Position)
         .In(aimAngle);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
     }
 
@@ -111,7 +111,7 @@ public class MarisaSuper : Attack<Marisa> {
         .Out(out Vector2 theirPosition)
         .Out(out float theirAngle);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.Get<Network>().Time - theirTime;
 
         var laser = new Laser(theirPosition, theirAngle, laserWidth, startupTime, activeTime, c.IsP1, c.IsPlayer, true) {
             Color = new Color4(1f, 0f, 0f, 1f),
@@ -119,7 +119,7 @@ public class MarisaSuper : Attack<Marisa> {
             GrazeAmount = grazeAmount
         };
 
-        c.Scene.AddEntity(laser);
+        c.TScene.AddEntity(laser);
         laser.FowardTime(latency);
 
 
@@ -148,7 +148,7 @@ public class MarisaSuper : Attack<Marisa> {
             Scale = new Vector2(visualScale),
         };
 
-        Game.Draw(laserPreviewStart, Layer.Player);
-        Game.Draw(laserPreview, Layer.Player);
+        Game.Get<Renderer>().Queue(laserPreviewStart, Layer.Player);
+        Game.Get<Renderer>().Queue(laserPreview, Layer.Player);
     }
 }

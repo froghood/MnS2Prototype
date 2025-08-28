@@ -20,7 +20,7 @@ public class ReimuSpecial : Attack<Reimu> {
 
 
         var localGroup = new LocalTargetingAmuletGroup(c.IsP1, c.IsPlayer);
-        c.Scene.AddEntity(localGroup);
+        c.TScene.AddEntity(localGroup);
 
 
         var arcAngle = MathF.Tau / numShots;
@@ -39,7 +39,7 @@ public class ReimuSpecial : Attack<Reimu> {
             projectile.ForwardTime(cooldownOverflow, false);
 
             localGroup.Add(projectile);
-            c.Scene.AddEntity(projectile);
+            c.TScene.AddEntity(projectile);
         }
 
         c.ApplyAttackCooldowns(Time.InSeconds(1f), PlayerActions.Special);
@@ -47,11 +47,11 @@ public class ReimuSpecial : Attack<Reimu> {
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Special)
-        .In(Game.Network.Time - cooldownOverflow)
+        .In(Game.Get<Network>().Time - cooldownOverflow)
         .In(c.Position)
         .In(angle);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
         c.SpendPower(Cost);
     }
@@ -70,11 +70,11 @@ public class ReimuSpecial : Attack<Reimu> {
     public override void RemoteRelease(Packet packet) {
 
         packet.Out(out Time time).Out(out Vector2 position).Out(out float angle);
-        var latency = Game.Network.Time - time;
+        var latency = Game.Get<Network>().Time - time;
 
 
         var remoteGroup = new RemoteTargetingAmuletGroup(Time.InSeconds(1.5f), c.IsP1, c.IsPlayer);
-        c.Scene.AddEntity(remoteGroup);
+        c.TScene.AddEntity(remoteGroup);
 
 
         var arcAngle = MathF.Tau / numShots;
@@ -89,7 +89,7 @@ public class ReimuSpecial : Attack<Reimu> {
             projectile.ForwardTime(latency, true);
 
             remoteGroup.Add(projectile);
-            c.Scene.AddEntity(projectile);
+            c.TScene.AddEntity(projectile);
         }
     }
 }

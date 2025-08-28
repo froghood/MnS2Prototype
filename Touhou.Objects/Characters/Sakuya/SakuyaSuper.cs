@@ -19,7 +19,7 @@ public class SakuyaSuper : Attack<Sakuya> {
         }
 
         var packet = new Packet(PacketType.AttackReleased).In(PlayerActions.Super);
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
 
         // if (c.HasEffect<Timestop>()) {
@@ -30,11 +30,11 @@ public class SakuyaSuper : Attack<Sakuya> {
 
         //     c.ApplyEffect(new Timestop(true, vfx.Destroy));
 
-        //     c.Scene.AddEntity(vfx);
+        //     c.TScene.AddEntity(vfx);
 
         //     var packet = new Packet(PacketType.AttackReleased).In(PlayerActions.Super);
 
-        //     Game.Network.Send(packet);
+        //     Game.Get<Network>().Send(packet);
         // }
 
 
@@ -65,7 +65,7 @@ public class SakuyaSuper : Attack<Sakuya> {
 
         // c.ApplyEffect(new Timestop(false, vfx.Destroy));
 
-        // c.Scene.AddEntity(vfx);
+        // c.TScene.AddEntity(vfx);
     }
 
 }

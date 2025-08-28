@@ -102,7 +102,7 @@ public class ReimuSuper : Attack<Reimu> {
         };
         projectile.ForwardTime(cooldownOverflow, false);
 
-        c.Scene.AddEntity(projectile);
+        c.TScene.AddEntity(projectile);
 
         c.SpendPower(Cost);
 
@@ -117,12 +117,12 @@ public class ReimuSuper : Attack<Reimu> {
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Super)
-        .In(Game.Network.Time - cooldownOverflow)
+        .In(Game.Get<Network>().Time - cooldownOverflow)
         .In(c.Position)
         .In(angle)
         .In(radius).In(velocity);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
         attackHold = false;
         aimOffset = 0f;
@@ -135,7 +135,7 @@ public class ReimuSuper : Attack<Reimu> {
 
     public override void RemoteRelease(Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2 position).Out(out float angle).Out(out float size).Out(out float velocity);
-        Time delta = Game.Network.Time - theirTime;
+        Time delta = Game.Get<Network>().Time - theirTime;
 
         var projectile = new YinYang(position, angle, c.IsP1, c.IsPlayer, true, size) {
             Color = new Color4(1f, 0f, 0f, 1f),
@@ -145,7 +145,7 @@ public class ReimuSuper : Attack<Reimu> {
         };
         projectile.ForwardTime(delta, true);
 
-        c.Scene.AddEntity(projectile);
+        c.TScene.AddEntity(projectile);
     }
 
     public override void Render() {
@@ -161,7 +161,7 @@ public class ReimuSuper : Attack<Reimu> {
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layer.Player);
+        Game.Get<Renderer>().Queue(aimArrowSprite, Layer.Player);
 
         var sizeIndicator = new Circle() {
             Origin = new Vector2(0.5f),
@@ -173,6 +173,6 @@ public class ReimuSuper : Attack<Reimu> {
 
         };
 
-        Game.Draw(sizeIndicator, Layer.Player);
+        Game.Get<Renderer>().Queue(sizeIndicator, Layer.Player);
     }
 }

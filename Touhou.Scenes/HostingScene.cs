@@ -7,14 +7,14 @@ using OpenTK.Mathematics;
 
 namespace Touhou.Scenes;
 
-public class HostingScene : Scene {
+public class HostingTScene : TScene {
 
     private readonly Text text;
 
     private int port;
 
-    public HostingScene() {
-        this.port = Game.Settings.Port;
+    public HostingTScene() {
+        this.port = Game.Get<Settings>().Port;
 
         text = new Text {
             DisplayedText = "Waiting for connection...",
@@ -27,23 +27,23 @@ public class HostingScene : Scene {
 
     public override void OnInitialize() {
 
-        Game.Network.TimeOffset -= Game.Time;
+        Game.Get<Network>().TimeOffset -= Game.Time;
 
-        if (Game.Settings.UseSteam) Game.Network.HostSteam();
-        else Game.Network.Host(port);
+        if (Game.Get<Settings>().UseSteam) Game.Get<Network>().HostSteam();
+        else Game.Get<Network>().Host(port);
 
         AddEntity(new ReceiveCallback(ReceiverCallback));
 
         AddEntity(new RenderCallback(() => {
-            Game.Draw(text, Layer.UI1);
+            Game.Get<Renderer>().Queue(text, Layer.UI1);
         }));
     }
 
     private void ReceiverCallback(Packet packet, IPEndPoint endPoint) {
         if (packet.Type != PacketType.Connection) return;
 
-        if (!Game.Settings.UseSteam) Game.Network.Connect(endPoint);
+        if (!Game.Get<Settings>().UseSteam) Game.Get<Network>().Connect(endPoint);
 
-        Game.Scenes.ChangeScene<HostSyncingScene>();
+        Game.Get<SceneManager>().ChangeScene<HostSyncingTScene>();
     }
 }

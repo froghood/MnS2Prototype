@@ -16,7 +16,7 @@ public class RemoteHomingAmulet : Homing {
 
 
 
-    private Character character { get => _character ??= Scene.GetFirstEntityWhere<Character>(e => e.IsP1 != IsP1Owned); }
+    private Character character { get => _character ??= TScene.GetFirstEntityWhere<Character>(e => e.IsP1 != IsP1Owned); }
     private Character _character;
 
 
@@ -67,8 +67,8 @@ public class RemoteHomingAmulet : Homing {
         if (state == HomingState.Homing && LifeTime >= SpawnDuration + PreHomingDuration + HomingDuration) {
             state = HomingState.PostHoming;
 
-            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time).In(state).In(Position).In(angle);
-            Game.Network.Send(packet);
+            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Get<Network>().Time).In(state).In(Position).In(angle);
+            Game.Get<Network>().Send(packet);
         }
 
         if (state == HomingState.Spawning) return;
@@ -116,8 +116,8 @@ public class RemoteHomingAmulet : Homing {
         // prevents excessive packet spam
         if (side != prevSide) lastSideChange = side;
         if (lastSideChange.HasValue && LifeTime >= nextPacketTimeThreshold) {
-            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Network.Time).In(state).In(Position).In(angle).In(side);
-            Game.Network.Send(packet);
+            var packet = new Packet(PacketType.UpdateProjectile).In(Id ^ 0x80000000).In(Game.Get<Network>().Time).In(state).In(Position).In(angle).In(side);
+            Game.Get<Network>().Send(packet);
 
             lastSideChange = null;
             nextPacketTimeThreshold = LifeTime + Time.InSeconds(0.2f);//Game.Random.NextSingle() * 0.1f);
@@ -193,7 +193,7 @@ public class RemoteHomingAmulet : Homing {
             Color.B,
             Color.A * spawnRatio);
 
-        Game.Draw(sprite, Layer.OpponentProjectiles);
+        Game.Get<Renderer>().Queue(sprite, Layer.OpponentProjectiles);
 
         base.Render();
 

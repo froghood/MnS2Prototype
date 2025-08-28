@@ -53,7 +53,7 @@ public class ShootingStar : ParametricProjectile {
                 GrazeAmount = TrailGrazeAmount,
             };
 
-            Scene.AddEntity(trailStars[i]);
+            TScene.AddEntity(trailStars[i]);
         }
     }
 
@@ -84,7 +84,7 @@ public class ShootingStar : ParametricProjectile {
             BlendMode = BlendMode.Additive
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
+        Game.Get<Renderer>().Queue(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 
     public override void Receive(Packet packet, IPEndPoint endPoint) {
@@ -132,6 +132,6 @@ public class ShootingStar : ParametricProjectile {
         Destroy();
 
         var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000).In(FuncTimeWithSpawnOffset.AsSeconds());
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
     }
 }

@@ -40,7 +40,7 @@ namespace Touhou.Objects {
         }
 
         public override void Render() {
-            Game.Draw(new Circle {
+            Game.Get<Renderer>().Queue(new Circle {
                 Origin = new Vector2(0.5f),
                 Position = Position,
                 Radius = Radius,

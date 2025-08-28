@@ -9,7 +9,7 @@ using Touhou.Objects.Projectiles;
 
 namespace Touhou.Scenes;
 
-public class NetplayMatchScene : Scene {
+public class NetplayMatchTScene : TScene {
 
     private readonly bool isP1;
     private readonly Time startTime;
@@ -25,7 +25,7 @@ public class NetplayMatchScene : Scene {
 
     //private Action<Time> latencyGraphDelegate;
 
-    public NetplayMatchScene(bool isP1, Time startTime, CharacterOption localOption, CharacterOption remoteOption) {
+    public NetplayMatchTScene(bool isP1, Time startTime, CharacterOption localOption, CharacterOption remoteOption) {
 
         this.isP1 = isP1;
         this.startTime = startTime;
@@ -33,7 +33,7 @@ public class NetplayMatchScene : Scene {
         this.remoteOption = remoteOption;
 
         updateTimeGraph = new Graph(() => {
-            Game.Stats.TryGet("update", out var value);
+            Game.Get<Stats>().TryGet("update", out var value);
             return value;
         }, 5000) {
             Size = new Vector2(800f, 100f),
@@ -44,7 +44,7 @@ public class NetplayMatchScene : Scene {
         };
 
         renderTimeGraph = new Graph(() => {
-            Game.Stats.TryGet("render", out var value);
+            Game.Get<Stats>().TryGet("render", out var value);
             return value;
         }, 5000) {
             Size = new Vector2(800f, 100f),
@@ -84,13 +84,13 @@ public class NetplayMatchScene : Scene {
                 StrokeWidth = 1f,
             };
 
-            Game.Draw(matchBoundsRectangle, Layer.Background2);
+            Game.Get<Renderer>().Queue(matchBoundsRectangle, Layer.Background2);
 
 
 
 
-            // Game.Draw(updateTimeGraph, Layers.UI1);
-            // Game.Draw(renderTimeGraph, Layers.UI1);
+            // Game.Get<Renderer>().Queue(updateTimeGraph, Layers.UI1);
+            // Game.Get<Renderer>().Queue(renderTimeGraph, Layers.UI1);
 
             // int actionNumber = 0;
             // foreach (var action in Game.Input.GetActionOrder()) {
@@ -105,7 +105,7 @@ public class NetplayMatchScene : Scene {
             //             Alignment = new Vector2(0.99f, 0.99f - 0.05f * actionNumber),
             //         };
 
-            //         Game.Draw(rect, Layers.UI1);
+            //         Game.Get<Renderer>().Queue(rect, Layers.UI1);
 
             //         actionNumber++;
             //     }
@@ -120,7 +120,7 @@ public class NetplayMatchScene : Scene {
             //     IsUI = true,
             //     Alignment = new Vector2(-0.9f, 0.99f),
             // };
-            // Game.Draw(localProjectileHistroyDisplay, Layers.UI1);
+            // Game.Get<Renderer>().Queue(localProjectileHistroyDisplay, Layers.UI1);
 
             // var remoteProjectileHistroyDisplay = new ProjectileHistoryDisplay("remote", Projectile.RemoteProjectileHistory) {
             //     Origin = new Vector2(0f, 1f),
@@ -131,13 +131,13 @@ public class NetplayMatchScene : Scene {
             //     IsUI = true,
             //     Alignment = new Vector2(-0.9f, 0.905f),
             // };
-            // Game.Draw(remoteProjectileHistroyDisplay, Layers.UI1);
+            // Game.Get<Renderer>().Queue(remoteProjectileHistroyDisplay, Layers.UI1);
 
 
         }));
 
-        Game.Network.ResetPing();
-        if (isP1) Game.Network.StartLatencyCorrection();
+        Game.Get<Network>().ResetPing();
+        if (isP1) Game.Get<Network>().StartLatencyCorrection();
 
         //var player = new PlayerReimu() { Position = new Vector2(80f, Game.Window.Size.Y / 2f) };
 
@@ -154,16 +154,16 @@ public class NetplayMatchScene : Scene {
             float zoom = MathF.Max(MathF.Min((distance - 250f) / 750f, 1f), 0f);
 
             var targetView = new Vector2(1600f, 900f) * (0.9f + 0.1f * zoom);
-            //Game.Camera.View += (targetView - Game.Camera.View) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
+            //Game.Get<Camera>().View += (targetView - Game.Get<Camera>().View) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
 
             var targetPosition = (localCharacter.Position + remoteCharacter.Position) / new Vector2(3f, 9f);
-            Game.Camera.Position += (targetPosition - Game.Camera.Position) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
+            Game.Get<Camera>().Position += (targetPosition - Game.Get<Camera>().Position) * (1f - MathF.Pow(0.05f, Game.Delta.AsSeconds()));
         }));
 
         AddEntity(new NetplayMatchUI(isP1));
 
 
-        //Game.Network.DataReceived += latencyGraphDelegate;
+        //Game.Get<Network>().DataReceived += latencyGraphDelegate;
 
         //AddEntity(latencyGraph);
 
@@ -175,7 +175,7 @@ public class NetplayMatchScene : Scene {
         //     UIAlignment = new Vector2(0.75f, 1f),
         // });
 
-        // AddEntity(new ValueDisplay<string>(() => $"Network Time: {Game.Network.Time.AsMilliseconds()}") {
+        // AddEntity(new ValueDisplay<string>(() => $"Network Time: {Game.Get<Network>().Time.AsMilliseconds()}") {
         //     Origin = Vector2.UnitY,
         //     Position = new Vector2(0f, -70f),
         //     CharacterSize = 40f,
@@ -184,7 +184,7 @@ public class NetplayMatchScene : Scene {
         //     UIAlignment = new Vector2(-1f, 1f),
         // });
 
-        // AddEntity(new ValueDisplay<string>(() => $"Lat: {Game.Network.PerceivedLatency.AsMilliseconds()}") {
+        // AddEntity(new ValueDisplay<string>(() => $"Lat: {Game.Get<Network>().PerceivedLatency.AsMilliseconds()}") {
         //     Origin = Vector2.UnitY,
         //     Position = new Vector2(0f, -140f),
         //     CharacterSize = 40f,
@@ -193,7 +193,7 @@ public class NetplayMatchScene : Scene {
         //     UIAlignment = new Vector2(-1f, 1f),
         // });
 
-        // AddEntity(new ValueDisplay<string>(() => $"Their Lat: {Game.Network.TheirPerceivedLatency.AsMilliseconds()}") {
+        // AddEntity(new ValueDisplay<string>(() => $"Their Lat: {Game.Get<Network>().TheirPerceivedLatency.AsMilliseconds()}") {
         //     Origin = Vector2.UnitY,
         //     Position = new Vector2(0f, -190f),
         //     CharacterSize = 40f,
@@ -214,11 +214,11 @@ public class NetplayMatchScene : Scene {
 
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Get<Settings>().UseSteam) Game.Get<Network>().DisconnectSteam();
+        else Game.Get<Network>().Disconnect();
 
         Log.Warn("Opponent disconnected");
 
-        Game.Scenes.ChangeScene<MainScene>();
+        Game.Get<SceneManager>().ChangeScene<MainTScene>();
     }
 }

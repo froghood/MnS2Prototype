@@ -12,7 +12,7 @@ public class MatchOld : Entity, IReceivable {
     public Time StartTime { get => startTime; }
     public Time EndTime { get => endTime; }
 
-    public Time CurrentTimeReal { get => Game.Network.Time - StartTime; }
+    public Time CurrentTimeReal { get => Game.Get<Network>().Time - StartTime; }
     public Time CurrentTime { get; private set; }
 
     public bool HasStarted { get => hasStarted; }
@@ -82,21 +82,21 @@ public class MatchOld : Entity, IReceivable {
     public override void Update() {
         CurrentTime = Math.Max(CurrentTime, CurrentTimeReal);
 
-        if (!hasStarted && Game.Network.Time >= startTime) {
+        if (!hasStarted && Game.Get<Network>().Time >= startTime) {
             hasStarted = true;
 
-            Game.Network.Send(new Packet(PacketType.MatchStarted));
+            Game.Get<Network>().Send(new Packet(PacketType.MatchStarted));
         }
 
         if (isRemoteDead && Game.Time - remoteDeathTime >= Time.InSeconds(3f)) {
 
-            var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
+            var matchStartTime = Game.Get<Network>().Time + Time.InSeconds(3f);
 
             var packet = new Packet(PacketType.Rematch).In(matchStartTime);
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
 
-            Game.Command(() => {
-                Game.Scenes.ChangeScene<NetplayMatchScene>(false, isP1, matchStartTime, localOption, remoteOption);
+            Game.Get<CommandService>().Do(() => {
+                Game.Get<SceneManager>().ChangeScene<NetplayMatchTScene>(false, isP1, matchStartTime, localOption, remoteOption);
             });
         }
     }
@@ -147,8 +147,8 @@ public class MatchOld : Entity, IReceivable {
 
         packet.Out(out Time matchStartTime);
 
-        Game.Command(() => {
-            Game.Scenes.ChangeScene<NetplayMatchScene>(false, isP1, matchStartTime, localOption, remoteOption);
+        Game.Get<CommandService>().Do(() => {
+            Game.Get<SceneManager>().ChangeScene<NetplayMatchTScene>(false, isP1, matchStartTime, localOption, remoteOption);
         });
     }
 

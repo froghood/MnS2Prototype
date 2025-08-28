@@ -3,7 +3,7 @@ using StbImageSharp;
 
 namespace Touhou.Graphics;
 
-public class TextureLibrary {
+public class TTextureLibrary {
 
     private Dictionary<string, int> textures = new();
 

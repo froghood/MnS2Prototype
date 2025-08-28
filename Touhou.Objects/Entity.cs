@@ -2,9 +2,10 @@ using OpenTK.Mathematics;
 using Touhou.Scenes;
 
 namespace Touhou.Objects;
+
 public abstract class Entity {
 
-    public Scene Scene { get; set; }
+    public TScene TScene { get; set; }
 
     public Vector2 Position { get; protected set; }
 

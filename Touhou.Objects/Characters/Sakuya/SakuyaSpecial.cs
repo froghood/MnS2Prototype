@@ -95,7 +95,7 @@ public class SakuyaSpecial : Attack<Sakuya> {
 
                     // timestop?.AddProjectile(projectile);
 
-                    c.Scene.AddEntity(projectile);
+                    c.TScene.AddEntity(projectile);
                 }
             }
         }
@@ -116,11 +116,11 @@ public class SakuyaSpecial : Attack<Sakuya> {
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Special)
-        .In(Game.Network.Time - cooldownOverflow)
+        .In(Game.Get<Network>().Time - cooldownOverflow)
         .In(c.Position)
         .In(aimAngle);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
     }
 
@@ -132,7 +132,7 @@ public class SakuyaSpecial : Attack<Sakuya> {
         .Out(out Vector2 theirPosition)
         .Out(out float theirAngle);
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.Get<Network>().Time - theirTime;
 
         // var isTimestopped = c.GetEffect<Timestop>(out var timestop);
 
@@ -160,7 +160,7 @@ public class SakuyaSpecial : Attack<Sakuya> {
 
                     // timestop?.AddProjectile(projectile);
 
-                    c.Scene.AddEntity(projectile);
+                    c.TScene.AddEntity(projectile);
                 }
             }
         }
@@ -179,7 +179,7 @@ public class SakuyaSpecial : Attack<Sakuya> {
             Color = new Color4(1f, 1f, 1f, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layer.Player);
+        Game.Get<Renderer>().Queue(aimArrowSprite, Layer.Player);
 
 
     }

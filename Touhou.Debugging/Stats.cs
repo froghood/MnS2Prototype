@@ -1,7 +1,7 @@
 
 namespace Touhou.Debugging;
 
-public class Fields {
+public class Stats : GameSystem {
 
 
     private Dictionary<string, dynamic> fields = new();

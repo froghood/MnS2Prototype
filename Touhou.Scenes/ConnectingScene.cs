@@ -8,14 +8,14 @@ using Steamworks;
 
 namespace Touhou.Scenes;
 
-public class ConnectingScene : Scene {
+public class ConnectingTScene : TScene {
 
     private readonly Text text;
 
     private IPEndPoint endPoint;
 
-    public ConnectingScene() {
-        endPoint = new IPEndPoint(IPAddress.Parse(Game.Settings.Address), Game.Settings.Port);
+    public ConnectingTScene() {
+        endPoint = new IPEndPoint(IPAddress.Parse(Game.Get<Settings>().Address), Game.Get<Settings>().Port);
 
         text = new Text {
             DisplayedText = "Connecting...",
@@ -27,40 +27,40 @@ public class ConnectingScene : Scene {
     }
 
     public override void OnInitialize() {
-        Game.Network.TimeOffset -= Game.Time;
+        Game.Get<Network>().TimeOffset -= Game.Time;
 
         AddEntity(new UpdateCallback(OnUpdate));
 
 
         AddEntity(new ReceiveCallback((packet, endPoint) => {
             if (packet.Type != PacketType.ConnectionResponse) return;
-            Game.Scenes.ChangeScene<ClientSyncingScene>();
+            Game.Get<SceneManager>().ChangeScene<ClientSyncingTScene>();
         }));
 
         AddEntity(new RenderCallback(() => {
-            Game.Draw(text, Layer.UI1);
+            Game.Get<Renderer>().Queue(text, Layer.UI1);
         }));
     }
 
     private void OnUpdate() {
-        if (!Game.Network.IsConnected) {
+        if (!Game.Get<Network>().IsConnected) {
             Connect();
         }
     }
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Get<Settings>().UseSteam) Game.Get<Network>().DisconnectSteam();
+        else Game.Get<Network>().Disconnect();
     }
 
     private void Connect() {
-        if (Game.Settings.UseSteam) Game.Network.ConnectSteam(Game.Settings.SteamID);
-        else Game.Network.Connect(endPoint);
+        if (Game.Get<Settings>().UseSteam) Game.Get<Network>().ConnectSteam(Game.Get<Settings>().SteamID);
+        else Game.Get<Network>().Connect(endPoint);
 
 
 
-        Game.Network.Send(new Packet(PacketType.Connection));
+        Game.Get<Network>().Send(new Packet(PacketType.Connection));
 
-        Log.Info($"Attempting to connect to {Game.Settings.SteamID}");
+        Log.Info($"Attempting to connect to {Game.Get<Settings>().SteamID}");
     }
 }

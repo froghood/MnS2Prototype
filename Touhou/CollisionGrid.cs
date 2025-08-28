@@ -22,8 +22,8 @@ public class CollisionGrid {
         _grid = new List<Hitbox>[width * height];
         Width = width;
         Height = height;
-        CellWidth = Game.WindowSize.X / (float)Width;
-        CellHeight = Game.WindowSize.Y / (float)Height;
+        CellWidth = Game.Window.Size.X / (float)Width;
+        CellHeight = Game.Window.Size.Y / (float)Height;
     }
 
     public void Add(Hitbox hitbox, int x, int y) {

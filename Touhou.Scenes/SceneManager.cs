@@ -1,66 +1,66 @@
 namespace Touhou.Scenes;
 
-public class SceneManager {
+public class SceneManager : GameSystem {
 
 
-    public Scene Current { get => currentScene; }
+    public TScene Current { get => currenTScene; }
 
 
 
 
-    private Scene currentScene;
-    private Dictionary<Type, Scene> savedScenes = new();
+    private TScene currenTScene;
+    private Dictionary<Type, TScene> savedTScenes = new();
 
 
-    public void ChangeScene<T>(bool saveCurrent = false, params object[] args) where T : Scene {
+    public void ChangeScene<T>(bool saveCurrent = false, params object[] args) where T : TScene {
 
-        if (currentScene != null && saveCurrent) {
-            currentScene?.OnDeactivate();
-            savedScenes.TryAdd(currentScene.GetType(), currentScene);
+        if (currenTScene != null && saveCurrent) {
+            currenTScene?.OnDeactivate();
+            savedTScenes.TryAdd(currenTScene.GetType(), currenTScene);
         } else {
-            currentScene?.OnTerminate();
+            currenTScene?.OnTerminate();
         }
 
         var type = typeof(T);
-        if (savedScenes.TryGetValue(type, out var savedScene)) {
-            currentScene = savedScene;
-            currentScene?.OnReactivate();
-            savedScenes.Remove(type);
+        if (savedTScenes.TryGetValue(type, out var savedTScene)) {
+            currenTScene = savedTScene;
+            currenTScene?.OnReactivate();
+            savedTScenes.Remove(type);
         } else {
-            currentScene = (T)Activator.CreateInstance(type, args);
-            currentScene?.OnInitialize();
+            currenTScene = (T)Activator.CreateInstance(type, args);
+            currenTScene?.OnInitialize();
         }
 
     }
-    public void ChangeSceneOld<T>(bool saveCurrent = false, params object[] args) where T : Scene {
+    public void ChangeTSceneOld<T>(bool saveCurrent = false, params object[] args) where T : TScene {
 
-        if (currentScene != null && savedScenes.ContainsKey(currentScene.GetType())) {
-            currentScene?.OnDeactivate();
+        if (currenTScene != null && savedTScenes.ContainsKey(currenTScene.GetType())) {
+            currenTScene?.OnDeactivate();
         } else {
-            currentScene?.OnTerminate();
+            currenTScene?.OnTerminate();
         }
 
         var type = typeof(T);
-        if (savedScenes.TryGetValue(type, out var scene)) {
+        if (savedTScenes.TryGetValue(type, out var TScene)) {
 
-            currentScene = scene;
-            currentScene?.OnReactivate();
-            if (!saveCurrent) savedScenes.Remove(type);
+            currenTScene = TScene;
+            currenTScene?.OnReactivate();
+            if (!saveCurrent) savedTScenes.Remove(type);
 
         } else {
 
-            currentScene = (T)Activator.CreateInstance(type, args);
-            currentScene?.OnInitialize();
-            if (saveCurrent) savedScenes.Add(type, currentScene);
+            currenTScene = (T)Activator.CreateInstance(type, args);
+            currenTScene?.OnInitialize();
+            if (saveCurrent) savedTScenes.Add(type, currenTScene);
 
         }
     }
 
-    public void UnloadScene<T>() where T : Scene {
+    public void UnloadTScene<T>() where T : TScene {
         var type = typeof(T);
 
-        if (savedScenes.TryGetValue(type, out var scene)) {
-            savedScenes.Remove(type);
+        if (savedTScenes.TryGetValue(type, out var TScene)) {
+            savedTScenes.Remove(type);
         }
 
     }

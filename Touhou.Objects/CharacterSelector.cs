@@ -52,7 +52,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
 
             if (localIndex != prevPosition) {
                 var packet = new Packet(PacketType.ChangedCharacter).In(localIndex - prevPosition);
-                Game.Network.Send(packet);
+                Game.Get<Network>().Send(packet);
             }
         }
 
@@ -61,17 +61,17 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
         if (isP1 && playerSelected && opponentSelected && action == PlayerActions.Primary) {
 
 
-            var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
+            var matchStartTime = Game.Get<Network>().Time + Time.InSeconds(3f);
 
             var packet = new Packet(PacketType.MatchReady)
             .In(matchStartTime)
             .In(localOption)
             .In(remoteOption);
 
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
 
-            Game.Command(() => {
-                Game.Scenes.ChangeScene<NetplayMatchScene>(false, true, matchStartTime, localOption, remoteOption);
+            Game.Get<CommandService>().Do(() => {
+                Game.Get<SceneManager>().ChangeScene<NetplayMatchTScene>(false, true, matchStartTime, localOption, remoteOption);
             });
 
         }
@@ -82,7 +82,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             playerSelected = true;
 
             var packet = new Packet(PacketType.SelectedCharacter);
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
 
         }
 
@@ -91,7 +91,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             playerSelected = false;
 
             var packet = new Packet(PacketType.DeselectedCharacter);
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
         }
 
     }
@@ -117,7 +117,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
                 IsUI = true
             };
 
-            Game.Draw(text, Layer.UI1);
+            Game.Get<Renderer>().Queue(text, Layer.UI1);
         }
 
         var playerText = new Text() {
@@ -146,8 +146,8 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
             IsUI = true
         };
 
-        Game.Draw(playerText, Layer.UI1);
-        Game.Draw(opponentText, Layer.UI1);
+        Game.Get<Renderer>().Queue(playerText, Layer.UI1);
+        Game.Get<Renderer>().Queue(opponentText, Layer.UI1);
 
         if (playerSelected) {
             var selectedFade = new Sprite("fade") {
@@ -162,7 +162,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
                 BlendMode = BlendMode.Additive
             };
 
-            Game.Draw(selectedFade, Layer.UI1);
+            Game.Get<Renderer>().Queue(selectedFade, Layer.UI1);
         }
 
         if (opponentSelected) {
@@ -178,7 +178,7 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
                 BlendMode = BlendMode.Additive
             };
 
-            Game.Draw(selectedFade, Layer.UI1);
+            Game.Get<Renderer>().Queue(selectedFade, Layer.UI1);
         }
 
     }
@@ -202,8 +202,8 @@ public class CharacterSelector : Entity, IControllable, IReceivable {
         .Out(out CharacterOption remoteOption)
         .Out(out CharacterOption localOption);
 
-        Game.Command(() => {
-            Game.Scenes.ChangeScene<NetplayMatchScene>(false, false, matchStartTime, localOption, remoteOption);
+        Game.Get<CommandService>().Do(() => {
+            Game.Get<SceneManager>().ChangeScene<NetplayMatchTScene>(false, false, matchStartTime, localOption, remoteOption);
 
         });
 

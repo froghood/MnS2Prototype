@@ -9,7 +9,7 @@ public class NetplayMatch : Match, IReceivable {
 
 
 
-    public override Time CurrentTime { get => currentTime = Time.Max(currentTime, Game.Network.Time - StartTime); protected set => currentTime = value; }
+    public override Time CurrentTime { get => currentTime = Time.Max(currentTime, Game.Get<Network>().Time - StartTime); protected set => currentTime = value; }
     private Time currentTime;
 
 
@@ -30,7 +30,7 @@ public class NetplayMatch : Match, IReceivable {
         this.localCharacter = localCharacter;
         this.remoteCharacter = remoteCharacter;
 
-        currentTime = Game.Network.Time - startTime;
+        currentTime = Game.Get<Network>().Time - startTime;
 
 
     }
@@ -38,7 +38,7 @@ public class NetplayMatch : Match, IReceivable {
     public override void Update() {
 
         if (!hasMatchStartedPacketBeenSent && HasStarted) {
-            Game.Network.Send(new Packet(PacketType.MatchStarted));
+            Game.Get<Network>().Send(new Packet(PacketType.MatchStarted));
             hasMatchStartedPacketBeenSent = true;
         }
 
@@ -59,13 +59,13 @@ public class NetplayMatch : Match, IReceivable {
 
     private void LocalRematch() {
 
-        var matchStartTime = Game.Network.Time + Time.InSeconds(3f);
+        var matchStartTime = Game.Get<Network>().Time + Time.InSeconds(3f);
 
         var packet = new Packet(PacketType.Rematch).In(matchStartTime);
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
-        Game.Command(() => {
-            Game.Scenes.ChangeScene<NetplayMatchScene>(false, IsP1, matchStartTime, localOption, remoteOption);
+        Game.Get<CommandService>().Do(() => {
+            Game.Get<SceneManager>().ChangeScene<NetplayMatchTScene>(false, IsP1, matchStartTime, localOption, remoteOption);
         });
 
     }
@@ -90,8 +90,8 @@ public class NetplayMatch : Match, IReceivable {
     private void RemoteRematch(Packet packet) {
         packet.Out(out Time matchStartTime);
 
-        Game.Command(() => {
-            Game.Scenes.ChangeScene<NetplayMatchScene>(false, IsP1, matchStartTime, localOption, remoteOption);
+        Game.Get<CommandService>().Do(() => {
+            Game.Get<SceneManager>().ChangeScene<NetplayMatchTScene>(false, IsP1, matchStartTime, localOption, remoteOption);
         });
     }
 

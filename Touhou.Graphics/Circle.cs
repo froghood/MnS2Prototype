@@ -64,21 +64,23 @@ public class Circle : Renderable {
 
         vertexArray.Bind();
 
-        Game.Renderer.ShaderLibrary.UseShader("circle");
+        Game.Get<Renderer>().ShaderLibrary.UseShader("circle");
 
-        Game.Renderer.ShaderLibrary.Uniform("position", Position - (IsUI ? Vector2.Zero : Game.Camera.Position));
-        Game.Renderer.ShaderLibrary.Uniform("scale", Scale);
-        Game.Renderer.ShaderLibrary.Uniform("rotation", rotationMatrix);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("position", Position - (IsUI ? Vector2.Zero : Game.Get<Camera>().Position));
+        Game.Get<Renderer>().ShaderLibrary.Uniform("scale", Scale);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("rotation", rotationMatrix);
 
-        Game.Renderer.ShaderLibrary.Uniform("isUI", IsUI);
-        Game.Renderer.ShaderLibrary.Uniform("uiAlignment", Alignment);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("isUI", IsUI);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("uiAlignment", Alignment);
 
-        Game.Renderer.ShaderLibrary.Uniform("cameraPosition", Game.Camera.Position);
-        Game.Renderer.ShaderLibrary.Uniform("cameraView", Game.Camera.View);
-        Game.Renderer.ShaderLibrary.Uniform("windowAspectRatio", Game.AspectRatio);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("cameraPosition", Game.Get<Camera>().Position);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("cameraView", Game.Get<Camera>().View);
 
-        Game.Renderer.ShaderLibrary.Uniform("strokeColor", StrokeColor);
-        Game.Renderer.ShaderLibrary.Uniform("fillColor", FillColor);
+        float aspectRatio = Game.Window.Size.X / (float)Game.Window.Size.Y;
+        Game.Get<Renderer>().ShaderLibrary.Uniform("windowAspectRatio", aspectRatio);
+
+        Game.Get<Renderer>().ShaderLibrary.Uniform("strokeColor", StrokeColor);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("fillColor", FillColor);
 
         GL.DrawElements(PrimitiveType.Triangles, vertexArray.IndexCount, DrawElementsType.UnsignedInt, 0);
 

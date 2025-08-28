@@ -5,8 +5,8 @@ namespace Touhou;
 
 public class Settings : GameSystem {
 
-    public Settings(string settingsPath) {
-        var jsonSource = File.ReadAllText(settingsPath);
+    public void Load(string path) {
+        var jsonSource = File.ReadAllText(path);
 
         JsonConvert.PopulateObject(jsonSource, this);
     }

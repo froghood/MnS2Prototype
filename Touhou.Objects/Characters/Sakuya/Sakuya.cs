@@ -60,7 +60,7 @@ public class Sakuya : Character {
             UseColorSwapping = false,
         };
 
-        Game.Draw(sprite, IsPlayer ? Layer.Player : Layer.Opponent);
+        Game.Get<Renderer>().Queue(sprite, IsPlayer ? Layer.Player : Layer.Opponent);
 
         base.Render();
     }

@@ -78,7 +78,7 @@ public class AuxiliaryStar : ParametricProjectile {
             BlendMode = BlendMode.Additive
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
+        Game.Get<Renderer>().Queue(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 
     public override void Receive(Packet packet, IPEndPoint endPoint) {

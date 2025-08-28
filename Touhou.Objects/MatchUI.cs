@@ -6,19 +6,19 @@ namespace Touhou.Objects;
 
 public class NetplayMatchUI : Entity {
 
-    private Character p1C { get => _p1C ??= Scene.GetFirstEntityWhere<Character>(e => e.IsP1); }
+    private Character p1C { get => _p1C ??= TScene.GetFirstEntityWhere<Character>(e => e.IsP1); }
     private Character _p1C;
 
 
-    private Character p2C { get => _p2C ??= Scene.GetFirstEntityWhere<Character>(e => !e.IsP1); }
+    private Character p2C { get => _p2C ??= TScene.GetFirstEntityWhere<Character>(e => !e.IsP1); }
     private Character _p2C;
 
 
-    private Character localC { get => _localC ??= Scene.GetFirstEntityWhere<Character>(e => e.IsP1 == isP1); }
+    private Character localC { get => _localC ??= TScene.GetFirstEntityWhere<Character>(e => e.IsP1 == isP1); }
     private Character _localC;
 
 
-    private Match Match => match is null ? Scene.GetFirstEntity<Match>() : match;
+    private Match Match => match is null ? TScene.GetFirstEntity<Match>() : match;
     private Match match;
 
 
@@ -70,7 +70,7 @@ public class NetplayMatchUI : Entity {
     //             IsUI = true,
     //         };
 
-    //         Game.Draw(rectangle, Layer.UI1);
+    //         Game.Get<Renderer>().Queue(rectangle, Layer.UI1);
 
     //         i += isP1 ? 1 : -1;
     //     }
@@ -101,7 +101,7 @@ public class NetplayMatchUI : Entity {
                 Alignment = new Vector2(0f, localC.IsAttackAvailable(action) ? -1f : -1.01f),
             };
 
-            Game.Draw(rectangle, Layer.UI1);
+            Game.Get<Renderer>().Queue(rectangle, Layer.UI1);
 
 
 
@@ -145,7 +145,7 @@ public class NetplayMatchUI : Entity {
                     UseColorSwapping = true,
                 };
 
-                Game.Draw(icon, Layer.UI1);
+                Game.Get<Renderer>().Queue(icon, Layer.UI1);
             }
 
 
@@ -200,9 +200,9 @@ public class NetplayMatchUI : Entity {
     //         Alignment = new Vector2(isP1 ? -1 : 1, -1),
     //     };
 
-    //     Game.Draw(bgRect, Layer.UI1);
-    //     Game.Draw(rect, Layer.UI1);
-    //     Game.Draw(sRect, Layer.UI1);
+    //     Game.Get<Renderer>().Queue(bgRect, Layer.UI1);
+    //     Game.Get<Renderer>().Queue(rect, Layer.UI1);
+    //     Game.Get<Renderer>().Queue(sRect, Layer.UI1);
 
     // }
 
@@ -233,8 +233,8 @@ public class NetplayMatchUI : Entity {
     //         StrokeWidth = 0f,
     //     };
 
-    //     Game.Draw(powerBarBG, Layer.UI1);
-    //     Game.Draw(powerBar, Layer.UI1);
+    //     Game.Get<Renderer>().Queue(powerBarBG, Layer.UI1);
+    //     Game.Get<Renderer>().Queue(powerBar, Layer.UI1);
     // }
 
 
@@ -258,7 +258,7 @@ public class NetplayMatchUI : Entity {
     //             Position = position + new Vector2(spacing * i - (bombCount - 1) * spacing / 2f, -38f),
     //         };
 
-    //         Game.Draw(circle, Layer.UI1);
+    //         Game.Get<Renderer>().Queue(circle, Layer.UI1);
     //     }
     // }
 
@@ -274,7 +274,7 @@ public class NetplayMatchUI : Entity {
                 IsUI = true,
             };
 
-            Game.Draw(sprite, Layer.UI1);
+            Game.Get<Renderer>().Queue(sprite, Layer.UI1);
         }
 
     }
@@ -293,7 +293,7 @@ public class NetplayMatchUI : Entity {
             Boldness = 0.25f,
         };
 
-        Game.Draw(timerText, Layer.UI1);
+        Game.Get<Renderer>().Queue(timerText, Layer.UI1);
 
         var ppsText = new Text() {
             Origin = new Vector2(0.5f, 1f),
@@ -308,7 +308,7 @@ public class NetplayMatchUI : Entity {
 
         };
 
-        Game.Draw(ppsText, Layer.UI1);
+        Game.Get<Renderer>().Queue(ppsText, Layer.UI1);
     }
 
 }

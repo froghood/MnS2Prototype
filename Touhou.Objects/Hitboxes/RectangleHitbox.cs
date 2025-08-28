@@ -47,7 +47,7 @@ namespace Touhou.Objects {
         }
 
         public override void Render() {
-            Game.Draw(new Rectangle {
+            Game.Get<Renderer>().Queue(new Rectangle {
                 Origin = new Vector2(0.5f),
                 Position = Position,
                 Size = Size,
@@ -59,7 +59,7 @@ namespace Touhou.Objects {
 
             // var bounds = GetBounds();
 
-            // Game.Draw(new Rectangle {
+            // Game.Get<Renderer>().Queue(new Rectangle {
             //     Origin = new Vector2(0.5f),
             //     Position = bounds.Center,
             //     Size = bounds.Size,

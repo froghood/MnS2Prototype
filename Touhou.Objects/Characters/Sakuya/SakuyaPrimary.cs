@@ -94,21 +94,21 @@ public class SakuyaPrimary : Attack<Sakuya> {
                     c.TimestoppedProjectiles.Enqueue(projectile);
                 }
 
-                c.Scene.AddEntity(projectile);
+                c.TScene.AddEntity(projectile);
             }
 
 
 
             var packet = new Packet(PacketType.AttackReleased)
             .In(PlayerActions.Primary)
-            .In(Game.Network.Time - cooldownOverflow + timeOffset)
+            .In(Game.Get<Network>().Time - cooldownOverflow + timeOffset)
             .In((byte)fireCount)
             .In(c.Position)
             .In(angle);
 
             fireCount = (byte)((fireCount + 1) % 3);
 
-            Game.Network.Send(packet);
+            Game.Get<Network>().Send(packet);
 
         }
     }
@@ -147,7 +147,7 @@ public class SakuyaPrimary : Attack<Sakuya> {
 
         //Log.Info($"{theirTime}, {fireCount}, {theirPosition}, {theirAngle}");
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.Get<Network>().Time - theirTime;
 
         var numShots = (fireCount) switch {
             0 => 1,
@@ -169,7 +169,7 @@ public class SakuyaPrimary : Attack<Sakuya> {
 
             //if (isTimestopped) timestop.AddProjectile(projectile);
 
-            c.Scene.AddEntity(projectile);
+            c.TScene.AddEntity(projectile);
         }
     }
 
@@ -187,7 +187,7 @@ public class SakuyaPrimary : Attack<Sakuya> {
 
 
 
-        Game.Draw(aimArrowSprite, Layer.Player);
+        Game.Get<Renderer>().Queue(aimArrowSprite, Layer.Player);
 
         base.Render();
     }

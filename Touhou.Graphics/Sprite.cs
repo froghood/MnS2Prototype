@@ -39,12 +39,12 @@ public class Sprite : Renderable {
 
     public override void Render() {
 
-        var textureUV = Game.Renderer.TextureAtlas.GetUVTuple(SpriteName, UVPaddingOffset);
-        var textureSize = Game.Renderer.TextureAtlas.GetSize(SpriteName);
+        var textureUV = Game.Get<Renderer>().TextureAtlas.GetUVTuple(SpriteName, UVPaddingOffset);
+        var textureSize = Game.Get<Renderer>().TextureAtlas.GetSize(SpriteName);
 
         // model + projection matrix
-        var cameraPosition = IsUI ? Vector2.Zero : Game.Camera.Position;
-        var cameraScale = Game.Camera.GetCameraScale(IsUI) / 2f;
+        var cameraPosition = IsUI ? Vector2.Zero : Game.Get<Camera>().Position;
+        var cameraScale = Game.Get<Camera>().GetCameraScale(IsUI) / 2f;
 
         var modelProjectionMatrix =
               Matrix4.CreateTranslation(-Origin.X, -Origin.Y, 0f)
@@ -52,10 +52,10 @@ public class Sprite : Renderable {
             * Matrix4.CreateRotationZ(Rotation)
             * Matrix4.CreateTranslation(Position.X - cameraPosition.X, Position.Y - cameraPosition.Y, 0f)
             * Matrix4.CreateOrthographicOffCenter(
-                Game.WindowSize.X * -cameraScale,
-                Game.WindowSize.X * cameraScale,
-                Game.WindowSize.Y * -cameraScale,
-                Game.WindowSize.Y * cameraScale,
+                Game.Window.Size.X * -cameraScale,
+                Game.Window.Size.X * cameraScale,
+                Game.Window.Size.Y * -cameraScale,
+                Game.Window.Size.Y * cameraScale,
                 -1f, 1f
             );
 
@@ -69,14 +69,14 @@ public class Sprite : Renderable {
         vertexArray.BufferVertexData(vertices, BufferUsageHint.DynamicDraw);
         vertexArray.Bind();
 
-        Game.Renderer.ShaderLibrary.UseShader("spriteb");
+        Game.Get<Renderer>().ShaderLibrary.UseShader("spriteb");
 
-        Game.Renderer.ShaderLibrary.Uniform("modelProjectionMatrix", modelProjectionMatrix);
-        Game.Renderer.ShaderLibrary.Uniform("alignment", Alignment);
-        Game.Renderer.ShaderLibrary.Uniform("inColor", Color);
-        Game.Renderer.ShaderLibrary.Uniform("useColorSwapping", UseColorSwapping);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("modelProjectionMatrix", modelProjectionMatrix);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("alignment", Alignment);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("inColor", Color);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("useColorSwapping", UseColorSwapping);
 
-        Game.Renderer.TextureLibrary.UseTexture("sprites", TextureUnit.Texture0);
+        Game.Get<Renderer>().TextureLibrary.UseTexture("sprites", TextureUnit.Texture0);
 
         GL.DrawElements(PrimitiveType.Triangles, vertexArray.IndexCount, DrawElementsType.UnsignedInt, 0);
     }

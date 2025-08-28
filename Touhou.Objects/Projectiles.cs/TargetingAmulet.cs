@@ -49,7 +49,7 @@ public class TargetingAmulet : ParametricProjectile {
             Color.B,
             Color.A * spawnRatio);
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
+        Game.Get<Renderer>().Queue(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
 
     }
 
@@ -67,14 +67,14 @@ public class TargetingAmulet : ParametricProjectile {
 
         if (Grazed) projectile.Graze();
 
-        Scene.AddEntity(projectile);
+        TScene.AddEntity(projectile);
     }
 
     public void RemoteTarget(Time theirTime, Vector2 targetPosition) {
         Destroy();
 
 
-        var latency = Game.Network.Time - theirTime;
+        var latency = Game.Get<Network>().Time - theirTime;
         var angle = MathF.Atan2(targetPosition.Y - Position.Y, targetPosition.X - Position.X);
 
         var projectile = new SpecialAmulet(Position, angle, IsP1Owned, IsPlayerOwned, true) {
@@ -85,6 +85,6 @@ public class TargetingAmulet : ParametricProjectile {
         };
         projectile.ForwardTime(latency, true);
 
-        Scene.AddEntity(projectile);
+        TScene.AddEntity(projectile);
     }
 }

@@ -6,7 +6,8 @@ using Touhou.Networking;
 using Touhou.Objects.Generics;
 
 namespace Touhou.Scenes;
-public class ClientSyncingScene : Scene {
+
+public class ClientSyncingTScene : TScene {
 
     private const int TOTAL_REQUESTS = 5;
     private const double REQUEST_FREQUENCY = 500; // ms
@@ -19,7 +20,7 @@ public class ClientSyncingScene : Scene {
 
     private readonly Text text;
 
-    public ClientSyncingScene() {
+    public ClientSyncingTScene() {
 
         text = new Text {
             DisplayedText = "Syncing...",
@@ -45,7 +46,7 @@ public class ClientSyncingScene : Scene {
 
             packet.Out(out Time ourTime).Out(out Time theirTime);
 
-            var roundTripTime = Game.Network.Time - ourTime;
+            var roundTripTime = Game.Get<Network>().Time - ourTime;
             var latency = Time.InSeconds(roundTripTime.AsSeconds() / 2f);
             var targetTime = ourTime + latency;
 
@@ -60,18 +61,18 @@ public class ClientSyncingScene : Scene {
 
                 // // pick the response closest to the average RTT
                 // var averageResponse = timeResponses.MinBy(e => Math.Abs(e.RoundTripTime - averageRTT));
-                // Game.Network.TimeOffset += averageResponse.Offset;
+                // Game.Get<Network>().TimeOffset += averageResponse.Offset;
 
                 // pick response with smallest RTT
                 var minResponse = timeResponses.MinBy(e => (long)e.RoundTripTime);
-                Game.Network.TimeOffset += minResponse.Offset;
+                Game.Get<Network>().TimeOffset += minResponse.Offset;
 
-                // var matchStartTime = Game.Network.Time + Time.InSeconds(3);
-                // Game.Network.Send(new Packet(PacketType.SyncFinished).In(matchStartTime));
-                // Game.Scenes.ChangeScene<MatchScene>(false, false, matchStartTime);
+                // var matchStartTime = Game.Get<Network>().Time + Time.InSeconds(3);
+                // Game.Get<Network>().Send(new Packet(PacketType.SyncFinished).In(matchStartTime));
+                // Game.Get<SceneManager>().ChangeTScene<MatchTScene>(false, false, matchStartTime);
 
-                Game.Network.Send(new Packet(PacketType.SyncFinished));
-                Game.Scenes.ChangeScene<CharacterSelectScene>(false, false);
+                Game.Get<Network>().Send(new Packet(PacketType.SyncFinished));
+                Game.Get<SceneManager>().ChangeScene<CharacterSelecTScene>(false, false);
             }
         }
     }
@@ -83,24 +84,24 @@ public class ClientSyncingScene : Scene {
     }
 
     private void RenderCallback() {
-        Game.Draw(text, Layer.UI1);
+        Game.Get<Renderer>().Queue(text, Layer.UI1);
     }
 
     private void Request() {
         //Console.ForegroundColor = ConsoleColor.DarkGray;
         //Console.WriteLine($"Requesting Time");
-        var packet = new Packet(PacketType.TimeRequest).In(Game.Network.Time);
-        Game.Network.Send(packet);
+        var packet = new Packet(PacketType.TimeRequest).In(Game.Get<Network>().Time);
+        Game.Get<Network>().Send(packet);
         requestCount++;
         requestTimer.Restart();
     }
 
     public override void OnDisconnect() {
-        if (Game.Settings.UseSteam) Game.Network.DisconnectSteam();
-        else Game.Network.Disconnect();
+        if (Game.Get<Settings>().UseSteam) Game.Get<Network>().DisconnectSteam();
+        else Game.Get<Network>().Disconnect();
 
         Log.Warn("Opponent disconnected");
 
-        Game.Scenes.ChangeScene<MainScene>();
+        Game.Get<SceneManager>().ChangeScene<MainTScene>();
     }
 }

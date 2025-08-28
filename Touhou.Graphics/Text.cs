@@ -37,12 +37,12 @@ public class Text : Renderable {
     }
 
     public override void Render() {
-        if (Game.Renderer.FontLibrary.TryUseFont("consolas", TextureUnit.Texture0, out var data)) {
+        if (Game.Get<Renderer>().FontLibrary.TryUseFont("consolas", TextureUnit.Texture0, out var data)) {
 
 
 
             var rotationMatrix = Matrix2.CreateRotation(Rotation);
-            float cameraScale = Game.Camera.GetCameraScale(IsUI);
+            float cameraScale = Game.Get<Camera>().GetCameraScale(IsUI);
 
             float[] vertices = new float[DisplayedText.Length * 4 * 4];
             int[] indices = new int[DisplayedText.Length * 6];
@@ -113,21 +113,21 @@ public class Text : Renderable {
 
             vertexArray.Bind();
 
-            Game.Renderer.ShaderLibrary.UseShader("text");
+            Game.Get<Renderer>().ShaderLibrary.UseShader("text");
 
-            Game.Renderer.ShaderLibrary.Uniform("position", Position);
-            Game.Renderer.ShaderLibrary.Uniform("scale", Scale);
-            Game.Renderer.ShaderLibrary.Uniform("rotation", rotationMatrix);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("position", Position);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("scale", Scale);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("rotation", rotationMatrix);
 
-            Game.Renderer.ShaderLibrary.Uniform("isUI", IsUI);
-            Game.Renderer.ShaderLibrary.Uniform("uiAlignment", Alignment);
-            Game.Renderer.ShaderLibrary.Uniform("windowSize", (Vector2)Game.WindowSize);
-            Game.Renderer.ShaderLibrary.Uniform("cameraPosition", Game.Camera.Position);
-            Game.Renderer.ShaderLibrary.Uniform("cameraScale", cameraScale);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("isUI", IsUI);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("uiAlignment", Alignment);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("windowSize", (Vector2)Game.Window.Size);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("cameraPosition", Game.Get<Camera>().Position);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("cameraScale", cameraScale);
 
-            Game.Renderer.ShaderLibrary.Uniform("screenPxRange", data.SDFSize / (CharacterSize / cameraScale) / 80f);
-            Game.Renderer.ShaderLibrary.Uniform("textColor", Color);
-            Game.Renderer.ShaderLibrary.Uniform("boldness", Boldness);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("screenPxRange", data.SDFSize / (CharacterSize / cameraScale) / 80f);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("textColor", Color);
+            Game.Get<Renderer>().ShaderLibrary.Uniform("boldness", Boldness);
 
             GL.DrawElements(PrimitiveType.Triangles, vertexArray.IndexCount, DrawElementsType.UnsignedInt, 0);
 
@@ -147,8 +147,8 @@ public class Text : Renderable {
 
     private Vector2 TransformModelToNDC(Vector2 position, Matrix2 rotation) {
         position = position * rotation * Scale + Position; // world space
-        position = position / Game.Camera.GetCameraSize(IsUI) * 2f;
-        position += IsUI ? Alignment : -Game.Camera.Position;
+        position = position / Game.Get<Camera>().GetCameraSize(IsUI) * 2f;
+        position += IsUI ? Alignment : -Game.Get<Camera>().Position;
         return position;
     }
 }

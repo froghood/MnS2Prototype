@@ -36,7 +36,7 @@ public class ExplodingStar : ParametricProjectile {
                 GrazeAmount = ExplosionGrazeAmount
             };
 
-            Scene.AddEntity(explosionStars[i]);
+            TScene.AddEntity(explosionStars[i]);
         }
     }
 
@@ -77,7 +77,7 @@ public class ExplodingStar : ParametricProjectile {
             BlendMode = BlendMode.Additive
         };
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
+        Game.Get<Renderer>().Queue(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 
     public override void Receive(Packet packet, IPEndPoint endPoint) {
@@ -114,6 +114,6 @@ public class ExplodingStar : ParametricProjectile {
         Destroy();
 
         var packet = new Packet(PacketType.DestroyProjectile).In(Id ^ 0x80000000).In(FuncTimeWithSpawnOffset.AsSeconds());
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
     }
 }

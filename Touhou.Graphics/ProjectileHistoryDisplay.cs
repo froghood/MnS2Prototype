@@ -73,7 +73,7 @@ public class ProjectileHistoryDisplay : Rectangle {
 
                 float angle = MathF.Tau / 5f;
 
-                var size = Game.Renderer.TextureAtlas.GetSize(spritesByType[type]);
+                var size = Game.Get<Renderer>().TextureAtlas.GetSize(spritesByType[type]);
                 float height = size.X * MathF.Abs(MathF.Sin(angle)) + size.Y * MathF.Abs(MathF.Cos(angle));
 
                 float alpha = 0.25f + (i + 1f) / group.Count * 0.75f;

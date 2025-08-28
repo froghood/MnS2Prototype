@@ -54,7 +54,7 @@ public class Character : Entity {
     public Time DeathTime { get; protected set; }
 
 
-    public Character Opponent { get => opponent ??= Scene.GetFirstEntityWhere<Character>(e => e != this); }
+    public Character Opponent { get => opponent ??= TScene.GetFirstEntityWhere<Character>(e => e != this); }
     private Character opponent;
 
     public float AngleToOpponent {
@@ -73,7 +73,7 @@ public class Character : Entity {
 
 
 
-    public Match Match { get => match ??= Scene.GetFirstEntity<Match>(); }
+    public Match Match { get => match ??= TScene.GetFirstEntity<Match>(); }
     private Match match;
 
 
@@ -117,7 +117,7 @@ public class Character : Entity {
             UseColorSwapping = true,
         };
 
-        Game.Draw(arrow, IsPlayer ? Layer.Player : Layer.Opponent);
+        Game.Get<Renderer>().Queue(arrow, IsPlayer ? Layer.Player : Layer.Opponent);
     }
 
     private void RenderMiniHud() {
@@ -139,8 +139,8 @@ public class Character : Entity {
             StrokeWidth = 0f,
         };
 
-        Game.Draw(powerBarBG, IsPlayer ? Layer.Player : Layer.Opponent);
-        Game.Draw(powerBar, IsPlayer ? Layer.Player : Layer.Opponent);
+        Game.Get<Renderer>().Queue(powerBarBG, IsPlayer ? Layer.Player : Layer.Opponent);
+        Game.Get<Renderer>().Queue(powerBar, IsPlayer ? Layer.Player : Layer.Opponent);
 
         float spacing = 8f;
 
@@ -152,7 +152,7 @@ public class Character : Entity {
                 Position = Position + new Vector2(spacing * i - (BombCount - 1) * spacing / 2f, -78f),
             };
 
-            Game.Draw(circle, IsPlayer ? Layer.Player : Layer.Opponent);
+            Game.Get<Renderer>().Queue(circle, IsPlayer ? Layer.Player : Layer.Opponent);
         }
 
     }
@@ -166,7 +166,7 @@ public class Character : Entity {
             UseColorSwapping = true,
         };
 
-        Game.Draw(hitboxSprite, IsPlayer ? Layer.Player : Layer.Opponent);
+        Game.Get<Renderer>().Queue(hitboxSprite, IsPlayer ? Layer.Player : Layer.Opponent);
     }
 
     public void SetState(CharacterState state) => State = state;

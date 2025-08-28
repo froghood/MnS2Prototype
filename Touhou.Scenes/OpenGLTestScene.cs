@@ -4,7 +4,7 @@ using Touhou.Graphics;
 
 namespace Touhou.Scenes;
 
-public class OpenGLTestScene : Scene {
+public class OpenGLTesTScene : TScene {
 
     private Sprite sprite;
     private Sprite sprite2;
@@ -14,7 +14,7 @@ public class OpenGLTestScene : Scene {
     private Rectangle rect;
     private Rectangle rect2;
 
-    public OpenGLTestScene() {
+    public OpenGLTesTScene() {
         sprite = new Sprite("reimu");
         sprite.Scale = Vector2.One;
         sprite.Origin = Vector2.One * 0.5f;
@@ -71,7 +71,7 @@ public class OpenGLTestScene : Scene {
                 IsUI = true,
             };
 
-            Game.Draw(bg, Layer.Background2);
+            Game.Get<Renderer>().Queue(bg, Layer.Background2);
 
             var bg2 = new Sprite("box2") {
                 Origin = new Vector2(0.5f, 0.5f),
@@ -82,7 +82,7 @@ public class OpenGLTestScene : Scene {
                 IsUI = true,
             };
 
-            Game.Draw(bg2, Layer.Background2);
+            Game.Get<Renderer>().Queue(bg2, Layer.Background2);
 
             var laser = new Sprite("laser_indicator") {
                 Origin = new Vector2(0.5f, 0.5f),
@@ -93,7 +93,7 @@ public class OpenGLTestScene : Scene {
                 IsUI = true,
             };
 
-            Game.Draw(laser, Layer.Background1);
+            Game.Get<Renderer>().Queue(laser, Layer.Background1);
 
             // var bg3 = new Sprite("box") {
             //     Origin = new Vector2(0.5f, 1f),
@@ -103,7 +103,7 @@ public class OpenGLTestScene : Scene {
             //     IsUI = true,
             // };
 
-            // Game.Draw(bg3, Layer.Background1);
+            // Game.Get<Renderer>().Queue(bg3, Layer.Background1);
 
             // var sprite = new Sprite("blendtest") {
             //     Origin = new Vector2(0.5f),
@@ -113,22 +113,22 @@ public class OpenGLTestScene : Scene {
             //     BlendMode = BlendMode.Additive,
             // };
 
-            //Game.Draw(sprite, Layers.Background1);
+            //Game.Get<Renderer>().Queue(sprite, Layers.Background1);
 
-            //Game.Draw(rect, Layers.Foreground1);
+            //Game.Get<Renderer>().Queue(rect, Layers.Foreground1);
 
-            // Game.Draw(rect2, Layers.Foreground1);
+            // Game.Get<Renderer>().Queue(rect2, Layers.Foreground1);
 
-            //Game.Draw(text, Layers.Foreground1);
+            //Game.Get<Renderer>().Queue(text, Layers.Foreground1);
 
-            // Game.Draw(sprite);
+            // Game.Get<Renderer>().Queue(sprite);
             // sprite.Rotation += 0.1f * Game.Delta.AsSeconds();
 
-            // Game.Draw(sprite2);
+            // Game.Get<Renderer>().Queue(sprite2);
             // sprite2.Rotation -= 0.1f * Game.Delta.AsSeconds();
 
             // text.DisplayText = $"{String.Format("{0:#,0.0}", Game.Time.AsSeconds())}";
-            // Game.Draw(text);
+            // Game.Get<Renderer>().Queue(text);
             // //text.Rotation += 0.05f * Game.Delta.AsSeconds();
             // //text.Padding = (MathF.Sin(Game.Time.AsSeconds() * MathF.PI) * 0.5f + 0.5f) * 0.2f;
             // text.Boldness = (MathF.Sin(Game.Time.AsSeconds() * MathF.Tau * 2f) * 0.5f + 0.5f);

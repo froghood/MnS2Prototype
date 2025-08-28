@@ -99,20 +99,22 @@ public class Graph : Renderable {
 
         vertexArray.Bind();
 
-        Game.Renderer.ShaderLibrary.UseShader("graph");
+        Game.Get<Renderer>().ShaderLibrary.UseShader("graph");
 
-        Game.Renderer.ShaderLibrary.Uniform("position", Position);
-        Game.Renderer.ShaderLibrary.Uniform("scale", Scale);
-        Game.Renderer.ShaderLibrary.Uniform("rotation", rotationMatrix);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("position", Position);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("scale", Scale);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("rotation", rotationMatrix);
 
-        Game.Renderer.ShaderLibrary.Uniform("isUI", IsUI);
-        Game.Renderer.ShaderLibrary.Uniform("uiAlignment", Alignment);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("isUI", IsUI);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("uiAlignment", Alignment);
 
-        Game.Renderer.ShaderLibrary.Uniform("cameraPosition", Game.Camera.Position);
-        Game.Renderer.ShaderLibrary.Uniform("cameraView", Game.Camera.View);
-        Game.Renderer.ShaderLibrary.Uniform("windowAspectRatio", Game.AspectRatio);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("cameraPosition", Game.Get<Camera>().Position);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("cameraView", Game.Get<Camera>().View);
 
-        Game.Renderer.ShaderLibrary.Uniform("inColor", Color);
+        float aspectRatio = Game.Window.Size.X / (float)Game.Window.Size.Y;
+        Game.Get<Renderer>().ShaderLibrary.Uniform("windowAspectRatio", aspectRatio);
+
+        Game.Get<Renderer>().ShaderLibrary.Uniform("inColor", Color);
 
         GL.DrawElements(PrimitiveType.LineStrip, vertexArray.IndexCount, DrawElementsType.UnsignedInt, 0);
 
@@ -122,8 +124,8 @@ public class Graph : Renderable {
     private Vector2 TransformModelToNDC(Vector2 vertex, Matrix2 rotationMatrix) {
         // vertex = vertex * rotationMatrix * Scale + Position; // world space
 
-        // vertex = vertex / Game.Camera.GetCameraSize(IsUI) * 2f;
-        // vertex += IsUI ? UIAlignment : -Game.Camera.Position;
+        // vertex = vertex / Game.Get<Camera>().GetCameraSize(IsUI) * 2f;
+        // vertex += IsUI ? UIAlignment : -Game.Get<Camera>().Position;
 
         return vertex;
     }

@@ -10,6 +10,7 @@ namespace Touhou.Networking;
 public class Network : GameSystem {
 
 
+    public event Action Disconnected;
 
     public bool IsConnected { get => isConnected; }
 
@@ -82,7 +83,7 @@ public class Network : GameSystem {
 
         connectionManager = SteamNetworkingSockets.ConnectRelay<SteamConnectionManager>(SteamClient.SteamId);
         connectionManager.DataReceived += receivedData;
-        connectionManager.Disconnected += () => Game.Scenes.Current?.OnDisconnect();
+        connectionManager.Disconnected += () => Disconnected?.Invoke();
 
         isConnected = true;
     }
@@ -107,7 +108,7 @@ public class Network : GameSystem {
 
         connectionManager = SteamNetworkingSockets.ConnectRelay<SteamConnectionManager>(id);
         connectionManager.DataReceived += receivedData;
-        connectionManager.Disconnected += () => Game.Scenes.Current?.OnDisconnect();
+        connectionManager.Disconnected += () => Disconnected?.Invoke();
 
         connectionTime = Game.Time;
         lastReceivedTime = Game.Time;
@@ -164,7 +165,7 @@ public class Network : GameSystem {
     public void Update() {
 
         if (isConnected && Game.Time > lastReceivedTime + Time.InSeconds(3)) {
-            Game.Scenes.Current?.OnDisconnect();
+            Disconnected?.Invoke();
         }
 
         // steam

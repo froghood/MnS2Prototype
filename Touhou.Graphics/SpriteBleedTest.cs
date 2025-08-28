@@ -28,7 +28,7 @@ public class SpriteBleedTest : Renderable {
         var origin = spriteSize * Origin;
         var rotationMatrix = Matrix2.CreateRotation(Rotation);
 
-        var cameraScale = Game.Camera.GetCameraScale(IsUI);
+        var cameraScale = Game.Get<Camera>().GetCameraScale(IsUI);
 
         var t = Game.Time.AsSeconds() / 10f;
 
@@ -43,10 +43,10 @@ public class SpriteBleedTest : Renderable {
         // modelMatrix *= Matrix4.CreateTranslation(MathF.Cos(t) * 300f, MathF.Sin(t) * 300f, 0f);
 
         var projectionMatrix = Matrix4.CreateOrthographicOffCenter(
-            Game.WindowSize.X * -cameraScale / 2f,
-            Game.WindowSize.X * cameraScale / 2f,
-            Game.WindowSize.Y * -cameraScale / 2f,
-            Game.WindowSize.Y * cameraScale / 2f,
+            Game.Window.Size.X * -cameraScale / 2f,
+            Game.Window.Size.X * cameraScale / 2f,
+            Game.Window.Size.Y * -cameraScale / 2f,
+            Game.Window.Size.Y * cameraScale / 2f,
              -1f, 1f);
 
 
@@ -87,15 +87,15 @@ public class SpriteBleedTest : Renderable {
 
         vertexArray.Bind();
 
-        Game.Renderer.ShaderLibrary.UseShader("spriteb");
+        Game.Get<Renderer>().ShaderLibrary.UseShader("spriteb");
 
-        Game.Renderer.ShaderLibrary.Uniform("modelMatrix", modelMatrix);
-        Game.Renderer.ShaderLibrary.Uniform("projectionMatrix", projectionMatrix);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("modelMatrix", modelMatrix);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("projectionMatrix", projectionMatrix);
 
-        Game.Renderer.ShaderLibrary.Uniform("inColor", Color4.White);
-        Game.Renderer.ShaderLibrary.Uniform("useColorSwapping", false);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("inColor", Color4.White);
+        Game.Get<Renderer>().ShaderLibrary.Uniform("useColorSwapping", false);
 
-        Game.Renderer.TextureLibrary.UseTexture("blendtest", TextureUnit.Texture0);
+        Game.Get<Renderer>().TextureLibrary.UseTexture("blendtest", TextureUnit.Texture0);
 
         GL.DrawElements(PrimitiveType.Triangles, vertexArray.IndexCount, DrawElementsType.UnsignedInt, 0);
 

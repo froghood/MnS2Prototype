@@ -86,16 +86,16 @@ public class ReimuSecondary : Attack<Reimu> {
                 CanCollide = false,
             };
 
-            c.Scene.AddEntity(projectile);
+            c.TScene.AddEntity(projectile);
         }
 
         var packet = new Packet(PacketType.AttackReleased)
         .In(PlayerActions.Secondary)
-        .In(Game.Network.Time)
+        .In(Game.Get<Network>().Time)
         .In(c.Position)
         .In(c.AngleToOpponent + aimOffset);
 
-        Game.Network.Send(packet);
+        Game.Get<Network>().Send(packet);
 
 
 
@@ -115,7 +115,7 @@ public class ReimuSecondary : Attack<Reimu> {
 
     public override void RemoteRelease(Packet packet) {
         packet.Out(out Time theirTime).Out(out Vector2 theirPosition).Out(out float theirAngle);
-        var delta = Game.Network.Time - theirTime;
+        var delta = Game.Get<Network>().Time - theirTime;
 
         foreach (var angle in angles) {
             var projectile = new RemoteHomingAmulet(theirPosition, theirAngle + angle, turnRadius, velocity, hitboxRadius, c.IsP1, c.IsPlayer) {
@@ -128,7 +128,7 @@ public class ReimuSecondary : Attack<Reimu> {
                 GrazeAmount = 3,
             };
 
-            c.Scene.AddEntity(projectile);
+            c.TScene.AddEntity(projectile);
         }
     }
 
@@ -145,6 +145,6 @@ public class ReimuSecondary : Attack<Reimu> {
             Color = new Color4(1f, darkness, darkness, 0.5f),
         };
 
-        Game.Draw(aimArrowSprite, Layer.Player);
+        Game.Get<Renderer>().Queue(aimArrowSprite, Layer.Player);
     }
 }

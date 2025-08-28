@@ -53,7 +53,7 @@ public class Amulet : ParametricProjectile {
            Color.B,
            Color.A * SpawnFactor * (1f - DestroyedFactor));
 
-        Game.Draw(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
+        Game.Get<Renderer>().Queue(sprite, IsPlayerOwned ? Layer.PlayerProjectiles : Layer.OpponentProjectiles);
     }
 }
 

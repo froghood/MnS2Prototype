@@ -197,7 +197,7 @@ public abstract class ParametricProjectile : Projectile, IReceivable {
     //     public override void Render() {
     //         _shape.Position = Position;
     //         _shape.Rotation = 180f / MathF.PI * MathF.Atan2(Position.Y - PrevPosition.Y, Position.X - PrevPosition.X);
-    //         Game.Draw(_shape, 0);
+    //         Game.Get<Renderer>().Queue(_shape, 0);
     //     }
     // }
 }
